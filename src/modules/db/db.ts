@@ -35,10 +35,6 @@ export class Db implements OnModuleDestroy, OnModuleInit {
       this.pool.addListener('connect', () => {
         console.log('Успешно подключились к БД');
       });
-
-      this.pool.addListener('error', (e) => {
-        console.log(e);
-      });
     }
   }
 
