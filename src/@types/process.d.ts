@@ -1,9 +1,9 @@
 declare namespace NodeJS {
   interface ProcessEnv {
     NODE_ENV: 'development' | 'production';
-    HOST: string;
+    SERVICE_PORT: string;
+    MICROSERVICE_HOST: string;
     MICROSERVICE_PORT: string;
-    PORT: string;
     CLIENT_ID: string;
     CLIENT_SECRET: string;
     POSTGRES_DB_NAME: string;

@@ -1,9 +1,16 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { DbModule } from './modules/db/db.module';
 import { ConfigModule } from '@nestjs/config';
-import { UsersModule } from './users/users.module';
+import { AuthMicroserviceModule } from './modules/microservices/auth/auth-microservice.module';
+import { UserMiddleware } from './middlewares/user/user.middleware';
+import { AppController } from './app/app.controller';
 
 @Module({
-  imports: [DbModule, ConfigModule.forRoot(), UsersModule],
+  imports: [DbModule, ConfigModule.forRoot(), AuthMicroserviceModule],
+  controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(UserMiddleware).forRoutes('*');
+  }
+}
