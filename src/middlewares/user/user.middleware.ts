@@ -1,9 +1,4 @@
-import {
-  HttpException,
-  Injectable,
-  NestMiddleware,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, NestMiddleware, NotFoundException } from '@nestjs/common';
 import { NextFunction, Request } from 'express';
 import { AuthMicroserviceService } from 'src/modules/microservices/auth/auth-microservice.service';
 
@@ -19,10 +14,7 @@ export class UserMiddleware implements NestMiddleware {
 
       console.log(user);
     } catch (error: unknown) {
-      throw new HttpException(
-        `Пользователь не найден: ${error as string}`,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException(`Пользователь не найден: ${error as string}`);
     }
 
     next();
