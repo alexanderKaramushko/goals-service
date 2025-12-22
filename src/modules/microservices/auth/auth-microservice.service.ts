@@ -9,7 +9,7 @@ export class AuthMicroserviceService {
     @Inject(AUTH_MICROSERVICE) private authMicroservice: ClientProxy,
   ) {}
 
-  getUserByJwt(jwt: string): Promise<AuthUser> {
+  getUserByJwt(jwt: string): Promise<AuthUser[]> {
     return this.authMicroservice.send('auth.user', jwt).toPromise();
   }
 }

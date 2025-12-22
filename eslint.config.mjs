@@ -19,7 +19,9 @@ export default tseslint.config(
       },
       sourceType: 'commonjs',
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['node-pg-migrate.config.mjs'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
