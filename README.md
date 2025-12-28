@@ -55,17 +55,68 @@
 – Общее число достигнутых целей. <br />
 – Общее число полученных баллов. <br />
 
-### 3. Модели данных (примерная структура)
+## 3. Модели данных (примерная структура)
 
-**3.1 User**
+**3.0 Концептуальная модель**
+
+**Сущности**: Пользователь, Цель, Шаг цели, Сюрприз(или Приз).
+
+**ER-диаграмма**:
+
+```mermaid
+erDiagram
+    USER {
+      string id
+      string username
+      date createdAt
+      boolean canAssignSurpise
+    }
+    TARGET {
+      int id
+      string userId
+      string title
+      string description
+      date completeDate
+      string status
+      boolean completed
+      int starsEarned
+      date createdAt
+      date updatedAt
+      date cancelledAt
+      boolean canAssignSurpise
+    }
+    STEP {
+      int id
+      int targetId
+      string description
+      date createdDate
+      date completeDate
+      boolean completed
+    }
+    SURPRISE {
+      int id
+      int userId
+      int targetId
+      string description
+      date createdDate
+      date completeDate
+      boolean completed
+    }
+
+    USER ||--o| TARGET : creates
+    TARGET ||--|{ STEP : has
+    TARGET ||--o{ SURPRISE : has
+    USER ||--o{ SURPRISE : has
+```
+
+**3.1 User (пользователь)**
 
 ```json
 {
-  "_id": ObjectId,
+  "id": String,
   "username": String,
   "stars": Number,
-  "targets": [ObjectId], // массив целей
-  "score": number,
+  "score": Number,
   "createdAt": Date,
   "canAssignSurpise": boolean,
 }
@@ -75,19 +126,17 @@
 
 ```json
 {
-  "_id": ObjectId,
-  "ownerId": ObjectId,
+  "id": Int,
+  "userId": String,
   "title": String,
   "description": String,
   "completeDate": Date,
-  "steps": [ObjectId], // массив шагов
   "status": String, // "created", "active", "completed", "cancelled"
   "starsEarned": Number,
   "createdAt": Date,
   "updatedAt": Date,
   "cancelledAt": Date,
-  "canAssignSurpise": boolean,
-  "cancellationPenaltyEnd": Date // Время, когда штраф истёк
+  "canAssignSurpise": boolean
 }
 ```
 
@@ -95,9 +144,10 @@
 
 ```json
   {
-    "_id": ObjectId,
+    "id": Int,
+    "targetId": Int,
     "description": String,
-    "targetDate": Date,
+    "createdAt": Date,
     "completeDate": Date,
     "completed": Boolean
   }
@@ -107,9 +157,9 @@
 
 ```json
 {
-  "_id": ObjectId,
-  "creatorId": ObjectId,
-  "targetId": ObjectId, // id цели
+  "id": Int,
+  "userId": Int,
+  "targetId": Int, // id цели
   "type": String, // "target" или "stars"
   "message": String,
   "createdAt": Date,
@@ -125,7 +175,7 @@
 
 **Создание цели**: пользователь заходит в систему, создает цель, добавляет шаги и нажимает "Старт". <br />
 **Назначение приза к цели**: другой пользователь заходит в систему, добавляет приз к завершенной цели, если она была закрыта без превышения лимитов по штрафам. <br />
-**Назначение приза за былла**: другой пользователь заходит в систему, переходит в профиль пользователя <br />
+**Назначение приза за баллы**: другой пользователь заходит в систему, переходит в профиль пользователя <br />
 и создает приз за баллы, у другого пользователя списываются баллы. <br />
 **Отмена цели**: пользователь нажимает кнопку "Отменить", фиксируется дата отмены, баллы не начисляются. <br />
 **Выполнение шага**: когда наступает дата выполнения шага, то пользователь должен записать итог шага и пометить его как выполненный. <br />
