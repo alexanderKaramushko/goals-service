@@ -2,7 +2,7 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Pool } from 'pg';
 
 @Injectable()
-export class Db implements OnModuleDestroy, OnModuleInit {
+export class DbService implements OnModuleDestroy, OnModuleInit {
   private pool: Pool;
 
   constructor() {

@@ -1,16 +1,11 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { DbModule } from './modules/db/db.module';
 import { ConfigModule } from '@nestjs/config';
-import { AuthMicroserviceModule } from './modules/microservices/auth/auth-microservice.module';
-import { UserMiddleware } from './middlewares/user/user.middleware';
 import { AppController } from './app/app.controller';
+import { TargetModule } from './modules/targets/targets.module';
 
 @Module({
-  imports: [DbModule, ConfigModule.forRoot(), AuthMicroserviceModule],
+  imports: [DbModule, ConfigModule.forRoot(), TargetModule],
   controllers: [AppController],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(UserMiddleware).exclude('app/health').forRoutes('*');
-  }
-}
+export class AppModule {}
