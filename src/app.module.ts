@@ -11,6 +11,6 @@ import { AppController } from './app/app.controller';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(UserMiddleware).forRoutes('*');
+    consumer.apply(UserMiddleware).exclude('app/health').forRoutes('*');
   }
 }
