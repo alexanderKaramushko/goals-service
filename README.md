@@ -76,30 +76,27 @@ erDiagram
       string userId
       string title
       string description
-      date completeDate
-      string status
-      boolean completed
-      int starsEarned
+      string status "CHECK (status IN ('created', 'active', 'completed', 'cancelled'))"
+      date shouldBeCompletedAt
+      date closedAt
       date createdAt
       date updatedAt
-      date cancelledAt
-      boolean canAssignSurpise
     }
     STEP {
       int id
       int targetId
       string description
-      date createdDate
-      date completeDate
-      boolean completed
+      date shouldBeCompletedAt
+      date closedAt
+      date createdAt
     }
     SURPRISE {
       int id
       int userId
       int targetId
       string description
-      date createdDate
-      date completeDate
+      date createdAt
+      date completedAt
       boolean completed
     }
 
@@ -130,7 +127,7 @@ erDiagram
   "userId": String,
   "title": String,
   "description": String,
-  "completeDate": Date,
+  "completedAt": Date,
   "status": String, // "created", "active", "completed", "cancelled"
   "starsEarned": Number,
   "createdAt": Date,
@@ -148,7 +145,7 @@ erDiagram
     "targetId": Int,
     "description": String,
     "createdAt": Date,
-    "completeDate": Date,
+    "completedAt": Date,
     "completed": Boolean
   }
 ```
