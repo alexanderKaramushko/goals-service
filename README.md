@@ -75,40 +75,39 @@
 erDiagram
     USER {
       string id
-      string username
-      date createdAt
-      boolean canAssignSurpise
+      string full_name
+      date created_at
     }
     TARGET {
       int id
-      string userId
+      string user_id
       string title
       string description
       string status "CHECK (status IN ('created', 'active', 'completed', 'cancelled'))"
-      date shouldBeCompletedAt
-      date closedAt
-      date createdAt
-      date updatedAt
+      date should_be_completed_at
+      date closed_at
+      date created_at
+      date updated_at
     }
     STEP {
       int id
-      int targetId
+      int target_id
       string description
-      date shouldBeCompletedAt
-      date closedAt
-      date createdAt
+      date should_be_completed_at
+      date closed_at
+      date created_at
     }
     SURPRISE {
       int id
-      int userId
-      int targetId
+      int user_id
+      int target_id
       string description
-      date createdAt
-      date completedAt
+      date created_at
+      date completed_at
       boolean completed
     }
 
-    USER ||--o| TARGET : creates
+    USER ||--o{ TARGET : creates
     TARGET ||--|{ STEP : has
     TARGET ||--o{ SURPRISE : has
     USER ||--o{ SURPRISE : has
@@ -119,11 +118,8 @@ erDiagram
 ```json
 {
   "id": String,
-  "username": String,
-  "stars": Number,
-  "score": Number,
-  "createdAt": Date,
-  "canAssignSurpise": boolean,
+  "full_name": String,
+  "created_at": Date
 }
 ```
 
@@ -131,17 +127,15 @@ erDiagram
 
 ```json
 {
-  "id": Int,
-  "userId": String,
+  "id": Int, // SERIAL
+  "user_id": String,
   "title": String,
   "description": String,
-  "completedAt": Date,
-  "status": String, // "created", "active", "completed", "cancelled"
-  "starsEarned": Number,
-  "createdAt": Date,
-  "updatedAt": Date,
-  "cancelledAt": Date,
-  "canAssignSurpise": boolean
+  "status": String | null, // "created", "active", "completed", "cancelled"
+  "should_be_completed_at": Date,
+  "closed_at": Date | null,
+  "created_at": Date | null,
+  "updated_at": Date | null
 }
 ```
 
@@ -150,10 +144,10 @@ erDiagram
 ```json
   {
     "id": Int,
-    "targetId": Int,
+    "target_id": Int,
     "description": String,
-    "createdAt": Date,
-    "completedAt": Date,
+    "created_at": Date,
+    "completed_at": Date,
     "completed": Boolean
   }
 ```
@@ -163,13 +157,13 @@ erDiagram
 ```json
 {
   "id": Int,
-  "userId": Int,
-  "targetId": Int, // id цели
+  "user_id": Int,
+  "target_id": Int, // id цели
   "type": String, // "target" или "stars"
   "message": String,
-  "createdAt": Date,
-  "isAccepted": Boolean,
-  "acceptedAt": Date
+  "created_at": Date,
+  "is_accepted": Boolean,
+  "accepted_at": Date
 }
 ```
 
