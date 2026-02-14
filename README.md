@@ -2,6 +2,14 @@
 
 Сервис управления целями.
 
+## dev-ресурсы
+
+<strong>OpenAPI</strong> <br />
+
+[Swagger Health service](http://localhost:3000/health) <br />
+[Swagger Goals service](http://localhost:3000/api) <br />
+[JSON-api](http://localhost:3000/api-json)
+
 ## Техническое задание (ТЗ) для проекта "Социальная система целей и сюрпризов"
 
 ## 1. Общее описание

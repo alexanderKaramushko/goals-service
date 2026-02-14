@@ -8,7 +8,11 @@ export class TargetsService {
 
   async create(createTargetDto: CreateTargetDto & { userId: string }) {
     return await this.dbService.query(
-      'INSERT INTO targets (userId, title, description, shouldBeCompletedAt, status) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING',
+      `INSERT INTO targets (userId, title, description, shouldBeCompletedAt, status)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (id) DO NOTHING
+        RETURNING *;
+      `,
       [
         createTargetDto.userId,
         createTargetDto.title,
