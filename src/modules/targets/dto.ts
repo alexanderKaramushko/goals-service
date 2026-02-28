@@ -9,7 +9,7 @@ export enum TargetStatus {
 }
 
 export class CreateTargetDto {
-  @ApiProperty({ example: 'Составить план питаний' })
+  @ApiProperty({ example: 'Составить план питания' })
   @IsNotEmpty()
   title: string;
 
@@ -34,7 +34,7 @@ export class CreatedTargetResponseDto {
   @ApiProperty({ example: '108266036103493388680' })
   userId: string;
 
-  @ApiProperty({ example: 'Составить план питаний' })
+  @ApiProperty({ example: 'Составить план питания' })
   title: string;
 
   @ApiProperty({

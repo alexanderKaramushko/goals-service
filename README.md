@@ -6,6 +6,7 @@
 
 <strong>OpenAPI</strong> <br />
 
+[Service](http://localhost:3000) <br />
 [Swagger Health service](http://localhost:3000/health) <br />
 [Swagger Goals service](http://localhost:3000/api) <br />
 [JSON-api](http://localhost:3000/api-json)
