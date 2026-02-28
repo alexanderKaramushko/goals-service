@@ -126,10 +126,12 @@ erDiagram
     STEP {
       int id
       int target_id
+      string title
       string description
       date should_be_completed_at
       date closed_at
       date created_at
+      date completed_at
     }
     SURPRISE {
       int id
@@ -161,11 +163,11 @@ erDiagram
 
 ```json
 {
-  "id": Int, // SERIAL
+  "id": Int,
   "user_id": String,
   "title": String,
   "description": String,
-  "status": String | null, // "created", "active", "completed", "cancelled"
+  "status": String | null,
   "should_be_completed_at": Date,
   "closed_at": Date | null,
   "created_at": Date | null,
@@ -179,10 +181,11 @@ erDiagram
   {
     "id": Int,
     "target_id": Int,
+    "title": String,
     "description": String,
     "created_at": Date,
     "completed_at": Date,
-    "completed": Boolean
+    "should_be_completed_at": Date
   }
 ```
 
@@ -192,8 +195,8 @@ erDiagram
 {
   "id": Int,
   "user_id": Int,
-  "target_id": Int, // id цели
-  "type": String, // "target" или "stars"
+  "target_id": Int,
+  "type": String,
   "message": String,
   "created_at": Date,
   "is_accepted": Boolean,
