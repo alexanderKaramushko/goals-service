@@ -138,15 +138,16 @@ erDiagram
       int id
       int user_id
       int target_id
+      string title
       string description
+      string type
       date created_at
-      date completed_at
-      boolean completed
+      date accepted_at
     }
 
     USER ||--o{ TARGET : creates
     TARGET ||--|{ STEP : has
-    TARGET ||--o{ SURPRISE : has
+    TARGET ||--o| SURPRISE : has
     USER ||--o{ SURPRISE : has
 ```
 
@@ -198,9 +199,9 @@ erDiagram
   "user_id": Int,
   "target_id": Int,
   "type": String,
-  "message": String,
+  "title": String,
+  "description": String,
   "created_at": Date,
-  "is_accepted": Boolean,
   "accepted_at": Date
 }
 ```
