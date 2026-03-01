@@ -1,13 +1,14 @@
 import request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { TargetModule } from '../src/modules/targets/targets.module';
+import { StepsModule } from '../src/modules/steps/steps.module';
+import { CreateStepDto } from 'src/modules/steps/dto';
 import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
-import { of } from 'rxjs';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { UserCreateInterceptor } from 'src/interceptors/user-create/user-create.interceptor';
+import { of } from 'rxjs';
 
-describe('Targets (e2e)', () => {
+describe('Steps (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -21,7 +22,7 @@ describe('Targets (e2e)', () => {
     };
 
     const moduleRef = await Test.createTestingModule({
-      imports: [TargetModule],
+      imports: [StepsModule],
     })
       .overrideProvider(AUTH_MICROSERVICE)
       .useValue(authMicroserviceMock)
@@ -41,11 +42,18 @@ describe('Targets (e2e)', () => {
     await app.init();
   });
 
-  const valid = {
+  const valid: CreateStepDto = {
     title: 'Test',
     description: 'Desc',
     shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
   };
+
+  it('/POST steps/create\n\tВалидация :targetId', async () => {
+    await request(app.getHttpServer())
+      .post('/steps/create/wrong')
+      .send(valid)
+      .expect(400);
+  });
 
   it.each([
     [
@@ -69,9 +77,9 @@ describe('Targets (e2e)', () => {
         shouldBeCompletedAt: 'not-a-timezone',
       },
     ],
-  ])('/POST targets/create\n\tВалидация параметра: %s\n', async (data) => {
+  ])('/POST steps/create\n\tВалидация параметра: %s\n', async (data) => {
     await request(app.getHttpServer())
-      .post('/targets/create')
+      .post('/steps/create/1')
       .send(data)
       .expect(400);
   });

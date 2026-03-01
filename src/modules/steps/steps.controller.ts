@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Param,
+  ParseIntPipe,
   Post,
   UseGuards,
   UseInterceptors,
@@ -36,9 +37,9 @@ export class StepsController {
   })
   @Post('create/:targetId')
   async create(
-    @Param() params: { targetId: number },
+    @Param('targetId', ParseIntPipe) targetId: number,
     @Body() createStepDto: CreateStepDto,
   ) {
-    return await this.stepsService.create(params.targetId, createStepDto);
+    return await this.stepsService.create(targetId, createStepDto);
   }
 }
