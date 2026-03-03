@@ -1,10 +1,11 @@
 services:
   postgres:
     image: postgres:17
+    container_name: db-1
     environment:
-      POSTGRES_DB: "goals"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "test"
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_DB_PASSWORD}
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
