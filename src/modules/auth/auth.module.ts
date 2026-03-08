@@ -5,6 +5,6 @@ import { AuthMicroserviceModule } from 'src/modules/microservices/auth/auth-micr
 @Module({
   imports: [AuthMicroserviceModule],
   providers: [AuthGuard],
-  exports: [AuthGuard],
+  exports: [AuthGuard, AuthMicroserviceModule],
 })
 export class AuthModule {}

@@ -5,6 +5,6 @@ import { DbModule } from 'src/modules/db/db.module';
 @Module({
   imports: [DbModule],
   providers: [UsersService],
-  exports: [UsersService],
+  exports: [UsersService, DbModule],
 })
 export class UsersModule {}
