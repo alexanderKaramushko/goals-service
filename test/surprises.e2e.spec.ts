@@ -1,52 +1,20 @@
 import request from 'supertest';
-import { Test } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
-import { of } from 'rxjs';
-import { AuthGuard } from 'src/modules/auth/auth.guard';
-import { UserCreateInterceptor } from 'src/interceptors/user-create/user-create.interceptor';
+import { INestApplication } from '@nestjs/common';
 import { CreateSurpriseDto } from 'src/modules/surprises/dto';
 import { SurprisesModule } from 'src/modules/surprises/surprises.module';
-import { DbService } from 'src/modules/db/db';
+import { createTestingModule } from './helpers/createTestingModule';
 
 describe('Surprises (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const authMicroserviceMock = {
-      send: jest
-        .fn()
-        .mockReturnValue(of([{ subjectId: 1, name: 'Test User' }])),
-      emit: jest.fn(),
-      connect: jest.fn().mockResolvedValue(undefined),
-      close: jest.fn().mockResolvedValue(undefined),
-    };
+    app = await createTestingModule({
+      modules: [SurprisesModule],
+    });
+  });
 
-    const dbMock = {
-      query: jest.fn().mockReturnValue([]),
-    };
-
-    const moduleRef = await Test.createTestingModule({
-      imports: [SurprisesModule],
-    })
-      .overrideProvider(DbService)
-      .useValue(dbMock)
-      .overrideProvider(AUTH_MICROSERVICE)
-      .useValue(authMicroserviceMock)
-      .overrideGuard(AuthGuard)
-      .useValue({ canActivate: () => true })
-      .overrideInterceptor(UserCreateInterceptor)
-      .useValue({
-        intercept: (_context: unknown, next: { handle: () => any }) =>
-          next.handle(),
-      })
-      .compile();
-
-    app = moduleRef.createNestApplication();
-
-    app.useGlobalPipes(new ValidationPipe());
-
-    await app.init();
+  afterAll(async () => {
+    await app.close();
   });
 
   const valid: CreateSurpriseDto = {
@@ -95,8 +63,4 @@ describe('Surprises (e2e)', () => {
 
   // TODO Реализация теста будет через testcontainers
   it.todo('Выбор типа "target" при передаче targetId');
-
-  afterAll(async () => {
-    await app.close();
-  });
 });
