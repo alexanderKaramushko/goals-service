@@ -6,6 +6,8 @@ import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
 import { of } from 'rxjs';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { UserCreateInterceptor } from 'src/interceptors/user-create/user-create.interceptor';
+import { DbService } from 'src/modules/db/db';
+import { CreateTargetDto } from 'src/modules/targets/dto';
 
 describe('Targets (e2e)', () => {
   let app: INestApplication;
@@ -20,9 +22,15 @@ describe('Targets (e2e)', () => {
       close: jest.fn().mockResolvedValue(undefined),
     };
 
+    const dbMock = {
+      query: jest.fn().mockReturnValue([]),
+    };
+
     const moduleRef = await Test.createTestingModule({
       imports: [TargetModule],
     })
+      .overrideProvider(DbService)
+      .useValue(dbMock)
       .overrideProvider(AUTH_MICROSERVICE)
       .useValue(authMicroserviceMock)
       .overrideGuard(AuthGuard)
@@ -41,13 +49,13 @@ describe('Targets (e2e)', () => {
     await app.init();
   });
 
-  const valid = {
+  const valid: CreateTargetDto = {
     title: 'Test',
     description: 'Desc',
     shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
   };
 
-  it.each([
+  it.each<[string, CreateTargetDto]>([
     [
       'title',
       {

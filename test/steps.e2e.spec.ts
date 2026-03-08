@@ -7,6 +7,7 @@ import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { UserCreateInterceptor } from 'src/interceptors/user-create/user-create.interceptor';
 import { of } from 'rxjs';
+import { DbService } from 'src/modules/db/db';
 
 describe('Steps (e2e)', () => {
   let app: INestApplication;
@@ -21,9 +22,15 @@ describe('Steps (e2e)', () => {
       close: jest.fn().mockResolvedValue(undefined),
     };
 
+    const dbMock = {
+      query: jest.fn().mockReturnValue([]),
+    };
+
     const moduleRef = await Test.createTestingModule({
       imports: [StepsModule],
     })
+      .overrideProvider(DbService)
+      .useValue(dbMock)
       .overrideProvider(AUTH_MICROSERVICE)
       .useValue(authMicroserviceMock)
       .overrideGuard(AuthGuard)
@@ -50,12 +57,12 @@ describe('Steps (e2e)', () => {
 
   it('/POST steps/create\n\tВалидация :targetId', async () => {
     await request(app.getHttpServer())
-      .post('/steps/create/wrong')
+      .post('/steps/create/wrongId')
       .send(valid)
       .expect(400);
   });
 
-  it.each([
+  it.each<[string, CreateStepDto]>([
     [
       'title',
       {
@@ -77,7 +84,7 @@ describe('Steps (e2e)', () => {
         shouldBeCompletedAt: 'not-a-timezone',
       },
     ],
-  ])('/POST steps/create\n\tВалидация параметра: %s\n', async (data) => {
+  ])('/POST steps/create\n\tВалидация параметра: %s\n', async (_, data) => {
     await request(app.getHttpServer())
       .post('/steps/create/1')
       .send(data)

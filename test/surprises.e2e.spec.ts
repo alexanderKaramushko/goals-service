@@ -90,8 +90,10 @@ describe('Surprises (e2e)', () => {
       .expect(400);
   });
 
+  // TODO Реализация теста будет через testcontainers
   it.todo('Выбор типа "user" при передаче userId');
 
+  // TODO Реализация теста будет через testcontainers
   it.todo('Выбор типа "target" при передаче targetId');
 
   afterAll(async () => {
