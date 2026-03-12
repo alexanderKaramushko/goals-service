@@ -112,6 +112,7 @@ erDiagram
       string id
       string full_name
       date created_at
+      date timezone
     }
     TARGET {
       int id
@@ -120,6 +121,7 @@ erDiagram
       string description
       string status "CHECK (status IN ('created', 'active', 'completed', 'cancelled'))"
       date should_be_completed_at
+      date completed_at
       date closed_at
       date created_at
       date updated_at
