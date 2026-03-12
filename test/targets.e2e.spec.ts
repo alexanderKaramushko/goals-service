@@ -2,13 +2,13 @@ import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { TargetModule } from '../src/modules/targets/targets.module';
 import { CreateTargetDto } from 'src/modules/targets/dto';
-import { createTestingModule } from './helpers/createTestingModule';
+import { createTestingApp } from './helpers/create-testing-app';
 
 describe('Targets (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    app = await createTestingModule({
+    app = await createTestingApp({
       modules: [TargetModule],
     });
   });

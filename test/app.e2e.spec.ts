@@ -1,13 +1,13 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { createTestingModule } from './helpers/createTestingModule';
+import { createTestingApp } from './helpers/create-testing-app';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    app = await createTestingModule({
+    app = await createTestingApp({
       modules: [AppModule],
     });
   });

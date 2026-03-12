@@ -12,7 +12,7 @@ import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { DbService } from 'src/modules/db/db';
 import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
 
-export async function createTestingModule(deps: {
+export async function createTestingApp(deps: {
   providers?: {
     provide: Provider;
     useValue: any;

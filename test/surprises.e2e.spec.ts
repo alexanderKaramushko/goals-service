@@ -2,13 +2,13 @@ import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { CreateSurpriseDto } from 'src/modules/surprises/dto';
 import { SurprisesModule } from 'src/modules/surprises/surprises.module';
-import { createTestingModule } from './helpers/createTestingModule';
+import { createTestingApp } from './helpers/create-testing-app';
 
 describe('Surprises (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    app = await createTestingModule({
+    app = await createTestingApp({
       modules: [SurprisesModule],
     });
   });
