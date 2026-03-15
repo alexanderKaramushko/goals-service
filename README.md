@@ -1,4 +1,4 @@
-# goals-mongodb
+# goals-service
 
 Сервис управления целями.
 
