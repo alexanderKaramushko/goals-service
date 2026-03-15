@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   CallHandler,
   ExecutionContext,
   Injectable,
@@ -12,7 +13,11 @@ export class TimezoneInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const timezone = request.headers['x-user-timezone'];
 
-    request.userTimezone = timezone || 'UTC';
+    if (!timezone) {
+      throw new BadRequestException('Не найдена таймзона пользователя');
+    }
+
+    request.userTimezone = timezone;
 
     return next.handle();
   }

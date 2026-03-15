@@ -15,6 +15,15 @@ export function createDocumentBuilderFactory(
     .setTitle(params.title)
     .setDescription(params.description)
     .setVersion(params.version)
+    .addGlobalParameters({
+      name: 'x-user-timezone',
+      in: 'header',
+      required: false,
+      description: 'Таймзона пользователя',
+      schema: {
+        type: 'string',
+      },
+    })
     .addTag(params.tag);
 
   if (params.secure) {

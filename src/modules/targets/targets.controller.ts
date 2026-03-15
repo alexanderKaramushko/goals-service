@@ -1,12 +1,18 @@
 import {
   Body,
   Controller,
+  Get,
+  Param,
   Post,
   Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreatedTargetResponseDto, CreateTargetDto } from './dto';
+import {
+  CreatedTargetResponseDto,
+  CreateTargetDto,
+  TargetsResponseDto,
+} from './dto';
 import { TargetsService } from './targets.service';
 
 import { type Request as ExpressRequest } from 'express';
@@ -17,7 +23,9 @@ import {
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiOperation,
+  ApiResponse,
 } from '@nestjs/swagger';
+import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
 
 @UseInterceptors(UserCreateInterceptor)
 @UseGuards(AuthGuard)
@@ -40,5 +48,19 @@ export class TargetsController {
       userId: request.user.subjectId,
       ...createTargetDto,
     });
+  }
+
+  @ApiOperation({ summary: 'Все цели пользователя' })
+  @ApiResponse({
+    description: 'Список всех целей пользователя',
+    type: [TargetsResponseDto],
+  })
+  @UseInterceptors(TimezoneInterceptor)
+  @Get('get-all/:userId')
+  getAll(@Request() request: ExpressRequest, @Param('userId') userId: string) {
+    return this.targetsService.getAllByUserId(
+      userId,
+      request.userTimezone as string,
+    );
   }
 }
