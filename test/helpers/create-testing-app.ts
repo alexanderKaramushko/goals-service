@@ -27,57 +27,55 @@ export async function createTestingApp(deps: {
     useValue: NestInterceptor;
   }[];
 }) {
-  const {
-    providers = [
-      {
-        provide: DbService,
-        useValue: {
-          query: () => [],
-        },
-      },
-      {
-        provide: AUTH_MICROSERVICE,
-        useValue: {
-          send: () => of([{ subjectId: 1, name: 'Test User' }]),
-          emit: () => {},
-          connect: () => undefined,
-          close: () => undefined,
-        },
-      },
-    ],
-    modules = [],
-    guards = [
-      {
-        provide: AuthGuard,
-        useValue: {
-          canActivate: () => true,
-        },
-      },
-    ],
-    interceptors = [
-      {
-        provide: UserCreateInterceptor,
-        useValue: {
-          intercept: (_context: unknown, next: { handle: () => any }) =>
-            next.handle(),
-        },
-      },
-    ],
-  } = deps;
+  const { providers = [], modules = [], guards = [], interceptors = [] } = deps;
 
   const module = Test.createTestingModule({
     imports: [...modules],
   });
 
-  providers.forEach(({ provide, useValue }) => {
+  [
+    {
+      provide: DbService,
+      useValue: {
+        query: () => [],
+      },
+    },
+    {
+      provide: AUTH_MICROSERVICE,
+      useValue: {
+        send: () => of([{ subjectId: 1, name: 'Test User' }]),
+        emit: () => {},
+        connect: () => undefined,
+        close: () => undefined,
+      },
+    },
+    ...providers,
+  ].forEach(({ provide, useValue }) => {
     module.overrideProvider(provide).useValue(useValue);
   });
 
-  guards.forEach(({ provide, useValue }) => {
+  [
+    {
+      provide: AuthGuard,
+      useValue: {
+        canActivate: () => true,
+      },
+    },
+    ...guards,
+  ].forEach(({ provide, useValue }) => {
     module.overrideGuard(provide).useValue(useValue);
   });
 
-  interceptors.forEach(({ provide, useValue }) => {
+  [
+    {
+      provide: UserCreateInterceptor,
+      useValue: {
+        intercept: (_context: unknown, next: { handle: () => any }) =>
+          next.handle(),
+      },
+    },
+    ...interceptors,
+  ].forEach(({ provide, useValue }) => {
     module.overrideInterceptor(provide).useValue(useValue);
   });
 
