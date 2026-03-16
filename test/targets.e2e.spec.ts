@@ -51,4 +51,20 @@ describe('Targets (e2e)', () => {
       .send(data)
       .expect(400);
   });
+
+  it.todo('isOutdated = true, если текущая дата больше чем дата дедлайна');
+
+  it.todo('isOutdated = false, если текущая дата равна дате дедлайна');
+
+  it.todo('isOutdated = false, если текущая дата меньше даты дедлайна');
+
+  it.todo('isOutdated = true, если дата завершения больше даты дедлайна');
+
+  it.todo('isOutdated = false, если дата завершения равна дате дедлайна');
+
+  it.todo('isOutdated = false, если дата завершения меньше даты дедлайна');
+
+  it.todo(
+    'Edge case: isOutdated = true, если дата по таймзоне больше даты дедлайна',
+  );
 });
