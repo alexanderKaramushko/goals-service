@@ -34,9 +34,13 @@ export class TargetsService {
       [userId],
     );
 
-    const currentDate = dayjs.tz(new Date(), userTimezone);
-
     return targets.map((target) => {
+      const currentDate = dayjs.tz(new Date(), userTimezone);
+      const completedAtDate =
+        target.completed_at && dayjs.tz(target.completed_at);
+
+      const shouldBeCompletedAtDate = dayjs(target.should_be_completed_at);
+
       return {
         id: target.id,
         userId: target.user_id,
@@ -44,10 +48,10 @@ export class TargetsService {
         description: target.description,
         status: target.status,
         shouldBeCompletedAt: target.should_be_completed_at,
-        isOutdated: dayjs(target.should_be_completed_at, 'YYYY-MM-DD').isBefore(
-          currentDate,
-          'day',
-        ),
+        isOutdated:
+          (completedAtDate &&
+            shouldBeCompletedAtDate.isBefore(completedAtDate)) ||
+          shouldBeCompletedAtDate.isBefore(currentDate, 'day'),
       };
     });
   }

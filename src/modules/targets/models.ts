@@ -6,6 +6,7 @@ export type Target = {
   title: string;
   description: string;
   status: TargetStatus;
+  completed_at: string;
   should_be_completed_at: string;
   is_outdated: boolean;
 };
