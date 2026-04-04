@@ -37,6 +37,11 @@ const config = {
       items: [{ to: '/', label: 'Документация', position: 'left' }],
     },
   },
+
+  themes: ['@docusaurus/theme-mermaid'],
+  markdown: {
+    mermaid: true,
+  },
 };
 
 module.exports = config;

@@ -12,3 +12,4 @@ sidebar_position: 2
 4. [Логика бизнес-процессов](./project-spec/business-processes)
 5. [Технические требования](./project-spec/technical-requirements)
 6. [Дополнительные требования](./project-spec/additional-requirements)
+7. [Системные API-сценарии (targets)](./project-spec/7-system-api-processes)
