@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsInt, IsString, ValidateIf } from 'class-validator';
 
-export enum SurpriseType {
+export enum RewardType {
   'user' = 'user',
   'target' = 'target',
 }
 
-export class CreateSurpriseDto {
+export class CreateRewardDto {
   @ApiProperty({ example: 'За составление плана питания' })
   @IsNotEmpty()
   title: string;
@@ -36,7 +36,7 @@ export class CreateSurpriseDto {
   targetId?: number;
 }
 
-export class CreatedSurpriseResponseDto {
+export class CreatedRewardResponseDto {
   @ApiProperty({ example: 1 })
   id: number;
 
@@ -51,7 +51,7 @@ export class CreatedSurpriseResponseDto {
   })
   description: string;
 
-  @ApiProperty({ example: SurpriseType.target, enum: SurpriseType })
+  @ApiProperty({ example: RewardType.target, enum: RewardType })
   type: string;
 
   @ApiProperty({ example: '2026-02-14T10:45:30.000Z' })

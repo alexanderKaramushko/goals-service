@@ -1,15 +1,15 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
-import { CreateSurpriseDto } from 'src/modules/surprises/dto';
-import { SurprisesModule } from 'src/modules/surprises/surprises.module';
+import { CreateRewardDto } from 'src/modules/rewards/dto';
+import { RewardsModule } from 'src/modules/rewards/rewards.module';
 import { createTestingApp } from './helpers/create-testing-app';
 
-describe('Surprises (e2e)', () => {
+describe('Rewards (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
     app = await createTestingApp({
-      modules: [SurprisesModule],
+      modules: [RewardsModule],
     });
   });
 
@@ -17,12 +17,12 @@ describe('Surprises (e2e)', () => {
     await app.close();
   });
 
-  const valid: CreateSurpriseDto = {
+  const valid: CreateRewardDto = {
     title: 'Test',
     description: 'Desc',
   };
 
-  it.each<[string, CreateSurpriseDto]>([
+  it.each<[string, CreateRewardDto]>([
     [
       'title',
       {
@@ -51,9 +51,9 @@ describe('Surprises (e2e)', () => {
         targetId: '1',
       } as any, // `as any` для проверки, что валидация упадет в 400-ю
     ],
-  ])('/POST surprises/create\n\tВалидация параметра: %s\n', async (_, data) => {
+  ])('/POST rewards/create\n\tВалидация параметра: %s\n', async (_, data) => {
     await request(app.getHttpServer())
-      .post('/surprises/create')
+      .post('/rewards/create')
       .send(data)
       .expect(400);
   });

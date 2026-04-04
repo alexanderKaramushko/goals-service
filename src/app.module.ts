@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app/app.controller';
 import { TargetModule } from './modules/targets/targets.module';
 import { StepsModule } from './modules/steps/steps.module';
-import { SurprisesModule } from './modules/surprises/surprises.module';
+import { RewardsModule } from './modules/rewards/rewards.module';
 
 @Module({
   imports: [
@@ -12,7 +12,7 @@ import { SurprisesModule } from './modules/surprises/surprises.module';
     ConfigModule.forRoot(),
     TargetModule,
     StepsModule,
-    SurprisesModule,
+    RewardsModule,
   ],
   controllers: [AppController],
 })
