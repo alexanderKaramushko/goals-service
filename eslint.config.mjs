@@ -20,7 +20,11 @@ export default tseslint.config(
       sourceType: 'commonjs',
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['node-pg-migrate.config.mjs'],
+          allowDefaultProject: [
+            'node-pg-migrate.config.mjs',
+            'docs/docusaurus.config.js',
+            'docs/sidebars.js',
+          ],
         },
         tsconfigRootDir: import.meta.dirname,
       },
