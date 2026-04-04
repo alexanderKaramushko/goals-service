@@ -45,7 +45,7 @@ export class CreatedTargetResponseDto {
   @ApiProperty({ example: TargetStatus.Created, enum: TargetStatus })
   status: string;
 
-  @ApiProperty({ example: '2026-02-14' })
+  @ApiProperty({ example: '2026-02-14T10:45:30.000Z' })
   shouldBeCompletedAt: string;
 }
 
@@ -67,7 +67,7 @@ export class TargetsResponseDto {
   @ApiProperty({ example: TargetStatus.Created, enum: TargetStatus })
   status: string;
 
-  @ApiProperty({ example: '2026-02-14' })
+  @ApiProperty({ example: '2026-02-14T10:45:30.000Z' })
   shouldBeCompletedAt: string;
 
   @ApiProperty({ example: false })

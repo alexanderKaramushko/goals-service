@@ -17,45 +17,69 @@ describe('Steps (e2e)', () => {
     await app.close();
   });
 
-  const valid: CreateStepDto = {
-    title: 'Test',
-    description: 'Desc',
-    shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
-  };
+  describe('/POST steps/create/:targetId', () => {
+    const valid: CreateStepDto = {
+      title: 'Test',
+      description: 'Desc',
+      shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
+    };
 
-  it('/POST steps/create\n\tВалидация :targetId', async () => {
-    await request(app.getHttpServer())
-      .post('/steps/create/wrongId')
-      .send(valid)
-      .expect(400);
-  });
+    it('/POST steps/create\n\tВалидация :targetId', async () => {
+      await request(app.getHttpServer())
+        .post('/steps/create/wrongId')
+        .send(valid)
+        .expect((res) => {
+          expect(res.status).toBe(400);
+          expect(res.body.message).toContain(
+            'Validation failed (numeric string is expected)',
+          );
+        });
+    });
 
-  it.each<[string, CreateStepDto]>([
-    [
-      'title',
-      {
-        ...valid,
-        title: '',
+    it.each<[string, CreateStepDto, string]>([
+      [
+        'title',
+        {
+          ...valid,
+          title: '',
+        },
+        'title should not be empty',
+      ],
+      [
+        'description',
+        {
+          ...valid,
+          description: '',
+        },
+        'description should not be empty',
+      ],
+      [
+        'shouldBeCompletedAt',
+        {
+          ...valid,
+          shouldBeCompletedAt: '',
+        },
+        'shouldBeCompletedAt should not be empty',
+      ],
+      [
+        'shouldBeCompletedAt',
+        {
+          ...valid,
+          shouldBeCompletedAt: 'not-a-timezone',
+        },
+        'shouldBeCompletedAt must be a valid ISO 8601 date string',
+      ],
+    ])(
+      '/POST steps/create\n\tВалидация параметра: %s\n',
+      async (_, data, message) => {
+        await request(app.getHttpServer())
+          .post('/steps/create/1')
+          .send(data)
+          .expect((res) => {
+            expect(res.status).toBe(400);
+            expect(res.body.message).toContain(message);
+          });
       },
-    ],
-    [
-      'description',
-      {
-        ...valid,
-        description: '',
-      },
-    ],
-    [
-      'shouldBeCompletedAt',
-      {
-        ...valid,
-        shouldBeCompletedAt: 'not-a-timezone',
-      },
-    ],
-  ])('/POST steps/create\n\tВалидация параметра: %s\n', async (_, data) => {
-    await request(app.getHttpServer())
-      .post('/steps/create/1')
-      .send(data)
-      .expect(400);
+    );
   });
 });

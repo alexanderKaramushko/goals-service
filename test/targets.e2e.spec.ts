@@ -24,13 +24,14 @@ describe('Targets (e2e)', () => {
       shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
     };
 
-    it.each<[string, CreateTargetDto]>([
+    it.each<[string, CreateTargetDto, string]>([
       [
         'title',
         {
           ...valid,
           title: '',
         },
+        'title should not be empty',
       ],
       [
         'description',
@@ -38,6 +39,15 @@ describe('Targets (e2e)', () => {
           ...valid,
           description: '',
         },
+        'description should not be empty',
+      ],
+      [
+        'shouldBeCompletedAt',
+        {
+          ...valid,
+          shouldBeCompletedAt: '',
+        },
+        'shouldBeCompletedAt should not be empty',
       ],
       [
         'shouldBeCompletedAt',
@@ -45,13 +55,20 @@ describe('Targets (e2e)', () => {
           ...valid,
           shouldBeCompletedAt: 'not-a-timezone',
         },
+        'shouldBeCompletedAt must be a valid ISO 8601 date string',
       ],
-    ])('/POST targets/create\n\tВалидация параметра: %s\n', async (data) => {
-      await request(app.getHttpServer())
-        .post('/targets/create')
-        .send(data)
-        .expect(400);
-    });
+    ])(
+      '/POST targets/create\n\tВалидация параметра: %s\n',
+      async (_, data, message) => {
+        await request(app.getHttpServer())
+          .post('/targets/create')
+          .send(data)
+          .expect((res) => {
+            expect(res.status).toBe(400);
+            expect(res.body.message).toContain(message);
+          });
+      },
+    );
 
     it.todo('Ошибка валидации, если shouldBeCompletedAt меньше текущей даты');
 

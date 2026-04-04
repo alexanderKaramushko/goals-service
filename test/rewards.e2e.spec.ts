@@ -17,45 +17,57 @@ describe('Rewards (e2e)', () => {
     await app.close();
   });
 
-  const valid: CreateRewardDto = {
-    title: 'Test',
-    description: 'Desc',
-  };
+  describe('/POST rewards/create', () => {
+    const valid: CreateRewardDto = {
+      title: 'Test',
+      description: 'Desc',
+    };
 
-  it.each<[string, CreateRewardDto]>([
-    [
-      'title',
-      {
-        ...valid,
-        title: '',
+    it.each<[string, CreateRewardDto, string]>([
+      [
+        'title',
+        {
+          ...valid,
+          title: '',
+        },
+        'title should not be empty',
+      ],
+      [
+        'description',
+        {
+          ...valid,
+          description: '',
+        },
+        'description should not be empty',
+      ],
+      [
+        'userId',
+        {
+          ...valid,
+          userId: 1,
+        },
+        'userId must be a string',
+      ],
+      [
+        'targetId',
+        {
+          ...valid,
+          targetId: '1',
+        } as any, // `as any` для проверки, что валидация упадет в 400-ю
+        'targetId must be an integer number',
+      ],
+    ])(
+      '/POST rewards/create\n\tВалидация параметра: %s\n',
+      async (_, data, message) => {
+        await request(app.getHttpServer())
+          .post('/rewards/create')
+          .send(data)
+          .expect((res) => {
+            expect(res.status).toBe(400);
+            expect(res.body.message).toContain(message);
+          });
       },
-    ],
-    [
-      'description',
-      {
-        ...valid,
-        description: '',
-      },
-    ],
-    [
-      'userId',
-      {
-        ...valid,
-        userId: 1,
-      },
-    ],
-    [
-      'targetId',
-      {
-        ...valid,
-        targetId: '1',
-      } as any, // `as any` для проверки, что валидация упадет в 400-ю
-    ],
-  ])('/POST rewards/create\n\tВалидация параметра: %s\n', async (_, data) => {
-    await request(app.getHttpServer())
-      .post('/rewards/create')
-      .send(data)
-      .expect(400);
+    );
   });
 
   // TODO Реализация теста будет через testcontainers
