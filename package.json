@@ -10,6 +10,8 @@
   },
   "scripts": {
     "build": "nest build",
+    "docs:start": "pnpm --dir docs start",
+    "docs:build": "pnpm --dir docs build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
