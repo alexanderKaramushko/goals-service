@@ -11,13 +11,34 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Дебаг тестов с подключением к процессу Node JS",
+      "name": "Дебаг unit-тестов с подключением к процессу Node JS",
       "runtimeExecutable": "npx",
       "args": [
         "--runInBand",
       ],
       "runtimeArgs": [
         "jest",
+        "--require=tsconfig-paths/register",
+        "--require=ts-node/register"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "restart": true,
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Дебаг e2e-тестов с подключением к процессу Node JS",
+      "runtimeExecutable": "npx",
+      "args": [
+        "--runInBand",
+      ],
+      "runtimeArgs": [
+        "jest",
+        "--config=${workspaceFolder}/test/jest-e2e.json",
         "--require=tsconfig-paths/register",
         "--require=ts-node/register"
       ],
