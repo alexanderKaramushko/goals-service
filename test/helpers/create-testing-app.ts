@@ -4,6 +4,7 @@ import {
   ModuleMetadata,
   CanActivate,
   NestInterceptor,
+  ExecutionContext,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
@@ -58,7 +59,13 @@ export async function createTestingApp(deps: {
     {
       provide: AuthGuard,
       useValue: {
-        canActivate: () => true,
+        canActivate: (context: ExecutionContext) => {
+          const request = context.switchToHttp().getRequest();
+
+          request.user = { subjectId: 1, name: 'Test User' };
+
+          return true;
+        },
       },
     },
     ...guards,
