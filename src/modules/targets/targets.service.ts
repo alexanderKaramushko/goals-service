@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import type { CreateTargetDto, TargetsResponseDto } from './dto';
 import { DbService } from 'src/modules/db/db';
 import { Target } from './models';
@@ -8,7 +8,21 @@ import { dayjs } from 'src/helpers/dayjs';
 export class TargetsService {
   constructor(private dbService: DbService) {}
 
-  async create(createTargetDto: CreateTargetDto & { userId: string }) {
+  async create(
+    createTargetDto: CreateTargetDto & { userId: string; userTimezone: string },
+  ) {
+    const currentDate = dayjs.tz(new Date(), createTargetDto.userTimezone);
+    const shouldBeCompletedAtDate = dayjs(createTargetDto.shouldBeCompletedAt);
+
+    if (
+      shouldBeCompletedAtDate.isBefore(currentDate, 'day') ||
+      shouldBeCompletedAtDate.isSame(currentDate, 'day')
+    ) {
+      throw new BadRequestException(
+        'Дата окончания должна быть больше текущей даты',
+      );
+    }
+
     return await this.dbService.query(
       `INSERT INTO targets (user_id, title, description, should_be_completed_at, status)
         VALUES ($1, $2, $3, $4, $5)

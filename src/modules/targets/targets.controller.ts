@@ -46,6 +46,7 @@ export class TargetsController {
   ) {
     return this.targetsService.create({
       userId: request.user.subjectId,
+      userTimezone: request.userTimezone as string,
       ...createTargetDto,
     });
   }

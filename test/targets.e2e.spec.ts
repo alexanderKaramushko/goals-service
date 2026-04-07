@@ -8,12 +8,16 @@ describe('Targets (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2020, 0, 1));
+
     app = await createTestingApp({
       modules: [TargetModule],
     });
   });
 
   afterAll(async () => {
+    jest.useRealTimers();
     await app.close();
   });
 
@@ -79,9 +83,62 @@ describe('Targets (e2e)', () => {
       },
     );
 
-    it.todo('Ошибка валидации, если shouldBeCompletedAt меньше текущей даты');
+    it('Валидация пройдена, если shouldBeCompletedAt больше текущей даты', async () => {
+      jest.setSystemTime(new Date(2026, 0, 1));
 
-    it.todo('Ошибка валидации, если shouldBeCompletedAt равен текущей дате');
+      await request(app.getHttpServer())
+        .post('/targets/create')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send({
+          ...valid,
+          shouldBeCompletedAt: '2026-02-01T00:00:00.000Z',
+        })
+        .expect((res) => {
+          expect(res.status).toBe(201);
+        });
+    });
+
+    it('Ошибка валидации, если shouldBeCompletedAt меньше текущей даты', async () => {
+      jest.setSystemTime(new Date(2026, 0, 1));
+
+      await request(app.getHttpServer())
+        .post('/targets/create')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send({
+          ...valid,
+          shouldBeCompletedAt: '2025-01-01T00:00:00.000Z',
+        })
+        .expect((res) => {
+          expect(res.status).toBe(400);
+          expect(res.body.message).toContain(
+            'Дата окончания должна быть больше текущей даты',
+          );
+        });
+    });
+
+    it('Ошибка валидации, если shouldBeCompletedAt равен текущей дате', async () => {
+      jest.setSystemTime(new Date(2026, 0, 1));
+
+      await request(app.getHttpServer())
+        .post('/targets/create')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send({
+          ...valid,
+          shouldBeCompletedAt: '2026-01-01T00:00:00.000Z',
+        })
+        .expect((res) => {
+          expect(res.status).toBe(400);
+          expect(res.body.message).toContain(
+            'Дата окончания должна быть больше текущей даты',
+          );
+        });
+    });
   });
 
   describe('GET targets/get-all/:user-id', () => {
