@@ -24,6 +24,15 @@ describe('Targets (e2e)', () => {
       shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
     };
 
+    it('/POST targets/create с валидными параметрами', async () => {
+      await request(app.getHttpServer())
+        .post('/targets/create')
+        .send(valid)
+        .expect((res) => {
+          expect(res.status).toBe(201);
+        });
+    });
+
     it.each<[string, CreateTargetDto, string]>([
       [
         'title',
