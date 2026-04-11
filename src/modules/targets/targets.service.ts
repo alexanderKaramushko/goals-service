@@ -62,10 +62,9 @@ export class TargetsService {
         description: target.description,
         status: target.status,
         shouldBeCompletedAt: target.should_be_completed_at,
-        isOutdated:
-          (completedAtDate &&
-            shouldBeCompletedAtDate.isBefore(completedAtDate)) ||
-          shouldBeCompletedAtDate.isBefore(currentDate, 'day'),
+        isOutdated: completedAtDate
+          ? shouldBeCompletedAtDate.isBefore(completedAtDate, 'day')
+          : shouldBeCompletedAtDate.isBefore(currentDate, 'day'),
       };
     });
   }
