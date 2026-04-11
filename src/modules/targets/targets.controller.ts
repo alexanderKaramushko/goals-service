@@ -39,6 +39,7 @@ export class TargetsController {
     description: 'Цель создана',
     type: CreatedTargetResponseDto,
   })
+  @UseInterceptors(TimezoneInterceptor)
   @Post('create')
   create(
     @Body() createTargetDto: CreateTargetDto,
