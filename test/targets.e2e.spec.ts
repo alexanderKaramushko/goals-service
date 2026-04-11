@@ -16,7 +16,6 @@ describe('Targets (e2e)', () => {
   afterEach(async () => {
     if (app) {
       await app.close();
-      app = undefined as unknown as INestApplication;
     }
   });
 
