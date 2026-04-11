@@ -5,6 +5,8 @@ import { CreateTargetDto } from 'src/modules/targets/dto';
 import { createTestingApp } from './helpers/create-testing-app';
 import { DbService } from 'src/modules/db/db';
 
+import targets from 'src/mocks/TargetsResponseDto.json';
+
 describe('Targets (e2e)', () => {
   let app: INestApplication;
 
@@ -170,13 +172,7 @@ describe('Targets (e2e)', () => {
   });
 
   describe('GET targets/get-all/:user-id', () => {
-    const target = {
-      id: 1,
-      user_id: '108266036103493388680',
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      status: 'created',
-    };
+    const target = targets[0];
 
     it('isOutdated = true, если текущая дата больше чем дата дедлайна', async () => {
       jest.setSystemTime(new Date(2026, 0, 1));

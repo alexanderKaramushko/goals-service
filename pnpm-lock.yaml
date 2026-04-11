@@ -81,6 +81,9 @@ importers:
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.3
+      cross-env:
+        specifier: ^10.1.0
+        version: 10.1.0
       eslint:
         specifier: ^9.18.0
         version: 9.39.1
@@ -99,6 +102,9 @@ importers:
       node-pg-migrate:
         specifier: ^8.0.4
         version: 8.0.4(@types/pg@8.15.6)(pg@8.16.3)
+      openapi-sampler:
+        specifier: ^1.7.2
+        version: 1.7.2
       prettier:
         specifier: ^3.4.2
         version: 3.7.1
@@ -344,6 +350,9 @@ packages:
 
   '@emnapi/wasi-threads@1.1.0':
     resolution: {integrity: sha512-WI0DdZ8xFSbgMjR1sFsKABJ/C5OnRrjT06JXbZKexJGrDuPTzZdDYfFlsgcCXCyf+suG5QU2e/y1Wo2V/OapLQ==, tarball: https://registry.npmjs.org/@emnapi/wasi-threads/-/wasi-threads-1.1.0.tgz}
+
+  '@epic-web/invariant@1.0.0':
+    resolution: {integrity: sha512-lrTPqgvfFQtR/eY/qkIzp98OGdNJu0m5ji3q/nJI8v3SXkRKEnWiOxMmbvcSoAIzv/cGiuvRy57k4suKQSAdwA==, tarball: https://registry.npmjs.org/@epic-web/invariant/-/invariant-1.0.0.tgz}
 
   '@eslint-community/eslint-utils@4.9.0':
     resolution: {integrity: sha512-ayVFHdtZ+hsq1t2Dy24wCmGXGe4q9Gu3smhLYALJrr473ZH27MsnSL+LKUlimp4BWJqMDMLmPpx/Q9R3OAlL4g==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/@eslint-community/eslint-utils/-/eslint-utils-4.9.0.tgz}
@@ -1542,6 +1551,11 @@ packages:
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
 
+  cross-env@10.1.0:
+    resolution: {integrity: sha512-GsYosgnACZTADcmEyJctkJIoqAhHjttw7RsFrVoJNXbsWWqaq6Ym+7kZjq6mS45O0jij6vtiReppKQEtqWy6Dw==, tarball: https://registry.npmjs.org/cross-env/-/cross-env-10.1.0.tgz}
+    engines: {node: '>=20'}
+    hasBin: true
+
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/cross-spawn/-/cross-spawn-7.0.6.tgz}
     engines: {node: '>= 8'}
@@ -1788,6 +1802,13 @@ packages:
   fast-uri@3.1.0:
     resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/fast-uri/-/fast-uri-3.1.0.tgz}
 
+  fast-xml-builder@1.1.4:
+    resolution: {integrity: sha512-f2jhpN4Eccy0/Uz9csxh3Nu6q4ErKxf0XIsasomfOihuSUa3/xw6w8dnOtCDgEItQFJG8KyXPzQXzcODDrrbOg==, tarball: https://registry.npmjs.org/fast-xml-builder/-/fast-xml-builder-1.1.4.tgz}
+
+  fast-xml-parser@5.5.11:
+    resolution: {integrity: sha512-QL0eb0YbSTVWF6tTf1+LEMSgtCEjBYPpnAjoLC8SscESlAjXEIRJ7cHtLG0pLeDFaZLa4VKZLArtA/60ZS7vyA==, tarball: https://registry.npmjs.org/fast-xml-parser/-/fast-xml-parser-5.5.11.tgz}
+    hasBin: true
+
   fb-watchman@2.0.2:
     resolution: {integrity: sha512-p5161BqbuCaSnB8jIbzQHOlpgsPmK5rJVDfDKO91Axs5NC1uu3HRQm6wt9cd9/+GtQQIO53JdGXXoyDpTAsgYA==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/fb-watchman/-/fb-watchman-2.0.2.tgz}
 
@@ -1833,6 +1854,9 @@ packages:
 
   flatted@3.3.3:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/flatted/-/flatted-3.3.3.tgz}
+
+  foreach@2.0.6:
+    resolution: {integrity: sha512-k6GAGDyqLe9JaebCsFCoudPPWfihKu8pylYXRlqP1J7ms39iPoTtk2fviNglIeQEwdh0bQeKJ01ZPyuyQvKzwg==, tarball: https://registry.npmjs.org/foreach/-/foreach-2.0.6.tgz}
 
   foreground-child@3.3.1:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/foreground-child/-/foreground-child-3.3.1.tgz}
@@ -2250,6 +2274,9 @@ packages:
   json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
 
+  json-pointer@0.6.2:
+    resolution: {integrity: sha512-vLWcKbOaXlO+jvRy4qNd+TI1QUPZzfJj1tpJ3vAXDych5XJf93ftpUKe5pKCrzyIIwgBJcOcCVRUfqQP25afBw==, tarball: https://registry.npmjs.org/json-pointer/-/json-pointer-0.6.2.tgz}
+
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz}
 
@@ -2496,6 +2523,9 @@ packages:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/onetime/-/onetime-5.1.2.tgz}
     engines: {node: '>=6'}
 
+  openapi-sampler@1.7.2:
+    resolution: {integrity: sha512-OKytvqB5XIaTgA9xtw8W8UTar+uymW2xPVpFN0NihMtuHPdPTGxBEhGnfFnJW5g/gOSIvkP+H0Xh3XhVI9/n7g==, tarball: https://registry.npmjs.org/openapi-sampler/-/openapi-sampler-1.7.2.tgz}
+
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/optionator/-/optionator-0.9.4.tgz}
     engines: {node: '>= 0.8.0'}
@@ -2542,6 +2572,10 @@ packages:
   path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/path-exists/-/path-exists-4.0.0.tgz}
     engines: {node: '>=8'}
+
+  path-expression-matcher@1.5.0:
+    resolution: {integrity: sha512-cbrerZV+6rvdQrrD+iGMcZFEiiSrbv9Tfdkvnusy6y0x0GKBXREFg/Y65GhIfm0tnLntThhzCnfKwp1WRjeCyQ==, tarball: https://registry.npmjs.org/path-expression-matcher/-/path-expression-matcher-1.5.0.tgz}
+    engines: {node: '>=14.0.0'}
 
   path-is-absolute@1.0.1:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/path-is-absolute/-/path-is-absolute-1.0.1.tgz}
@@ -2881,6 +2915,9 @@ packages:
   strip-json-comments@3.1.1:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/strip-json-comments/-/strip-json-comments-3.1.1.tgz}
     engines: {node: '>=8'}
+
+  strnum@2.2.3:
+    resolution: {integrity: sha512-oKx6RUCuHfT3oyVjtnrmn19H1SiCqgJSg+54XqURKp5aCMbrXrhLjRN9TjuwMjiYstZ0MzDrHqkGZ5dFTKd+zg==, tarball: https://registry.npmjs.org/strnum/-/strnum-2.2.3.tgz}
 
   strtok3@10.3.4:
     resolution: {integrity: sha512-KIy5nylvC5le1OdaaoCJ07L+8iQzJHGH6pWDuzS+d07Cu7n1MZ2x26P8ZKIWfbK02+XIL8Mp4RkWeqdUCrDMfg==, tarball: https://artifactory.tcsbank.ru/artifactory/api/npm/npm-all/_relative/repository/npm-registry-npmjs-org-proxy/strtok3/-/strtok3-10.3.4.tgz}
@@ -3478,6 +3515,8 @@ snapshots:
     dependencies:
       tslib: 2.8.1
     optional: true
+
+  '@epic-web/invariant@1.0.0': {}
 
   '@eslint-community/eslint-utils@4.9.0(eslint@9.39.1)':
     dependencies:
@@ -4824,6 +4863,11 @@ snapshots:
 
   create-require@1.1.1: {}
 
+  cross-env@10.1.0:
+    dependencies:
+      '@epic-web/invariant': 1.0.0
+      cross-spawn: 7.0.6
+
   cross-spawn@7.0.6:
     dependencies:
       path-key: 3.1.1
@@ -5079,6 +5123,16 @@ snapshots:
 
   fast-uri@3.1.0: {}
 
+  fast-xml-builder@1.1.4:
+    dependencies:
+      path-expression-matcher: 1.5.0
+
+  fast-xml-parser@5.5.11:
+    dependencies:
+      fast-xml-builder: 1.1.4
+      path-expression-matcher: 1.5.0
+      strnum: 2.2.3
+
   fb-watchman@2.0.2:
     dependencies:
       bser: 2.1.1
@@ -5133,6 +5187,8 @@ snapshots:
       keyv: 4.5.4
 
   flatted@3.3.3: {}
+
+  foreach@2.0.6: {}
 
   foreground-child@3.3.1:
     dependencies:
@@ -5745,6 +5801,10 @@ snapshots:
 
   json-parse-even-better-errors@2.3.1: {}
 
+  json-pointer@0.6.2:
+    dependencies:
+      foreach: 2.0.6
+
   json-schema-traverse@0.4.1: {}
 
   json-schema-traverse@1.0.0: {}
@@ -5942,6 +6002,12 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
+  openapi-sampler@1.7.2:
+    dependencies:
+      '@types/json-schema': 7.0.15
+      fast-xml-parser: 5.5.11
+      json-pointer: 0.6.2
+
   optionator@0.9.4:
     dependencies:
       deep-is: 0.1.4
@@ -5997,6 +6063,8 @@ snapshots:
   parseurl@1.3.3: {}
 
   path-exists@4.0.0: {}
+
+  path-expression-matcher@1.5.0: {}
 
   path-is-absolute@1.0.1: {}
 
@@ -6320,6 +6388,8 @@ snapshots:
   strip-final-newline@2.0.0: {}
 
   strip-json-comments@3.1.1: {}
+
+  strnum@2.2.3: {}
 
   strtok3@10.3.4:
     dependencies:

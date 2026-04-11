@@ -11,5 +11,6 @@ declare namespace NodeJS {
     POSTGRES_DB_HOST: string;
     POSTGRES_DB_USER: string;
     POSTGRES_DB_PASSWORD: string;
+    MOCKS_DIR?: string;
   }
 }
