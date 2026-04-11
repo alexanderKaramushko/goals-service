@@ -9,7 +9,8 @@
 [Service](http://localhost:3000) <br />
 [Swagger Health service](http://localhost:3000/health) <br />
 [Swagger Goals service](http://localhost:3000/api) <br />
-[JSON-api](http://localhost:3000/api-json)
+[JSON-api](http://localhost:3000/api-json) <br />
+[Проектная документация (ТЗ)](http://localhost:3004/)
 
 ### Документация
 
@@ -65,5 +66,5 @@ pnpm start
 * [ ] Добавить базовый логгинг
 * [ ] Добавить базовый сбор метрик в Prometheus
 * [ ] Добавить валидации для дат у цели
-* [ ] Добавить автогенерацию моков на основе схем OpenAPI
-* [ ] Исследовать пользу от введения мутационного тестирования
+* [x] Добавить автогенерацию моков на основе схем OpenAPI
+* [ ] ~~Исследовать пользу от введения мутационного тестирования~~ **Добавлена генерация моков src/mocks**
