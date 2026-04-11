@@ -3,34 +3,44 @@ import { INestApplication } from '@nestjs/common';
 import { TargetModule } from '../src/modules/targets/targets.module';
 import { CreateTargetDto } from 'src/modules/targets/dto';
 import { createTestingApp } from './helpers/create-testing-app';
+import { DbService } from 'src/modules/db/db';
 
 describe('Targets (e2e)', () => {
   let app: INestApplication;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(2020, 0, 1));
-
-    app = await createTestingApp({
-      modules: [TargetModule],
-    });
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
+    if (app) {
+      await app.close();
+      app = undefined as unknown as INestApplication;
+    }
+  });
+
+  afterAll(() => {
     jest.useRealTimers();
-    await app.close();
   });
 
   describe('/POST targets/create', () => {
     const valid: CreateTargetDto = {
       title: 'Test',
       description: 'Desc',
-      shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
+      shouldBeCompletedAt: '2022-01-01T20:00:00.000Z',
     };
 
     it('/POST targets/create с валидными параметрами', async () => {
+      app = await createTestingApp({
+        modules: [TargetModule],
+      });
+
       await request(app.getHttpServer())
         .post('/targets/create')
+        .set({
+          'x-user-timezone': 'America/Anchorage',
+        })
         .send(valid)
         .expect((res) => {
           expect(res.status).toBe(201);
@@ -73,8 +83,15 @@ describe('Targets (e2e)', () => {
     ])(
       '/POST targets/create\n\tВалидация параметра: %s\n',
       async (_, data, message) => {
+        app = await createTestingApp({
+          modules: [TargetModule],
+        });
+
         await request(app.getHttpServer())
           .post('/targets/create')
+          .set({
+            'x-user-timezone': 'America/Anchorage',
+          })
           .send(data)
           .expect((res) => {
             expect(res.status).toBe(400);
@@ -84,7 +101,11 @@ describe('Targets (e2e)', () => {
     );
 
     it('Валидация пройдена, если shouldBeCompletedAt больше текущей даты', async () => {
-      jest.setSystemTime(new Date(2026, 0, 1));
+      jest.setSystemTime(new Date(2025, 1, 2));
+
+      app = await createTestingApp({
+        modules: [TargetModule],
+      });
 
       await request(app.getHttpServer())
         .post('/targets/create')
@@ -93,7 +114,7 @@ describe('Targets (e2e)', () => {
         })
         .send({
           ...valid,
-          shouldBeCompletedAt: '2026-02-01T00:00:00.000Z',
+          shouldBeCompletedAt: '2025-02-03T20:00:00.000Z',
         })
         .expect((res) => {
           expect(res.status).toBe(201);
@@ -101,7 +122,11 @@ describe('Targets (e2e)', () => {
     });
 
     it('Ошибка валидации, если shouldBeCompletedAt меньше текущей даты', async () => {
-      jest.setSystemTime(new Date(2026, 0, 1));
+      jest.setSystemTime(new Date(2025, 1, 2));
+
+      app = await createTestingApp({
+        modules: [TargetModule],
+      });
 
       await request(app.getHttpServer())
         .post('/targets/create')
@@ -110,7 +135,7 @@ describe('Targets (e2e)', () => {
         })
         .send({
           ...valid,
-          shouldBeCompletedAt: '2025-01-01T00:00:00.000Z',
+          shouldBeCompletedAt: '2025-02-01T20:00:00.000Z',
         })
         .expect((res) => {
           expect(res.status).toBe(400);
@@ -121,7 +146,11 @@ describe('Targets (e2e)', () => {
     });
 
     it('Ошибка валидации, если shouldBeCompletedAt равен текущей дате', async () => {
-      jest.setSystemTime(new Date(2026, 0, 1));
+      jest.setSystemTime(new Date(2026, 1, 2));
+
+      app = await createTestingApp({
+        modules: [TargetModule],
+      });
 
       await request(app.getHttpServer())
         .post('/targets/create')
@@ -130,7 +159,7 @@ describe('Targets (e2e)', () => {
         })
         .send({
           ...valid,
-          shouldBeCompletedAt: '2026-01-01T00:00:00.000Z',
+          shouldBeCompletedAt: '2026-01-02T20:00:00.000Z',
         })
         .expect((res) => {
           expect(res.status).toBe(400);
@@ -142,18 +171,302 @@ describe('Targets (e2e)', () => {
   });
 
   describe('GET targets/get-all/:user-id', () => {
-    it.todo('isOutdated = true, если текущая дата больше чем дата дедлайна');
+    const target = {
+      id: 1,
+      user_id: '108266036103493388680',
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      status: 'created',
+    };
 
-    it.todo('isOutdated = false, если текущая дата равна дате дедлайна');
+    it('isOutdated = true, если текущая дата больше чем дата дедлайна', async () => {
+      jest.setSystemTime(new Date(2026, 0, 1));
 
-    it.todo('isOutdated = false, если текущая дата меньше даты дедлайна');
+      app = await createTestingApp({
+        modules: [TargetModule],
+        providers: [
+          {
+            provide: DbService,
+            useValue: {
+              query: () => [
+                {
+                  ...target,
+                  completed_at: '',
+                  should_be_completed_at: '2025-01-01T20:00:00.000Z',
+                },
+              ],
+            },
+          },
+        ],
+      });
 
-    it.todo('isOutdated = true, если дата завершения больше даты дедлайна');
+      await request(app.getHttpServer())
+        .get('/targets/get-all/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send()
+        .expect((res) => {
+          expect(res.status).toBe(200);
+          expect(res.body).toEqual([
+            expect.objectContaining({
+              isOutdated: true,
+            }),
+          ]);
+        });
+    });
 
-    it.todo('isOutdated = false, если дата завершения равна дате дедлайна');
+    it('isOutdated = false, если текущая дата равна дате дедлайна', async () => {
+      jest.setSystemTime(new Date(2026, 0, 1));
 
-    it.todo('isOutdated = false, если дата завершения меньше даты дедлайна');
+      app = await createTestingApp({
+        modules: [TargetModule],
+        providers: [
+          {
+            provide: DbService,
+            useValue: {
+              query: () => [
+                {
+                  ...target,
+                  completed_at: '',
+                  should_be_completed_at: '2026-01-01T20:00:00.000Z',
+                },
+              ],
+            },
+          },
+        ],
+      });
 
-    it.todo('isOutdated = true, если дата по таймзоне больше даты дедлайна');
+      await request(app.getHttpServer())
+        .get('/targets/get-all/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send()
+        .expect((res) => {
+          expect(res.status).toBe(200);
+          expect(res.body).toEqual([
+            expect.objectContaining({
+              isOutdated: false,
+            }),
+          ]);
+        });
+    });
+
+    it('isOutdated = false, если текущая дата меньше даты дедлайна', async () => {
+      jest.setSystemTime(new Date(2026, 0, 1));
+
+      app = await createTestingApp({
+        modules: [TargetModule],
+        providers: [
+          {
+            provide: DbService,
+            useValue: {
+              query: () => [
+                {
+                  ...target,
+                  completed_at: '',
+                  should_be_completed_at: '2027-01-01T20:00:00.000Z',
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      await request(app.getHttpServer())
+        .get('/targets/get-all/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send()
+        .expect((res) => {
+          expect(res.status).toBe(200);
+          expect(res.body).toEqual([
+            expect.objectContaining({
+              isOutdated: false,
+            }),
+          ]);
+        });
+    });
+
+    it('isOutdated = true, если дедлайн в прошлом относительно даты по таймзоне', async () => {
+      jest.setSystemTime(new Date(2026, 0, 1, 1, 0));
+
+      app = await createTestingApp({
+        modules: [TargetModule],
+        providers: [
+          {
+            provide: DbService,
+            useValue: {
+              query: () => [
+                {
+                  ...target,
+                  completed_at: '',
+                  should_be_completed_at: '2026-01-01T20:00:00.000Z',
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      await request(app.getHttpServer())
+        .get('/targets/get-all/1')
+        .set({
+          'x-user-timezone': 'America/Anchorage',
+        })
+        .send()
+        .expect((res) => {
+          expect(res.status).toBe(200);
+          expect(res.body).toEqual([
+            expect.objectContaining({
+              isOutdated: false,
+            }),
+          ]);
+        });
+    });
+
+    it('isOutdated = false, если дедлайн в будущем относительно даты по таймзоне', async () => {
+      jest.setSystemTime(new Date(2026, 0, 1, 23, 0));
+
+      app = await createTestingApp({
+        modules: [TargetModule],
+        providers: [
+          {
+            provide: DbService,
+            useValue: {
+              query: () => [
+                {
+                  ...target,
+                  completed_at: '',
+                  should_be_completed_at: '2026-01-01T10:00:00.000Z',
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      await request(app.getHttpServer())
+        .get('/targets/get-all/1')
+        .set({
+          'x-user-timezone': 'Asia/Tokyo',
+        })
+        .send()
+        .expect((res) => {
+          expect(res.status).toBe(200);
+          expect(res.body).toEqual([
+            expect.objectContaining({
+              isOutdated: false,
+            }),
+          ]);
+        });
+    });
+
+    it('isOutdated = true, если дата завершения больше даты дедлайна', async () => {
+      app = await createTestingApp({
+        modules: [TargetModule],
+        providers: [
+          {
+            provide: DbService,
+            useValue: {
+              query: () => [
+                {
+                  ...target,
+                  completed_at: '2026-01-01T20:00:00.000Z',
+                  should_be_completed_at: '2025-01-01T20:00:00.000Z',
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      await request(app.getHttpServer())
+        .get('/targets/get-all/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send()
+        .expect((res) => {
+          expect(res.status).toBe(200);
+          expect(res.body).toEqual([
+            expect.objectContaining({
+              isOutdated: true,
+            }),
+          ]);
+        });
+    });
+
+    it('isOutdated = false, если дата завершения равна дате дедлайна', async () => {
+      app = await createTestingApp({
+        modules: [TargetModule],
+        providers: [
+          {
+            provide: DbService,
+            useValue: {
+              query: () => [
+                {
+                  ...target,
+                  completed_at: '2025-01-01T20:00:00.000Z',
+                  should_be_completed_at: '2025-01-01T20:00:00.000Z',
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      await request(app.getHttpServer())
+        .get('/targets/get-all/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send()
+        .expect((res) => {
+          expect(res.status).toBe(200);
+          expect(res.body).toEqual([
+            expect.objectContaining({
+              isOutdated: false,
+            }),
+          ]);
+        });
+    });
+
+    it('isOutdated = false, если дата завершения меньше даты дедлайна', async () => {
+      app = await createTestingApp({
+        modules: [TargetModule],
+        providers: [
+          {
+            provide: DbService,
+            useValue: {
+              query: () => [
+                {
+                  ...target,
+                  completed_at: '2024-01-01T20:00:00.000Z',
+                  should_be_completed_at: '2025-01-01T20:00:00.000Z',
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      await request(app.getHttpServer())
+        .get('/targets/get-all/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send()
+        .expect((res) => {
+          expect(res.status).toBe(200);
+          expect(res.body).toEqual([
+            expect.objectContaining({
+              isOutdated: false,
+            }),
+          ]);
+        });
+    });
   });
 });

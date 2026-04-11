@@ -11,7 +11,7 @@ export class TargetsService {
   async create(
     createTargetDto: CreateTargetDto & { userId: string; userTimezone: string },
   ) {
-    const currentDate = dayjs.tz(new Date(), createTargetDto.userTimezone);
+    const currentDate = dayjs(new Date()).tz(createTargetDto.userTimezone);
     const shouldBeCompletedAtDate = dayjs(createTargetDto.shouldBeCompletedAt);
 
     if (
@@ -49,10 +49,9 @@ export class TargetsService {
     );
 
     return targets.map((target) => {
-      const currentDate = dayjs.tz(new Date(), userTimezone);
-      const completedAtDate =
-        target.completed_at && dayjs.tz(target.completed_at);
+      const currentDate = dayjs(new Date()).tz(userTimezone);
 
+      const completedAtDate = target.completed_at && dayjs(target.completed_at);
       const shouldBeCompletedAtDate = dayjs(target.should_be_completed_at);
 
       return {
