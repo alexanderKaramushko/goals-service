@@ -22,6 +22,7 @@ export default tseslint.config(
         projectService: {
           allowDefaultProject: [
             'node-pg-migrate.config.mjs',
+            'jest.config.mjs',
             'docs/docusaurus.config.js',
             'docs/sidebars.js',
           ],
