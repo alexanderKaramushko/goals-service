@@ -4,7 +4,7 @@ sidebar_position: 7
 
 # 7. User Flow (targets)
 
-## 7.1 Flow авторизации (`/targets/*`)
+## 7.1 Flow авторизации
 
 ```mermaid
 ---
