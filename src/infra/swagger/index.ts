@@ -22,7 +22,7 @@ export function createDocumentBuilderFactory(
       description: 'Таймзона пользователя',
       schema: {
         type: 'string',
-        enum: ['Europe/Moscow', 'Canada/Yukon'],
+        enum: ['Europe/Moscow', 'Canada/Yukon', 'Europe/Samara'],
       },
     })
     .addTag(params.tag);

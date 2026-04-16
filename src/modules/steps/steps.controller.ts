@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   ParseIntPipe,
   Post,
+  Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,6 +19,8 @@ import {
 } from '@nestjs/swagger';
 import { StepsService } from './steps.service';
 import { CreatedStepResponseDto, CreateStepDto } from './dto';
+import { type Request as ExpressRequest } from 'express';
+import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
 
 @UseInterceptors(UserCreateInterceptor)
 @UseGuards(AuthGuard)
@@ -41,5 +45,27 @@ export class StepsController {
     @Body() createStepDto: CreateStepDto,
   ) {
     return await this.stepsService.create(targetId, createStepDto);
+  }
+
+  @ApiOperation({ summary: 'Все шаги у цели' })
+  @ApiCreatedResponse({
+    description: 'Список всех шагов цели',
+    type: CreatedStepResponseDto,
+  })
+  @ApiParam({
+    name: 'targetId',
+    required: true,
+    type: Number,
+  })
+  @UseInterceptors(TimezoneInterceptor)
+  @Get('get-all/:targetId')
+  async getAll(
+    @Request() request: ExpressRequest,
+    @Param('targetId', ParseIntPipe) targetId: number,
+  ) {
+    return await this.stepsService.getAllByTargetId(
+      targetId,
+      request.userTimezone as string,
+    );
   }
 }

@@ -25,7 +25,7 @@ export class CreatedStepResponseDto {
   id: number;
 
   @ApiProperty({ example: 1 })
-  targetId: string;
+  targetId: number;
 
   @ApiProperty({ example: 'Рецепты для плана питания' })
   title: string;
@@ -54,4 +54,33 @@ export class CreatedStepResponseDto {
     nullable: true,
   })
   completed_at: string | null;
+}
+
+export class StepsResponseDto {
+  @ApiProperty({ example: 1 })
+  id: number;
+
+  @ApiProperty({ example: 1 })
+  targetId: number;
+
+  @ApiProperty({ example: 'Рецепты для плана питания' })
+  title: string;
+
+  @ApiProperty({
+    example: 'Найти рецепты для планов питания и составить список продуктов',
+  })
+  description: string;
+
+  @ApiProperty({ example: '2026-02-14T10:45:30.000Z' })
+  shouldBeCompletedAt: string;
+
+  @ApiProperty({
+    example: null,
+    type: String,
+    nullable: true,
+  })
+  completedAt: string | null;
+
+  @ApiProperty({ example: false })
+  isOutdated: boolean;
 }
