@@ -39,12 +39,18 @@ export class StepsController {
     required: true,
     type: Number,
   })
+  @UseInterceptors(TimezoneInterceptor)
   @Post('create/:targetId')
   async create(
+    @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
     @Body() createStepDto: CreateStepDto,
   ) {
-    return await this.stepsService.create(targetId, createStepDto);
+    return await this.stepsService.create({
+      targetId,
+      userTimezone: request.userTimezone as string,
+      ...createStepDto,
+    });
   }
 
   @ApiOperation({ summary: 'Все шаги у цели' })

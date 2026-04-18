@@ -7,14 +7,19 @@ import { createTestingApp } from './helpers/create-testing-app';
 describe('Steps (e2e)', () => {
   let app: INestApplication;
 
-  beforeAll(async () => {
-    app = await createTestingApp({
-      modules: [StepsModule],
-    });
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2020, 0, 1));
   });
 
-  afterAll(async () => {
-    await app.close();
+  afterEach(async () => {
+    if (app) {
+      await app.close();
+    }
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   describe('/POST steps/create/:targetId', () => {
@@ -25,8 +30,15 @@ describe('Steps (e2e)', () => {
     };
 
     it('/POST steps/create\n\tВалидация :targetId', async () => {
+      app = await createTestingApp({
+        modules: [StepsModule],
+      });
+
       await request(app.getHttpServer())
         .post('/steps/create/wrongId')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
         .send(valid)
         .expect((res) => {
           expect(res.status).toBe(400);
@@ -72,8 +84,15 @@ describe('Steps (e2e)', () => {
     ])(
       '/POST steps/create\n\tВалидация параметра: %s\n',
       async (_, data, message) => {
+        app = await createTestingApp({
+          modules: [StepsModule],
+        });
+
         await request(app.getHttpServer())
           .post('/steps/create/1')
+          .set({
+            'x-user-timezone': 'Europe/Moscow',
+          })
           .send(data)
           .expect((res) => {
             expect(res.status).toBe(400);
@@ -81,5 +100,79 @@ describe('Steps (e2e)', () => {
           });
       },
     );
+
+    it('Валидация пройдена, если shouldBeCompletedAt больше текущей даты', async () => {
+      jest.setSystemTime(new Date(2025, 1, 2));
+
+      app = await createTestingApp({
+        modules: [StepsModule],
+      });
+
+      await request(app.getHttpServer())
+        .post('/steps/create/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send({
+          ...valid,
+          shouldBeCompletedAt: '2025-02-03T20:00:00.000Z',
+        })
+        .expect((res) => {
+          expect(res.status).toBe(201);
+        });
+    });
+
+    it('Ошибка валидации, если shouldBeCompletedAt меньше текущей даты', async () => {
+      jest.setSystemTime(new Date(2025, 1, 2));
+
+      app = await createTestingApp({
+        modules: [StepsModule],
+      });
+
+      await request(app.getHttpServer())
+        .post('/steps/create/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send({
+          ...valid,
+          shouldBeCompletedAt: '2025-02-01T20:00:00.000Z',
+        })
+        .expect((res) => {
+          expect(res.status).toBe(400);
+          expect(res.body.message).toContain(
+            'Дата окончания должна быть больше текущей даты',
+          );
+        });
+    });
+
+    it('Ошибка валидации, если shouldBeCompletedAt равен текущей дате', async () => {
+      jest.setSystemTime(new Date(2026, 1, 2));
+
+      app = await createTestingApp({
+        modules: [StepsModule],
+      });
+
+      await request(app.getHttpServer())
+        .post('/steps/create/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send({
+          ...valid,
+          shouldBeCompletedAt: '2026-01-02T20:00:00.000Z',
+        })
+        .expect((res) => {
+          expect(res.status).toBe(400);
+          expect(res.body.message).toContain(
+            'Дата окончания должна быть больше текущей даты',
+          );
+        });
+    });
+
+    // TODO Реализация теста будет через testcontainers,
+    // так как сейчас не происходит реального поиска шагов,
+    // всегда возвращается мок query
+    it.todo('Ошибка валидации, если есть шаг с одинаковым shouldBeCompletedAt');
   });
 });
