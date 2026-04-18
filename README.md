@@ -10,7 +10,7 @@
 [Swagger Health service](http://localhost:3000/health) <br />
 [Swagger Goals service](http://localhost:3000/api) <br />
 [JSON-api](http://localhost:3000/api-json) <br />
-[Проектная документация (ТЗ)](http://localhost:3004/)
+[Проектная документация (ТЗ)](https://goals-service-alpha.vercel.app)
 
 ### Документация
 
@@ -68,7 +68,7 @@ pnpm start
 * [x] ~~Добавить валидации для дат у цели~~
 * [x] ~~Добавить автогенерацию моков на основе схем OpenAPI~~ **Добавлена генерация моков src/mocks**
 * [ ] Исследовать пользу от введения мутационного тестирования
-* [ ] Поднять стенд с документацией
+* [x] ~~Поднять стенд с документацией~~ [Стенд на Vercel](https://goals-service-alpha.vercel.app)
 * [ ] Добавить юнит-тесты на проверку выходных данных методов сервисов
 * [ ] Вынести SQL-запросы в Repository *
 * [ ] Добавить seed factory для наполнения данными БД *
