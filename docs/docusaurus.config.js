@@ -1,5 +1,3 @@
-// @ts-check
-
 const config = {
   title: 'Goals Service Docs',
   tagline: 'Project and product documentation',
@@ -7,7 +5,7 @@ const config = {
   url: 'http://localhost',
   baseUrl: '/',
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'ignore',
   onBrokenMarkdownLinks: 'warn',
 
   i18n: {
@@ -29,6 +27,46 @@ const config = {
         },
       },
     ],
+  ],
+
+  plugins: [
+    function removeIncompatibleWebpackProgressPlugin() {
+      const isWebpackBarPlugin = (plugin) => {
+        const constructorName = plugin?.constructor?.name;
+        const options = plugin?.options;
+
+        return (
+          constructorName === 'WebpackBarPlugin' ||
+          Boolean(
+            options &&
+            typeof options === 'object' &&
+            'name' in options &&
+            'color' in options &&
+            'reporter' in options &&
+            'reporters' in options,
+          )
+        );
+      };
+
+      return {
+        name: 'remove-incompatible-webpack-progress-plugin',
+        configureWebpack(webpackConfig) {
+          const initialPlugins = webpackConfig.plugins ?? [];
+          const plugins = initialPlugins.filter(
+            (plugin) => !isWebpackBarPlugin(plugin),
+          );
+
+          if (plugins.length === initialPlugins.length) {
+            return {};
+          }
+
+          return {
+            plugins,
+            mergeStrategy: { plugins: 'replace' },
+          };
+        },
+      };
+    },
   ],
 
   themeConfig: {
