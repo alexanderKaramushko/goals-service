@@ -1,16 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import type { CreateTargetDto, TargetsResponseDto } from './dto';
-import { DbService } from 'src/modules/db/db';
-import { Target } from './models';
+import type {
+  CreatedTargetResponseDto,
+  CreateTargetDto,
+  TargetsResponseDto,
+} from './dto';
 import { dayjs } from 'src/helpers/dayjs';
+import { TargetsRepository } from './targets.repository';
+import { TargetRaw } from './targets.types';
 
 @Injectable()
 export class TargetsService {
-  constructor(private dbService: DbService) {}
+  constructor(private targetsRepository: TargetsRepository) {}
 
   async create(
     createTargetDto: CreateTargetDto & { userId: string; userTimezone: string },
-  ) {
+  ): Promise<CreatedTargetResponseDto[]> {
     const currentDate = dayjs(new Date()).tz(createTargetDto.userTimezone);
     const shouldBeCompletedAtDate = dayjs(createTargetDto.shouldBeCompletedAt);
 
@@ -23,48 +27,52 @@ export class TargetsService {
       );
     }
 
-    return await this.dbService.query(
-      `INSERT INTO targets (user_id, title, description, should_be_completed_at, status)
-        VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (id) DO NOTHING
-        RETURNING *;
-      `,
-      [
-        createTargetDto.userId,
-        createTargetDto.title,
-        createTargetDto.description,
-        createTargetDto.shouldBeCompletedAt,
-        'created',
-      ],
-    );
+    const targets = await this.targetsRepository.createTarget(createTargetDto);
+
+    return targets.map((target) => this.toCreatedResponseDto(target));
   }
 
   async getAllByUserId(
     userId: string,
     userTimezone: string,
   ): Promise<TargetsResponseDto[]> {
-    const targets = await this.dbService.query<Target>(
-      `SELECT * from targets t where t.user_id = $1`,
-      [userId],
-    );
+    const targets = await this.targetsRepository.getAllByUserId(userId);
 
-    return targets.map((target) => {
-      const currentDate = dayjs(new Date()).tz(userTimezone);
+    return targets.map((target) => this.toResponseDto(target, userTimezone));
+  }
 
-      const completedAtDate = target.completed_at && dayjs(target.completed_at);
-      const shouldBeCompletedAtDate = dayjs(target.should_be_completed_at);
+  toCreatedResponseDto(targetRaw: TargetRaw): CreatedTargetResponseDto {
+    return {
+      id: targetRaw.id,
+      userId: targetRaw.user_id,
+      title: targetRaw.title,
+      description: targetRaw.description,
+      status: targetRaw.status,
+      shouldBeCompletedAt: targetRaw.should_be_completed_at,
+    };
+  }
 
-      return {
-        id: target.id,
-        userId: target.user_id,
-        title: target.title,
-        description: target.description,
-        status: target.status,
-        shouldBeCompletedAt: target.should_be_completed_at,
-        isOutdated: completedAtDate
-          ? shouldBeCompletedAtDate.isBefore(completedAtDate, 'day')
-          : shouldBeCompletedAtDate.isBefore(currentDate, 'day'),
-      };
-    });
+  toResponseDto(
+    targetRaw: TargetRaw,
+    userTimezone: string,
+  ): TargetsResponseDto {
+    const currentDate = dayjs(new Date()).tz(userTimezone);
+
+    const completedAtDate =
+      targetRaw.completed_at && dayjs(targetRaw.completed_at);
+
+    const shouldBeCompletedAtDate = dayjs(targetRaw.should_be_completed_at);
+
+    return {
+      id: targetRaw.id,
+      userId: targetRaw.user_id,
+      title: targetRaw.title,
+      description: targetRaw.description,
+      status: targetRaw.status,
+      shouldBeCompletedAt: targetRaw.should_be_completed_at,
+      isOutdated: completedAtDate
+        ? shouldBeCompletedAtDate.isBefore(completedAtDate, 'day')
+        : shouldBeCompletedAtDate.isBefore(currentDate, 'day'),
+    };
   }
 }

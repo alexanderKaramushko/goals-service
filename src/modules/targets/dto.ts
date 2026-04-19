@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsDateString } from 'class-validator';
-
-export enum TargetStatus {
-  Created = 'created',
-  Active = 'active',
-  Completed = 'completed',
-  Cancelled = 'cancelled',
-}
+import { TargetStatus } from './targets.types';
 
 export class CreateTargetDto {
   @ApiProperty({ example: 'Составить план питания' })
