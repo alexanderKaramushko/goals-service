@@ -1,8 +1,9 @@
+// src/modules/db/db.ts
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Pool } from 'pg';
+import { Pool, QueryResultRow } from 'pg';
 
 @Injectable()
-export class DbService implements OnModuleDestroy, OnModuleInit {
+export class DbService implements OnModuleInit, OnModuleDestroy {
   private pool: Pool;
 
   constructor() {
@@ -15,17 +16,17 @@ export class DbService implements OnModuleDestroy, OnModuleInit {
     });
   }
 
-  async query<T>(query: string, params?: any[]): Promise<T[]> {
+  async query<T extends QueryResultRow>(
+    sql: string,
+    params: unknown[] = [],
+  ): Promise<T[]> {
     const client = await this.pool.connect();
 
     try {
-      const res = await client.query(query, params);
+      const result = await client.query<T>(sql, params);
 
-      return res.rows as T[];
-    } catch (error) {
-      throw new Error(`Error executing query: ${error}`);
+      return result.rows;
     } finally {
-      // Возвращаем клиент обратно в пул
       client.release();
     }
   }
