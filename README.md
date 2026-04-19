@@ -73,3 +73,4 @@ pnpm start
 * [ ] Вынести SQL-запросы в Repository *
 * [ ] Добавить seed factory для наполнения данными БД *
 * [ ] Подключить [testcontainers](https://testcontainers.com/) *
+* [ ] Исследовать кэширование GET-запросов (например, через Redis)
