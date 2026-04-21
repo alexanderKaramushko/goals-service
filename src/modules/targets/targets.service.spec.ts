@@ -1,9 +1,20 @@
 import { TargetsService } from './targets.service';
-import { TargetStatus } from './targets.types';
 import { TargetsRepository } from './targets.repository';
+
+import targets from 'src/mocks/TargetsResponseDto.json';
+import { TargetStatus } from './targets.types';
 
 describe('TargetsService', () => {
   let service: TargetsService;
+  const target = targets[0];
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
     service = new TargetsService({} as TargetsRepository);
@@ -34,6 +45,122 @@ describe('TargetsService', () => {
       description: targetRaw.description,
       status: targetRaw.status,
       shouldBeCompletedAt: targetRaw.should_be_completed_at,
+    });
+  });
+
+  describe('getAllByUserId', () => {
+    it('isOutdated = true, если текущая дата больше чем дата дедлайна', () => {
+      jest.setSystemTime(new Date(2026, 0, 1));
+
+      expect(
+        service.toResponseDto(
+          {
+            ...target,
+            completed_at: '',
+            should_be_completed_at: '2025-01-01T20:00:00.000Z',
+          },
+          'Europe/Moscow',
+        ),
+      ).toEqual(expect.objectContaining({ isOutdated: true }));
+    });
+
+    it('isOutdated = false, если текущая дата равна дате дедлайна', () => {
+      jest.setSystemTime(new Date(2026, 0, 1));
+
+      expect(
+        service.toResponseDto(
+          {
+            ...target,
+            completed_at: '',
+            should_be_completed_at: '2026-01-01T20:00:00.000Z',
+          },
+          'Europe/Moscow',
+        ),
+      ).toEqual(expect.objectContaining({ isOutdated: false }));
+    });
+
+    it('isOutdated = false, если текущая дата меньше даты дедлайна', () => {
+      jest.setSystemTime(new Date(2026, 0, 1));
+
+      expect(
+        service.toResponseDto(
+          {
+            ...target,
+            completed_at: '',
+            should_be_completed_at: '2027-01-01T20:00:00.000Z',
+          },
+          'Europe/Moscow',
+        ),
+      ).toEqual(expect.objectContaining({ isOutdated: false }));
+    });
+
+    it('isOutdated = false, если дедлайн в прошлом относительно даты по таймзоне', () => {
+      jest.setSystemTime(new Date(2026, 0, 1, 1, 0));
+
+      expect(
+        service.toResponseDto(
+          {
+            ...target,
+            completed_at: '',
+            should_be_completed_at: '2026-01-01T20:00:00.000Z',
+          },
+          'America/Anchorage',
+        ),
+      ).toEqual(expect.objectContaining({ isOutdated: false }));
+    });
+
+    it('isOutdated = false, если дедлайн в будущем относительно даты по таймзоне', () => {
+      jest.setSystemTime(new Date(2026, 0, 1, 23, 0));
+
+      expect(
+        service.toResponseDto(
+          {
+            ...target,
+            completed_at: '',
+            should_be_completed_at: '2026-01-01T10:00:00.000Z',
+          },
+          'Asia/Tokyo',
+        ),
+      ).toEqual(expect.objectContaining({ isOutdated: false }));
+    });
+
+    it('isOutdated = true, если дата завершения больше даты дедлайна', () => {
+      expect(
+        service.toResponseDto(
+          {
+            ...target,
+            completed_at: '2026-01-01T20:00:00.000Z',
+            should_be_completed_at: '2025-01-01T20:00:00.000Z',
+          },
+          'Asia/Tokyo',
+        ),
+      ).toEqual(expect.objectContaining({ isOutdated: true }));
+    });
+
+    it('isOutdated = false, если дата завершения равна дате дедлайна', () => {
+      expect(
+        service.toResponseDto(
+          {
+            ...target,
+            completed_at: '2025-01-01T20:00:00.000Z',
+            should_be_completed_at: '2025-01-01T20:00:00.000Z',
+          },
+          'Europe/Moscow',
+        ),
+      ).toEqual(expect.objectContaining({ isOutdated: false }));
+    });
+
+    it('isOutdated = false, если дата завершения меньше даты дедлайна', () => {
+      expect(
+        service.toResponseDto(
+          {
+            ...target,
+            completed_at: '2024-01-01T20:00:00.000Z',
+            should_be_completed_at: '2025-01-01T20:00:00.000Z',
+          },
+          'Europe/Moscow',
+        ),
+      ).toEqual(expect.objectContaining({ isOutdated: false }));
     });
   });
 });
