@@ -2,6 +2,8 @@ import { StepsService } from './steps.service';
 import { StepsRepository } from './steps.repository';
 
 import steps from 'src/mocks/CreatedStepResponseDto.json';
+import { CreateStepDto } from './dto';
+import { BadRequestException } from '@nestjs/common';
 
 describe('StepsService', () => {
   let service: StepsService;
@@ -16,7 +18,11 @@ describe('StepsService', () => {
   });
 
   beforeEach(() => {
-    service = new StepsService({} as StepsRepository);
+    service = new StepsService({
+      findByTargetIdAndShouldBeCompletedAt: () => [],
+      createStep: () => [],
+      getAllByTargetId: () => [],
+    } as unknown as StepsRepository);
   });
 
   it('сервис создается', () => {
@@ -136,6 +142,61 @@ describe('StepsService', () => {
           'Europe/Moscow',
         ),
       ).toEqual(expect.objectContaining({ isOutdated: false }));
+    });
+  });
+
+  describe.only('create', () => {
+    const valid: CreateStepDto = {
+      title: 'Test',
+      description: 'Desc',
+      shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
+    };
+
+    it('Валидация пройдена, если shouldBeCompletedAt больше текущей даты', async () => {
+      jest.setSystemTime(new Date(2025, 1, 2));
+
+      const result = await service.create({
+        ...valid,
+        shouldBeCompletedAt: '2025-02-03T20:00:00.000Z',
+        targetId: 1,
+        userTimezone: 'Europe/Moscow',
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('Ошибка валидации, если shouldBeCompletedAt меньше текущей даты', async () => {
+      jest.setSystemTime(new Date(2025, 1, 2));
+
+      await expect(
+        service.create({
+          ...valid,
+          shouldBeCompletedAt: '2025-02-01T20:00:00.000Z',
+          targetId: 1,
+          userTimezone: 'Europe/Moscow',
+        }),
+      ).rejects.toThrow(
+        new BadRequestException(
+          'Дата окончания должна быть больше текущей даты',
+        ),
+      );
+    });
+
+    it('Ошибка валидации, если shouldBeCompletedAt равен текущей дате', async () => {
+      jest.setSystemTime(new Date(2026, 1, 2));
+
+      await expect(
+        service.create({
+          ...valid,
+          shouldBeCompletedAt: '2026-01-02T20:00:00.000Z',
+          targetId: 1,
+          userTimezone: 'Europe/Moscow',
+        }),
+      ).rejects.toThrow(
+        new BadRequestException(
+          'Дата окончания должна быть больше текущей даты',
+        ),
+      );
     });
   });
 });
