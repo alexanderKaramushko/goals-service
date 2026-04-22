@@ -1,16 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { DbService } from '../db/db';
-import { CreateStepDto, StepsResponseDto } from './dto';
-import { Step } from './models';
+import { CreatedStepResponseDto, CreateStepDto, StepsResponseDto } from './dto';
 import { dayjs } from 'src/helpers/dayjs';
+import { StepsRepository } from './steps.repository';
+import { StepRaw } from './steps.types';
 
 @Injectable()
 export class StepsService {
-  constructor(private dbService: DbService) {}
+  constructor(private stepsRepository: StepsRepository) {}
 
   async create(
     createStepDto: CreateStepDto & { targetId: number; userTimezone: string },
-  ) {
+  ): Promise<CreatedStepResponseDto[]> {
     const currentDate = dayjs(new Date()).tz(createStepDto.userTimezone);
     const shouldBeCompletedAtDate = dayjs(createStepDto.shouldBeCompletedAt);
 
@@ -23,16 +23,11 @@ export class StepsService {
       );
     }
 
-    const stepWithSameShouldBeCompletedAt = await this.dbService.query<Step>(
-      `SELECT EXISTS (
-        SELECT 1
-        FROM steps s
-        WHERE s.target_id = $1
-        AND s.should_be_completed_at = $2::date
-      ) AS "exists"
-      `,
-      [createStepDto.targetId, createStepDto.shouldBeCompletedAt],
-    );
+    const stepWithSameShouldBeCompletedAt =
+      await this.stepsRepository.findByTargetIdAndShouldBeCompletedAt(
+        createStepDto.targetId,
+        createStepDto.shouldBeCompletedAt,
+      );
 
     if (stepWithSameShouldBeCompletedAt.length > 0) {
       throw new BadRequestException(
@@ -40,51 +35,48 @@ export class StepsService {
       );
     }
 
-    return await this.dbService.query(
-      `INSERT INTO steps (title, description, target_id, should_be_completed_at)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (id) DO NOTHING
-        RETURNING *;
-      `,
-      [
-        createStepDto.title,
-        createStepDto.description,
-        createStepDto.targetId,
-        createStepDto.shouldBeCompletedAt,
-      ],
-    );
+    const steps = await this.stepsRepository.createStep(createStepDto);
+
+    return steps.map((step) => this.toCreatedResponseDto(step));
   }
 
   async getAllByTargetId(
     targetId: number,
     userTimezone: string,
   ): Promise<StepsResponseDto[]> {
-    const steps = await this.dbService.query<Step>(
-      `
-        SELECT s.* from steps s
-        INNER JOIN targets t ON t.id = s.target_id
-        WHERE s.target_id = $1 AND t.status IN ('created', 'active')
-      `,
-      [targetId],
-    );
+    const steps = await this.stepsRepository.getAllByTargetId(targetId);
 
-    return steps.map((step) => {
-      const currentDate = dayjs(new Date()).tz(userTimezone);
+    return steps.map((step) => this.toResponseDto(step, userTimezone));
+  }
 
-      const completedAtDate = step.completed_at && dayjs(step.completed_at);
-      const shouldBeCompletedAtDate = dayjs(step.should_be_completed_at);
+  toCreatedResponseDto(stepRaw: StepRaw): CreatedStepResponseDto {
+    return {
+      id: stepRaw.id,
+      targetId: stepRaw.target_id!,
+      title: stepRaw.title,
+      description: stepRaw.description,
+      shouldBeCompletedAt: stepRaw.should_be_completed_at,
+      closed_at: stepRaw.closed_at,
+      created_at: stepRaw.created_at,
+      completed_at: stepRaw.completed_at,
+    };
+  }
 
-      return {
-        id: step.id,
-        targetId: step.target_id!,
-        title: step.title,
-        description: step.description,
-        shouldBeCompletedAt: step.should_be_completed_at,
-        completedAt: step.completed_at,
-        isOutdated: completedAtDate
-          ? shouldBeCompletedAtDate.isBefore(completedAtDate, 'day')
-          : shouldBeCompletedAtDate.isBefore(currentDate, 'day'),
-      };
-    });
+  toResponseDto(stepRaw: StepRaw, userTimezone: string): StepsResponseDto {
+    const currentDate = dayjs(new Date()).tz(userTimezone);
+    const completedAtDate = stepRaw.completed_at && dayjs(stepRaw.completed_at);
+    const shouldBeCompletedAtDate = dayjs(stepRaw.should_be_completed_at);
+
+    return {
+      id: stepRaw.id,
+      targetId: stepRaw.target_id!,
+      title: stepRaw.title,
+      description: stepRaw.description,
+      shouldBeCompletedAt: stepRaw.should_be_completed_at,
+      completedAt: stepRaw.completed_at,
+      isOutdated: completedAtDate
+        ? shouldBeCompletedAtDate.isBefore(completedAtDate, 'day')
+        : shouldBeCompletedAtDate.isBefore(currentDate, 'day'),
+    };
   }
 }

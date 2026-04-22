@@ -1,4 +1,4 @@
-export type Step = {
+export type StepRaw = {
   id: number;
   // TODO target_id не должен быть null
   // Шаг ВСЕГДА привязан к цели
