@@ -3,6 +3,8 @@ import { TargetsRepository } from './targets.repository';
 
 import targets from 'src/mocks/TargetsResponseDto.json';
 import { TargetStatus } from './targets.types';
+import { BadRequestException } from '@nestjs/common';
+import { CreateTargetDto } from './dto';
 
 describe('TargetsService', () => {
   let service: TargetsService;
@@ -17,7 +19,10 @@ describe('TargetsService', () => {
   });
 
   beforeEach(() => {
-    service = new TargetsService({} as TargetsRepository);
+    service = new TargetsService({
+      createTarget: () => [],
+      getAllByUserId: () => [],
+    } as unknown as TargetsRepository);
   });
 
   it('сервис создается', () => {
@@ -161,6 +166,53 @@ describe('TargetsService', () => {
           'Europe/Moscow',
         ),
       ).toEqual(expect.objectContaining({ isOutdated: false }));
+    });
+  });
+
+  describe('create', () => {
+    const valid: CreateTargetDto = {
+      title: 'Test',
+      description: 'Desc',
+      shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
+    };
+
+    it('Валидация пройдена, если shouldBeCompletedAt больше текущей даты', async () => {
+      jest.setSystemTime(new Date(2025, 1, 2));
+
+      const result = await service.create({
+        ...valid,
+        shouldBeCompletedAt: '2025-02-03T20:00:00.000Z',
+        userId: 'user-1',
+        userTimezone: 'Europe/Moscow',
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('Ошибка валидации, если shouldBeCompletedAt меньше текущей даты', async () => {
+      jest.setSystemTime(new Date(2025, 1, 2));
+
+      await expect(
+        service.create({
+          ...valid,
+          shouldBeCompletedAt: '2025-02-01T20:00:00.000Z',
+          userId: '108266036103493388680',
+          userTimezone: 'Europe/Moscow',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('Ошибка валидации, если shouldBeCompletedAt равен текущей дате', async () => {
+      jest.setSystemTime(new Date(2026, 1, 2));
+
+      await expect(
+        service.create({
+          ...valid,
+          shouldBeCompletedAt: '2026-01-02T20:00:00.000Z',
+          userId: '108266036103493388680',
+          userTimezone: 'Europe/Moscow',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
   });
 });
