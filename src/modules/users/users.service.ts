@@ -1,15 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { DbService } from 'src/modules/db/db';
-import { User } from './types';
+import { UsersRepository } from './users.repository';
+import { CreatedUserResponseDto, CreateUserDto } from './dto';
+import { UserRaw } from './users.types';
 
 @Injectable()
 export class UsersService {
-  constructor(private dbService: DbService) {}
+  constructor(private usersRepository: UsersRepository) {}
 
-  async create(user: User) {
-    await this.dbService.query(
-      'INSERT INTO users (id, full_name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING',
-      [user.subjectId, user.name],
-    );
+  async create(user: CreateUserDto): Promise<CreatedUserResponseDto[]> {
+    const users = await this.usersRepository.createUser(user);
+
+    return users.map((userRaw) => this.toCreatedResponseDto(userRaw));
+  }
+
+  toCreatedResponseDto(userRaw: UserRaw): CreatedUserResponseDto {
+    return {
+      id: userRaw.id,
+      fullName: userRaw.full_name,
+      createdAt: userRaw.created_at!,
+    };
   }
 }
