@@ -9,8 +9,7 @@ export class UsersRepository {
 
   async createUser(user: CreateUserDto): Promise<UserRaw[]> {
     return this.dbService.query(
-      `
-        INSERT INTO users (id, full_name)
+      `INSERT INTO users (id, full_name)
         VALUES ($1, $2)
         ON CONFLICT (id) DO NOTHING
         RETURNING *;

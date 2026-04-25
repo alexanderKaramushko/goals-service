@@ -28,7 +28,10 @@ export class TargetsRepository {
 
   async getAllByUserId(userId: string): Promise<TargetRaw[]> {
     return this.dbService.query(
-      `SELECT * from targets t where t.user_id = $1`,
+      `SELECT *
+        FROM targets t
+        WHERE t.user_id = $1
+      `,
       [userId],
     );
   }

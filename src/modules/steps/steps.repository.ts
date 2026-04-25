@@ -13,9 +13,9 @@ export class StepsRepository {
   ): Promise<StepRaw[]> {
     return this.dbService.query(
       `SELECT *
-      FROM steps s
-      WHERE s.target_id = $1
-      AND s.should_be_completed_at = $2::date
+        FROM steps s
+        WHERE s.target_id = $1
+        AND s.should_be_completed_at = $2::date
       `,
       [targetId, shouldBeCompletedAt],
     );
@@ -41,10 +41,11 @@ export class StepsRepository {
 
   async getAllByTargetId(targetId: number): Promise<StepRaw[]> {
     return this.dbService.query(
-      `
-        SELECT s.* from steps s
+      `SELECT s.*
+        FROM steps s
         INNER JOIN targets t ON t.id = s.target_id
-        WHERE s.target_id = $1 AND t.status IN ('created', 'active')
+        WHERE s.target_id = $1
+        AND t.status IN ('created', 'active')
       `,
       [targetId],
     );
