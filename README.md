@@ -75,3 +75,4 @@ pnpm start
 * [ ] Подключить [testcontainers](https://testcontainers.com/) *
 * [ ] Исследовать кэширование GET-запросов (например, через Redis)
 * [ ] Настроить версионирование и историю изменений
+* [ ] Провести рефакторинг создания и получения пользователя: удалить UserCreateInterceptor, добавить UsersService.getOrCreate(request.authUser) *
