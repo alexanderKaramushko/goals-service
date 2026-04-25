@@ -40,8 +40,11 @@ export class CreatedRewardResponseDto {
   @ApiProperty({ example: 1 })
   id: number;
 
-  @ApiProperty({ example: '108266036103493388680' })
-  userId: string;
+  @ApiProperty({ example: '108266036103493388680', nullable: true })
+  userId: string | null;
+
+  @ApiProperty({ example: 1, nullable: true })
+  targetId: number | null;
 
   @ApiProperty({ example: 'За составление плана питания' })
   title: string;
@@ -57,6 +60,6 @@ export class CreatedRewardResponseDto {
   @ApiProperty({ example: '2026-02-14T10:45:30.000Z' })
   createdAt: string;
 
-  @ApiProperty({ example: '2026-02-14T10:45:30.000Z' })
-  acceptedAt: string;
+  @ApiProperty({ example: '2026-02-14T10:45:30.000Z', nullable: true })
+  acceptedAt: string | null;
 }

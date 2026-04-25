@@ -69,10 +69,4 @@ describe('Rewards (e2e)', () => {
       },
     );
   });
-
-  // TODO Реализация теста будет через testcontainers
-  it.todo('Выбор типа "user" при передаче userId');
-
-  // TODO Реализация теста будет через testcontainers
-  it.todo('Выбор типа "target" при передаче targetId');
 });
