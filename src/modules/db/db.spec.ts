@@ -1,5 +1,5 @@
 import { TestingModule } from '@nestjs/testing';
-import { DbService } from './db';
+import { DbService } from './db.service';
 import { createTestingModule } from 'src/helpers/create-testing-module';
 
 describe('Db', () => {

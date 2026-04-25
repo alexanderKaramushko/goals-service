@@ -1,4 +1,3 @@
-// src/modules/db/db.ts
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Pool, QueryResultRow } from 'pg';
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DbService } from '../db/db';
+import { DbService } from '../db/db.service';
 import { CreateRewardDto, RewardType } from './dto';
 import { RewardRaw } from './rewards.types';
 

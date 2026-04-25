@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DbService } from 'src/modules/db/db';
+import { DbService } from 'src/modules/db/db.service';
 import { UserRaw } from './users.types';
 import { CreateUserDto } from './dto';
 

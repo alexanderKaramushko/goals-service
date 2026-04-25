@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DbService } from '../db/db';
+import { DbService } from '../db/db.service';
 import { CreateStepDto } from './dto';
 import { StepRaw } from './steps.types';
 
