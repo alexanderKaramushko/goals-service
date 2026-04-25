@@ -12,10 +12,10 @@ export class RewardsRepository {
   ): Promise<RewardRaw[]> {
     return this.dbService.query(
       `INSERT INTO rewards (user_id, target_id, title, description, type)
-          VALUES ($1, $2, $3, $4, $5)
-          ON CONFLICT (id) DO NOTHING
-          RETURNING *;
-        `,
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (id) DO NOTHING
+        RETURNING *;
+      `,
       [
         createRewardDto.userId ?? null,
         createRewardDto.targetId ?? null,
