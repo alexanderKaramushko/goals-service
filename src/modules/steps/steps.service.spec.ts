@@ -1,8 +1,8 @@
-import { StepsService } from './steps.service';
-import { StepsRepository } from './steps.repository';
+import { StepsService } from 'src/modules/steps/steps.service';
+import { StepsRepository } from 'src/modules/steps/steps.repository';
 
 import steps from 'src/mocks/CreatedStepResponseDto.json';
-import { CreateStepDto } from './dto';
+import { CreateStepDto } from 'src/modules/steps/dto';
 import { BadRequestException } from '@nestjs/common';
 
 describe('StepsService', () => {

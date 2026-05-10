@@ -1,10 +1,10 @@
-import { TargetsService } from './targets.service';
-import { TargetsRepository } from './targets.repository';
+import { TargetsService } from 'src/modules/targets/targets.service';
+import { TargetsRepository } from 'src/modules/targets/targets.repository';
 
 import targets from 'src/mocks/TargetsResponseDto.json';
-import { TargetStatus } from './targets.types';
+import { TargetStatus } from 'src/modules/targets/targets.types';
 import { BadRequestException } from '@nestjs/common';
-import { CreateTargetDto } from './dto';
+import { CreateTargetDto } from 'src/modules/targets/dto';
 
 describe('TargetsService', () => {
   let service: TargetsService;

@@ -1,5 +1,5 @@
 import { TestingModule } from '@nestjs/testing';
-import { StepsController } from './steps.controller';
+import { StepsController } from 'src/modules/steps/steps.controller';
 import { createTestingModule } from 'src/helpers/create-testing-module';
 
 describe('StepsController', () => {

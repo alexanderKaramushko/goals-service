@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { type ClientProxy } from '@nestjs/microservices';
-import { AUTH_MICROSERVICE } from './tokens';
-import { AuthUser } from './auth-microservice.interface';
+import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
+import { AuthUser } from 'src/modules/microservices/auth/auth-microservice.interface';
 
 @Injectable()
 export class AuthMicroserviceService {

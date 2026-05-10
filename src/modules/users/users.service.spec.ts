@@ -1,5 +1,5 @@
-import { UsersService } from './users.service';
-import { UsersRepository } from './users.repository';
+import { UsersService } from 'src/modules/users/users.service';
+import { UsersRepository } from 'src/modules/users/users.repository';
 
 describe('UsersService', () => {
   let service: UsersService;

@@ -1,12 +1,12 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from 'src/app.module';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
-import { createDocumentBuilderFactory } from './infra/swagger';
+import { createDocumentBuilderFactory } from 'src/infra/swagger';
 import { SwaggerModule } from '@nestjs/swagger';
-import { TargetModule } from './modules/targets/targets.module';
-import { StepsModule } from './modules/steps/steps.module';
-import { RewardsModule } from './modules/rewards/rewards.module';
+import { TargetModule } from 'src/modules/targets/targets.module';
+import { StepsModule } from 'src/modules/steps/steps.module';
+import { RewardsModule } from 'src/modules/rewards/rewards.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

@@ -6,14 +6,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UserCreateInterceptor } from 'src/interceptors/user-create/user-create.interceptor';
-import { AuthGuard } from '../auth/auth.guard';
+import { AuthGuard } from 'src/modules/auth/auth.guard';
 import {
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiOperation,
 } from '@nestjs/swagger';
-import { RewardsService } from './rewards.service';
-import { CreatedRewardResponseDto, CreateRewardDto } from './dto';
+import { RewardsService } from 'src/modules/rewards/rewards.service';
+import { CreatedRewardResponseDto, CreateRewardDto } from 'src/modules/rewards/dto';
 
 @UseInterceptors(UserCreateInterceptor)
 @UseGuards(AuthGuard)

@@ -1,6 +1,6 @@
-import { RewardsService } from './rewards.service';
-import { RewardsRepository } from './rewards.repository';
-import { RewardType } from './dto';
+import { RewardsService } from 'src/modules/rewards/rewards.service';
+import { RewardsRepository } from 'src/modules/rewards/rewards.repository';
+import { RewardType } from 'src/modules/rewards/dto';
 
 describe('RewardsService', () => {
   let service: RewardsService;

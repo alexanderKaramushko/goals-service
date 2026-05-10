@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsDateString } from 'class-validator';
-import { TargetStatus } from './targets.types';
+import { TargetStatus } from 'src/modules/targets/targets.types';
 
 export class CreateTargetDto {
   @ApiProperty({ example: 'Составить план питания' })

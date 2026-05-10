@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
-import { AuthMicroserviceService } from './auth-microservice.service';
-import { AUTH_MICROSERVICE } from './tokens';
+import { AuthMicroserviceService } from 'src/modules/microservices/auth/auth-microservice.service';
+import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({

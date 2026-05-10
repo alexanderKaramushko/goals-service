@@ -10,15 +10,15 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UserCreateInterceptor } from 'src/interceptors/user-create/user-create.interceptor';
-import { AuthGuard } from '../auth/auth.guard';
+import { AuthGuard } from 'src/modules/auth/auth.guard';
 import {
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiOperation,
   ApiParam,
 } from '@nestjs/swagger';
-import { StepsService } from './steps.service';
-import { CreatedStepResponseDto, CreateStepDto } from './dto';
+import { StepsService } from 'src/modules/steps/steps.service';
+import { CreatedStepResponseDto, CreateStepDto } from 'src/modules/steps/dto';
 import { type Request as ExpressRequest } from 'express';
 import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
 

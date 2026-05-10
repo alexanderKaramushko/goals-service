@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import type { CreateTargetDto } from './dto';
+import type { CreateTargetDto } from 'src/modules/targets/dto';
 import { DbService } from 'src/modules/db/db.service';
-import { TargetRaw } from './targets.types';
+import { TargetRaw } from 'src/modules/targets/targets.types';
 
 @Injectable()
 export class TargetsRepository {

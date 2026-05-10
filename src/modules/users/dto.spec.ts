@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { CreateUserDto } from './dto';
+import { CreateUserDto } from 'src/modules/users/dto';
 
 async function getValidationMessages(dto: CreateUserDto): Promise<string[]> {
   const errors = await validate(dto);

@@ -3,10 +3,10 @@ import type {
   CreatedTargetResponseDto,
   CreateTargetDto,
   TargetsResponseDto,
-} from './dto';
+} from 'src/modules/targets/dto';
 import { dayjs } from 'src/helpers/dayjs';
-import { TargetsRepository } from './targets.repository';
-import { TargetRaw } from './targets.types';
+import { TargetsRepository } from 'src/modules/targets/targets.repository';
+import { TargetRaw } from 'src/modules/targets/targets.types';
 
 @Injectable()
 export class TargetsService {
