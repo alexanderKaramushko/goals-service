@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { DbService } from '../db/db.service';
-import { CreateRewardDto, RewardType } from './dto';
-import { RewardRaw } from './rewards.types';
+import { DbService } from 'src/modules/db/db.service';
+import { CreateRewardDto, RewardType } from 'src/modules/rewards/dto';
+import { RewardRaw } from 'src/modules/rewards/rewards.types';
 
 @Injectable()
 export class RewardsRepository {

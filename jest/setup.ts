@@ -24,7 +24,7 @@ export default async () => {
     const { TargetModule } = require('../src/modules/targets/targets.module');
     const { StepsModule } = require('../src/modules/steps/steps.module');
     const { RewardsModule } = require('../src/modules/rewards/rewards.module');
-    const { createTestingApp } = require('../test/helpers/create-testing-app');
+    const { createTestingApp } = require('../src/helpers/create-testing-app');
 
     app = await createTestingApp({
       modules: [TargetModule, StepsModule, RewardsModule],

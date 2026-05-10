@@ -2,7 +2,7 @@ import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { CreateRewardDto } from 'src/modules/rewards/dto';
 import { RewardsModule } from 'src/modules/rewards/rewards.module';
-import { createTestingApp } from './helpers/create-testing-app';
+import { createTestingApp } from 'src/helpers/create-testing-app';
 
 describe('Rewards (e2e)', () => {
   let app: INestApplication;

@@ -1,5 +1,5 @@
 import { of } from 'rxjs';
-import { TimezoneInterceptor } from './timezone.interceptor';
+import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
 
 describe('TimezoneInterceptor', () => {
   let interceptor: TimezoneInterceptor;

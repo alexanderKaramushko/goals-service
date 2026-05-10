@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreatedStepResponseDto, CreateStepDto, StepsResponseDto } from './dto';
+import { CreatedStepResponseDto, CreateStepDto, StepsResponseDto } from 'src/modules/steps/dto';
 import { dayjs } from 'src/helpers/dayjs';
-import { StepsRepository } from './steps.repository';
-import { StepRaw } from './steps.types';
+import { StepsRepository } from 'src/modules/steps/steps.repository';
+import { StepRaw } from 'src/modules/steps/steps.types';
 
 @Injectable()
 export class StepsService {

@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
-import { StepsModule } from '../src/modules/steps/steps.module';
+import { StepsModule } from 'src/modules/steps/steps.module';
 import { CreateStepDto } from 'src/modules/steps/dto';
-import { createTestingApp } from './helpers/create-testing-app';
+import { createTestingApp } from 'src/helpers/create-testing-app';
 
 describe('Steps (e2e)', () => {
   let app: INestApplication;

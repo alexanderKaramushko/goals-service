@@ -12,8 +12,8 @@ import {
   CreatedTargetResponseDto,
   CreateTargetDto,
   TargetsResponseDto,
-} from './dto';
-import { TargetsService } from './targets.service';
+} from 'src/modules/targets/dto';
+import { TargetsService } from 'src/modules/targets/targets.service';
 
 import { type Request as ExpressRequest } from 'express';
 import { AuthGuard } from 'src/modules/auth/auth.guard';

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { DbModule } from './modules/db/db.module';
+import { DbModule } from 'src/modules/db/db.module';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app/app.controller';
-import { TargetModule } from './modules/targets/targets.module';
-import { StepsModule } from './modules/steps/steps.module';
-import { RewardsModule } from './modules/rewards/rewards.module';
+import { AppController } from 'src/app/app.controller';
+import { TargetModule } from 'src/modules/targets/targets.module';
+import { StepsModule } from 'src/modules/steps/steps.module';
+import { RewardsModule } from 'src/modules/rewards/rewards.module';
 
 @Module({
   imports: [
