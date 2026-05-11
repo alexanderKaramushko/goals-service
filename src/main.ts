@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { createDocumentBuilderFactory } from 'src/infra/swagger';
 import { SwaggerModule } from '@nestjs/swagger';
-import { TargetModule } from 'src/modules/targets/targets.module';
+import { TargetsModule } from 'src/modules/targets/targets.module';
 import { StepsModule } from 'src/modules/steps/steps.module';
 import { RewardsModule } from 'src/modules/rewards/rewards.module';
 
@@ -43,7 +43,7 @@ async function bootstrap() {
     'api',
     app,
     SwaggerModule.createDocument(app, secureDocumentBuilder.build(), {
-      include: [TargetModule, StepsModule, RewardsModule],
+      include: [TargetsModule, StepsModule, RewardsModule],
     }),
   );
 
