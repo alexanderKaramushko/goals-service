@@ -201,7 +201,7 @@ describe('Steps (e2e)', () => {
         .expect((res) => {
           expect(res.status).toBe(400);
           expect(res.body.message).toBe(
-            'Уже есть шаг с датой окончания 2025-01-01',
+            'Уже есть шаг с датой окончания 2027-02-15',
           );
         });
     });

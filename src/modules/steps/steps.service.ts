@@ -34,8 +34,10 @@ export class StepsService {
       );
 
     if (stepWithSameShouldBeCompletedAt.length > 0) {
+      const [step] = stepWithSameShouldBeCompletedAt;
+
       throw new BadRequestException(
-        'Уже есть шаг с датой окончания 2025-01-01',
+        `Уже есть шаг с датой окончания ${dayjs(step.should_be_completed_at).format('YYYY-MM-DD')}`,
       );
     }
 
