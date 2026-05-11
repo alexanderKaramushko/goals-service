@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsEnum } from 'class-validator';
 
-enum Provider {
+export enum Provider {
   GOOGLE = 'google',
 }
 

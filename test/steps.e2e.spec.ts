@@ -3,11 +3,56 @@ import { INestApplication } from '@nestjs/common';
 import { StepsModule } from 'src/modules/steps/steps.module';
 import { CreateStepDto } from 'src/modules/steps/dto';
 import { createTestingApp } from 'src/helpers/create-testing-app';
+import {
+  PostgreSqlContainer,
+  StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql';
+import { Client } from 'pg';
+import { execSync } from 'child_process';
+import { clearTables } from './factories';
+import { createTargetFactory } from './factories/targets.factory';
+import { TargetsRepository } from 'src/modules/targets/targets.repository';
+import { UsersRepository } from 'src/modules/users/users.repository';
+import { createUserFactory } from './factories/users.factory';
+import { Provider } from 'src/modules/users/dto';
+import { UsersModule } from 'src/modules/users/users.module';
+import { TargetsModule } from 'src/modules/targets/targets.module';
 
 describe('Steps (e2e)', () => {
+  jest.setTimeout(60000);
+
   let app: INestApplication;
 
-  beforeAll(() => {
+  let postgresContainer: StartedPostgreSqlContainer;
+  let postgresClient: Client;
+
+  beforeAll(async () => {
+    postgresContainer = await new PostgreSqlContainer(
+      'postgres:17-alpine',
+    ).start();
+
+    postgresClient = new Client({
+      connectionString: postgresContainer.getConnectionUri(),
+    });
+
+    process.env.DATABASE_URL = postgresContainer.getConnectionUri();
+    process.env.POSTGRES_DB_HOST = postgresContainer.getHost();
+    process.env.POSTGRES_DB_PORT = postgresContainer.getPort().toString();
+    process.env.POSTGRES_DB_NAME = postgresContainer.getDatabase();
+    process.env.POSTGRES_DB_PASSWORD = postgresContainer.getPassword();
+    process.env.POSTGRES_DB_USER = postgresContainer.getUsername();
+
+    await postgresClient.connect();
+
+    execSync('pnpm run migrate:init', {
+      env: {
+        ...process.env,
+        DATABASE_URL: postgresContainer.getConnectionUri(),
+      },
+    });
+  });
+
+  beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(2020, 0, 1));
   });
@@ -16,10 +61,15 @@ describe('Steps (e2e)', () => {
     if (app) {
       await app.close();
     }
+
+    await clearTables(postgresClient, ['steps']);
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     jest.useRealTimers();
+
+    await postgresClient.end();
+    await postgresContainer.stop();
   });
 
   describe('/POST steps/create/:targetId', () => {
@@ -101,9 +151,66 @@ describe('Steps (e2e)', () => {
       },
     );
 
-    // TODO Реализация теста будет через testcontainers,
-    // так как сейчас не происходит реального поиска шагов,
-    // всегда возвращается мок query
-    it.todo('Ошибка валидации, если есть шаг с одинаковым shouldBeCompletedAt');
+    it('Ошибка валидации, если есть шаг с одинаковым shouldBeCompletedAt', async () => {
+      jest.useRealTimers();
+
+      app = await createTestingApp(
+        {
+          modules: [UsersModule, TargetsModule, StepsModule],
+        },
+        { useRealDbService: true },
+      );
+
+      const createUser = createUserFactory(app.get(UsersRepository));
+      const createTarget = createTargetFactory(app.get(TargetsRepository));
+
+      await createUser({
+        name: 'Александр',
+        provider: Provider.GOOGLE,
+        subjectId: '1',
+      });
+
+      const [target] = await createTarget({
+        userId: '1',
+        title: 'Составить план питания',
+        description: 'Расписать план питания и составить список продуктов',
+        shouldBeCompletedAt: '2026-02-14',
+      });
+
+      await request(app.getHttpServer())
+        .post('/steps/create/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send({
+          targetId: target.id,
+          title: 'Рецепты для плана питания',
+          description:
+            'Найти рецепты для планов питания и составить список продуктов',
+          shouldBeCompletedAt: '2027-02-15T06:45:30.000Z',
+        })
+        .expect((res) => {
+          expect(res.status).toBe(201);
+        });
+
+      await request(app.getHttpServer())
+        .post('/steps/create/1')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send({
+          targetId: target.id,
+          title: 'Рецепты для плана питания',
+          description:
+            'Найти рецепты для планов питания и составить список продуктов',
+          shouldBeCompletedAt: '2027-02-15T06:45:30.000Z',
+        })
+        .expect((res) => {
+          expect(res.status).toBe(400);
+          expect(res.body.message).toBe(
+            'Уже есть шаг с датой окончания 2025-01-01',
+          );
+        });
+    });
   });
 });

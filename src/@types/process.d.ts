@@ -6,6 +6,7 @@ declare namespace NodeJS {
     MICROSERVICE_PORT: string;
     CLIENT_ID: string;
     CLIENT_SECRET: string;
+    DATABASE_URL: string;
     POSTGRES_DB_NAME: string;
     POSTGRES_DB_PORT: string;
     POSTGRES_DB_HOST: string;

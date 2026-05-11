@@ -13,34 +13,44 @@ import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { DbService } from 'src/modules/db/db.service';
 import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
 
-export async function createTestingApp(deps: {
-  providers?: {
-    provide: Provider;
-    useValue: any;
-  }[];
-  modules?: Exclude<ModuleMetadata['imports'], undefined>;
-  guards?: {
-    provide: Provider;
-    useValue: CanActivate;
-  }[];
-  interceptors?: {
-    provide: Provider;
-    useValue: NestInterceptor;
-  }[];
-}) {
+export async function createTestingApp(
+  deps: {
+    providers?: {
+      provide: Provider;
+      useValue: any;
+    }[];
+    modules?: Exclude<ModuleMetadata['imports'], undefined>;
+    guards?: {
+      provide: Provider;
+      useValue: CanActivate;
+    }[];
+    interceptors?: {
+      provide: Provider;
+      useValue: NestInterceptor;
+    }[];
+  },
+  options?: {
+    useRealDbService: boolean;
+  },
+) {
   const { providers = [], modules = [], guards = [], interceptors = [] } = deps;
+  const { useRealDbService = false } = options ?? {};
 
   const module = Test.createTestingModule({
     imports: [...modules],
   });
 
   [
-    {
-      provide: DbService,
-      useValue: {
-        query: () => [],
-      },
-    },
+    ...(useRealDbService
+      ? [{}]
+      : [
+          {
+            provide: DbService,
+            useValue: {
+              query: () => [],
+            },
+          },
+        ]),
     {
       provide: AUTH_MICROSERVICE,
       useValue: {
