@@ -21,13 +21,13 @@ export default async () => {
   try {
     const { SwaggerModule } = require('@nestjs/swagger');
     const { createDocumentBuilderFactory } = require('../src/infra/swagger');
-    const { TargetModule } = require('../src/modules/targets/targets.module');
+    const { TargetsModule } = require('../src/modules/targets/targets.module');
     const { StepsModule } = require('../src/modules/steps/steps.module');
     const { RewardsModule } = require('../src/modules/rewards/rewards.module');
     const { createTestingApp } = require('../src/helpers/create-testing-app');
 
     app = await createTestingApp({
-      modules: [TargetModule, StepsModule, RewardsModule],
+      modules: [TargetsModule, StepsModule, RewardsModule],
     });
 
     const secureDocumentBuilder = createDocumentBuilderFactory({
@@ -42,7 +42,7 @@ export default async () => {
       app,
       secureDocumentBuilder.build(),
       {
-        include: [TargetModule, StepsModule, RewardsModule],
+        include: [TargetsModule, StepsModule, RewardsModule],
       },
     ).components?.schemas;
 

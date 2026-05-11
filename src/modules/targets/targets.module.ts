@@ -10,4 +10,4 @@ import { TargetsRepository } from 'src/modules/targets/targets.repository';
   controllers: [TargetsController],
   providers: [TargetsService, TargetsRepository],
 })
-export class TargetModule {}
+export class TargetsModule {}
