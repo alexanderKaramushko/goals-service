@@ -6,13 +6,20 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   private pool: Pool;
 
   constructor() {
-    this.pool = new Pool({
-      host: process.env.POSTGRES_DB_HOST,
-      port: Number.parseInt(process.env.POSTGRES_DB_PORT, 10),
-      user: process.env.POSTGRES_DB_USER,
-      password: process.env.POSTGRES_DB_PASSWORD,
-      database: process.env.POSTGRES_DB_NAME,
-    });
+    const databaseUrl = process.env.DATABASE_URL;
+    const config = databaseUrl
+      ? {
+          connectionString: databaseUrl,
+        }
+      : {
+          host: process.env.POSTGRES_DB_HOST,
+          port: Number.parseInt(process.env.POSTGRES_DB_PORT ?? '5432', 10),
+          user: process.env.POSTGRES_DB_USER,
+          password: process.env.POSTGRES_DB_PASSWORD,
+          database: process.env.POSTGRES_DB_NAME,
+        };
+
+    this.pool = new Pool(config);
   }
 
   async query<T extends QueryResultRow>(

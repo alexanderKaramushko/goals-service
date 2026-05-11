@@ -36,11 +36,6 @@ describe('Steps (e2e)', () => {
     });
 
     process.env.DATABASE_URL = postgresContainer.getConnectionUri();
-    process.env.POSTGRES_DB_HOST = postgresContainer.getHost();
-    process.env.POSTGRES_DB_PORT = postgresContainer.getPort().toString();
-    process.env.POSTGRES_DB_NAME = postgresContainer.getDatabase();
-    process.env.POSTGRES_DB_PASSWORD = postgresContainer.getPassword();
-    process.env.POSTGRES_DB_USER = postgresContainer.getUsername();
 
     await postgresClient.connect();
 
@@ -68,8 +63,8 @@ describe('Steps (e2e)', () => {
   afterAll(async () => {
     jest.useRealTimers();
 
-    await postgresClient.end();
-    await postgresContainer.stop();
+    await postgresClient?.end();
+    await postgresContainer?.stop();
   });
 
   describe('/POST steps/create/:targetId', () => {
