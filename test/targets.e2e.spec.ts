@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
-import { TargetModule } from 'src/modules/targets/targets.module';
+import { TargetsModule } from 'src/modules/targets/targets.module';
 import { CreateTargetDto } from 'src/modules/targets/dto';
 import { createTestingApp } from 'src/helpers/create-testing-app';
 
@@ -31,7 +31,7 @@ describe('Targets (e2e)', () => {
 
     it('/POST targets/create с валидными параметрами', async () => {
       app = await createTestingApp({
-        modules: [TargetModule],
+        modules: [TargetsModule],
       });
 
       await request(app.getHttpServer())
@@ -82,7 +82,7 @@ describe('Targets (e2e)', () => {
       '/POST targets/create\n\tВалидация параметра: %s\n',
       async (_, data, message) => {
         app = await createTestingApp({
-          modules: [TargetModule],
+          modules: [TargetsModule],
         });
 
         await request(app.getHttpServer())
