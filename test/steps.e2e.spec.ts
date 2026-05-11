@@ -173,12 +173,11 @@ describe('Steps (e2e)', () => {
       });
 
       await request(app.getHttpServer())
-        .post('/steps/create/1')
+        .post(`/steps/create/${target.id}`)
         .set({
           'x-user-timezone': 'Europe/Moscow',
         })
         .send({
-          targetId: target.id,
           title: 'Рецепты для плана питания',
           description:
             'Найти рецепты для планов питания и составить список продуктов',
@@ -189,12 +188,11 @@ describe('Steps (e2e)', () => {
         });
 
       await request(app.getHttpServer())
-        .post('/steps/create/1')
+        .post(`/steps/create/${target.id}`)
         .set({
           'x-user-timezone': 'Europe/Moscow',
         })
         .send({
-          targetId: target.id,
           title: 'Рецепты для плана питания',
           description:
             'Найти рецепты для планов питания и составить список продуктов',
