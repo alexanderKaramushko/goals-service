@@ -73,9 +73,9 @@ pnpm start
 * [ ] Исследовать пользу от введения мутационного тестирования
 * [x] ~~Поднять стенд с документацией~~ [Стенд на Vercel](https://goals-service-alpha.vercel.app)
 * [ ] Добавить юнит-тесты на проверку выходных данных методов сервисов
-* [ ] Вынести SQL-запросы в Repository *
-* [ ] Добавить seed factory для наполнения данными БД *
-* [ ] Подключить [testcontainers](https://testcontainers.com/) *
+* [x] ~~Вынести SQL-запросы в Repository *~~
+* [x] ~~Добавить seed factory для наполнения данными БД *~~
+* [x] ~~Подключить [testcontainers](https://testcontainers.com/) *~~
 * [ ] Исследовать кэширование GET-запросов (например, через Redis)
 * [ ] Настроить версионирование и историю изменений
 * [ ] Провести рефакторинг создания и получения пользователя: удалить UserCreateInterceptor, добавить UsersService.getOrCreate(request.authUser) *
