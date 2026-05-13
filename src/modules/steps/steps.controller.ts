@@ -9,7 +9,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { UserCreateInterceptor } from 'src/interceptors/user-create/user-create.interceptor';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import {
   ApiCookieAuth,
@@ -22,7 +21,6 @@ import { CreatedStepResponseDto, CreateStepDto } from 'src/modules/steps/dto';
 import { type Request as ExpressRequest } from 'express';
 import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
 
-@UseInterceptors(UserCreateInterceptor)
 @UseGuards(AuthGuard)
 @ApiCookieAuth('jwt')
 @Controller('steps')

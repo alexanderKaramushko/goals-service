@@ -25,7 +25,8 @@
     "test:e2e": "cross-env MOCKS_DIR=src/mocks jest --config ./test/jest-e2e.json",
     "migrate:create": "node-pg-migrate --config node-pg-migrate.config.mjs --migration-file-language sql create",
     "migrate:init": "node-pg-migrate --config node-pg-migrate.config.mjs up",
-    "migrate:test:down": "node-pg-migrate down"
+    "migrate:test:down": "node-pg-migrate down",
+    "check:types": "tsc --noEmit"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

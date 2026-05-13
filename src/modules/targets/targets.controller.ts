@@ -17,7 +17,6 @@ import { TargetsService } from 'src/modules/targets/targets.service';
 
 import { type Request as ExpressRequest } from 'express';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
-import { UserCreateInterceptor } from 'src/interceptors/user-create/user-create.interceptor';
 import {
   ApiCookieAuth,
   ApiCreatedResponse,
@@ -25,9 +24,8 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
-import { AuthUser } from 'src/modules/microservices/auth/auth-microservice.interface';
+import { CurrentUser } from '../users/users.types';
 
-@UseInterceptors(UserCreateInterceptor)
 @UseGuards(AuthGuard)
 @ApiCookieAuth('jwt')
 @Controller('targets')
@@ -43,10 +41,10 @@ export class TargetsController {
   @Post('create')
   create(
     @Body() createTargetDto: CreateTargetDto,
-    @Request() request: ExpressRequest & { user: AuthUser },
+    @Request() request: ExpressRequest & { user: CurrentUser },
   ) {
     return this.targetsService.create({
-      userId: request.user.subjectId,
+      userId: request.user.id,
       userTimezone: request.userTimezone as string,
       ...createTargetDto,
     });

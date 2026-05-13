@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
-import { UserCreateInterceptor } from 'src/interceptors/user-create/user-create.interceptor';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import {
   ApiCookieAuth,
@@ -13,9 +6,11 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { RewardsService } from 'src/modules/rewards/rewards.service';
-import { CreatedRewardResponseDto, CreateRewardDto } from 'src/modules/rewards/dto';
+import {
+  CreatedRewardResponseDto,
+  CreateRewardDto,
+} from 'src/modules/rewards/dto';
 
-@UseInterceptors(UserCreateInterceptor)
 @UseGuards(AuthGuard)
 @ApiCookieAuth('jwt')
 @Controller('rewards')

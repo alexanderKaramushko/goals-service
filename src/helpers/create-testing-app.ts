@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { UserCreateInterceptor } from 'src/interceptors/user-create/user-create.interceptor';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { DbService } from 'src/modules/db/db.service';
 import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
@@ -83,16 +82,7 @@ export async function createTestingApp(
     module.overrideGuard(provide).useValue(useValue);
   });
 
-  [
-    {
-      provide: UserCreateInterceptor,
-      useValue: {
-        intercept: (_context: unknown, next: { handle: () => any }) =>
-          next.handle(),
-      },
-    },
-    ...interceptors,
-  ].forEach(({ provide, useValue }) => {
+  [...interceptors].forEach(({ provide, useValue }) => {
     module.overrideInterceptor(provide).useValue(useValue);
   });
 
