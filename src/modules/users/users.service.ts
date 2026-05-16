@@ -7,8 +7,8 @@ import { UserRaw } from 'src/modules/users/users.types';
 export class UsersService {
   constructor(private usersRepository: UsersRepository) {}
 
-  async create(user: CreateUserDto): Promise<CreatedUserResponseDto[]> {
-    const users = await this.usersRepository.createUser(user);
+  async createOrUpdate(user: CreateUserDto): Promise<CreatedUserResponseDto[]> {
+    const users = await this.usersRepository.createOrUpdateUser(user);
 
     return users.map((userRaw) => this.toCreatedResponseDto(userRaw));
   }

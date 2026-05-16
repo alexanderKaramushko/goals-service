@@ -29,15 +29,17 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    const [user] = await this.authMicroserviceService.verifyJwt(
+    const [authProviderUser] = await this.authMicroserviceService.verifyJwt(
       request.cookies.jwt,
     );
 
-    if (user) {
-      const [createdUser] =
-        (await this.usersService.create(user as CreateUserDto)) ?? [];
+    if (authProviderUser) {
+      const [user] =
+        (await this.usersService.createOrUpdate(
+          authProviderUser as CreateUserDto,
+        )) ?? [];
 
-      request.user = createdUser;
+      request.user = user;
 
       return !!request.user;
     } else {
