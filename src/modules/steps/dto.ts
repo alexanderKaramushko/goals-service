@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsDateString, IsInt, IsString } from 'class-validator';
 
 export class CreateStepDto {
   @ApiProperty({ example: 'Рецепты для плана питания' })
@@ -83,4 +83,30 @@ export class StepsResponseDto {
 
   @ApiProperty({ example: false })
   isOutdated: boolean;
+}
+
+export class CompleteStepDto {
+  @ApiProperty({
+    example: 1,
+    description: 'Id завершаемого шага',
+  })
+  @IsInt()
+  stepId: number;
+
+  @ApiProperty({
+    example: 'Посмотрел видео по правильному питанию',
+    description: 'Описание итогов завершаемого шага',
+  })
+  @IsNotEmpty()
+  @IsString()
+  resultComment: string;
+}
+
+export class CompletedStepResponseDto {
+  @ApiProperty({
+    example: '2024-05-17',
+    description: 'Дата завершения шага',
+  })
+  @IsDateString()
+  completedAt: string | null;
 }

@@ -11,14 +11,14 @@ describe('AuthGuard', () => {
   let guard: AuthGuard;
 
   const verifyJwtMock = jest.fn();
-  const createUserMock = jest.fn();
+  const createOrUpdateUserMock = jest.fn();
 
   const authMicroserviceService = {
     verifyJwt: verifyJwtMock,
   };
 
   const usersService = {
-    create: createUserMock,
+    createOrUpdate: createOrUpdateUserMock,
   };
 
   const mockRequest = {
@@ -61,7 +61,7 @@ describe('AuthGuard', () => {
     );
 
     expect(verifyJwtMock).not.toHaveBeenCalled();
-    expect(createUserMock).not.toHaveBeenCalled();
+    expect(createOrUpdateUserMock).not.toHaveBeenCalled();
   });
 
   it('Должен вызывать verifyJwt с токеном из cookies', async () => {
@@ -82,7 +82,7 @@ describe('AuthGuard', () => {
     expect(verifyJwtMock).toHaveBeenCalledWith('token');
   });
 
-  it('Должен создавать пользователя через usersService.create, если JWT валиден', async () => {
+  it('Должен создавать пользователя через usersService.createOrUpdate, если JWT валиден', async () => {
     mockRequest.cookies = {
       jwt: 'token',
     };
@@ -94,10 +94,11 @@ describe('AuthGuard', () => {
     } satisfies AuthProviderUser;
 
     verifyJwtMock.mockResolvedValue([user]);
+    createOrUpdateUserMock.mockResolvedValue([user]);
 
     await guard.canActivate(mockExecutionContext);
 
-    expect(createUserMock).toHaveBeenCalledWith(user);
+    expect(createOrUpdateUserMock).toHaveBeenCalledWith(user);
   });
 
   it('Должен записывать созданного пользователя в request.user', async () => {
@@ -118,7 +119,7 @@ describe('AuthGuard', () => {
     } satisfies CurrentUser;
 
     verifyJwtMock.mockResolvedValue([authProviderUser]);
-    createUserMock.mockResolvedValue(createdUser);
+    createOrUpdateUserMock.mockResolvedValue([createdUser]);
 
     await guard.canActivate(mockExecutionContext);
 
@@ -140,6 +141,6 @@ describe('AuthGuard', () => {
       new UnauthorizedException('Пользователь не найден'),
     );
 
-    expect(createUserMock).not.toHaveBeenCalled();
+    expect(createOrUpdateUserMock).not.toHaveBeenCalled();
   });
 });

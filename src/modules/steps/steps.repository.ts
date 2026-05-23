@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/modules/db/db.service';
 import { CreateStepDto } from 'src/modules/steps/dto';
 import { StepRaw } from 'src/modules/steps/steps.types';
+import { TargetRaw } from '../targets/targets.types';
+import { PoolClient } from 'pg';
 
 @Injectable()
 export class StepsRepository {
@@ -49,5 +51,90 @@ export class StepsRepository {
       `,
       [targetId],
     );
+  }
+
+  async getAllAscDeadlineByTargetId(
+    poolClient: PoolClient,
+    payload: {
+      targetId: number;
+    },
+  ): Promise<StepRaw[]> {
+    const result = await poolClient.query(
+      `SELECT s.*
+        FROM steps s
+        INNER JOIN targets t ON t.id = s.target_id
+        WHERE s.target_id = $1 AND s.completed_at IS NULL
+        ORDER BY s.should_be_completed_at ASC
+      `,
+      [payload.targetId],
+    );
+
+    return result.rows;
+  }
+
+  async getStepForUserId(
+    poolClient: PoolClient,
+    payload: {
+      stepId: number;
+      userId: string;
+    },
+  ): Promise<StepRaw | undefined> {
+    const result = await poolClient.query<StepRaw>(
+      `SELECT s.*
+        FROM steps s
+        INNER JOIN targets t ON t.id = s.target_id
+        WHERE s.id = $1 AND t.user_id = $2
+        FOR UPDATE;
+      `,
+      [payload.stepId, payload.userId],
+    );
+
+    const [step] = result.rows;
+
+    return step;
+  }
+
+  async getTargetByStepId(
+    poolClient: PoolClient,
+    payload: {
+      stepId: number;
+      userId: string;
+    },
+  ): Promise<TargetRaw | undefined> {
+    const result = await poolClient.query<TargetRaw>(
+      `SELECT t.*
+        FROM steps s
+        INNER JOIN targets t ON t.id = s.target_id
+        WHERE s.id = $1 AND t.user_id = $2
+        FOR UPDATE;
+      `,
+      [payload.stepId, payload.userId],
+    );
+
+    const [target] = result.rows;
+
+    return target;
+  }
+
+  async completeStep(
+    poolClient: PoolClient,
+    payload: {
+      stepId: number;
+      resultComment: string;
+    },
+  ): Promise<StepRaw | undefined> {
+    const result = await poolClient.query<StepRaw>(
+      `UPDATE steps
+          SET completed_at = NOW(),
+              result_comment = $2
+          WHERE id = $1 AND completed_at IS NULL
+        RETURNING *;
+      `,
+      [payload.stepId, payload.resultComment],
+    );
+
+    const [step] = result.rows;
+
+    return step;
   }
 }
