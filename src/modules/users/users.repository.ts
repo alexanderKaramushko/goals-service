@@ -13,7 +13,7 @@ export class UsersRepository {
         VALUES ($1, $2)
         ON CONFLICT (id)
         DO UPDATE SET
-          name = EXCLUDED.full_name
+          full_name = EXCLUDED.full_name
         RETURNING *;
       `,
       [user.subjectId, user.name],

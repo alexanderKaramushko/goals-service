@@ -1,8 +1,6 @@
 export type StepRaw = {
   id: number;
-  // TODO target_id не должен быть null
-  // Шаг ВСЕГДА привязан к цели
-  target_id: number | null;
+  target_id: number;
   title: string;
   description: string;
   should_be_completed_at: string;

@@ -11,6 +11,7 @@ import { of } from 'rxjs';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { DbService } from 'src/modules/db/db.service';
 import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
+import { CurrentUser } from 'src/modules/users/users.types';
 
 export async function createTestingApp(
   deps: {
@@ -47,6 +48,10 @@ export async function createTestingApp(
             provide: DbService,
             useValue: {
               query: () => [],
+              getPoolClient: () => ({
+                query: () => [],
+                release: () => {},
+              }),
             },
           },
         ]),
@@ -71,7 +76,11 @@ export async function createTestingApp(
         canActivate: (context: ExecutionContext) => {
           const request = context.switchToHttp().getRequest();
 
-          request.user = { subjectId: 1, name: 'Test User' };
+          request.user = {
+            id: '1',
+            fullName: 'Test User',
+            createdAt: '2026-01-01T10:45:30.000Z',
+          } satisfies CurrentUser;
 
           return true;
         },

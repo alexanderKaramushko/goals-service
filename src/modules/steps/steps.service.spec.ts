@@ -1,5 +1,6 @@
 import { StepsService } from 'src/modules/steps/steps.service';
 import { StepsRepository } from 'src/modules/steps/steps.repository';
+import { DbService } from 'src/modules/db/db.service';
 
 import steps from 'src/mocks/CreatedStepResponseDto.json';
 import { CreateStepDto } from 'src/modules/steps/dto';
@@ -18,11 +19,16 @@ describe('StepsService', () => {
   });
 
   beforeEach(() => {
-    service = new StepsService({
-      findByTargetIdAndShouldBeCompletedAt: () => [],
-      createStep: () => [],
-      getAllByTargetId: () => [],
-    } as unknown as StepsRepository);
+    service = new StepsService(
+      {
+        findByTargetIdAndShouldBeCompletedAt: () => [],
+        createStep: () => [],
+        getAllByTargetId: () => [],
+      } as unknown as StepsRepository,
+      {
+        getPoolClient: () => {},
+      } as DbService,
+    );
   });
 
   it('сервис создается', () => {
@@ -34,7 +40,7 @@ describe('StepsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1));
 
       expect(
-        service.toResponseDto(
+        service.toAllResponseDto(
           {
             ...step,
             completed_at: null,
@@ -49,7 +55,7 @@ describe('StepsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1));
 
       expect(
-        service.toResponseDto(
+        service.toAllResponseDto(
           {
             ...step,
             completed_at: null,
@@ -64,7 +70,7 @@ describe('StepsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1));
 
       expect(
-        service.toResponseDto(
+        service.toAllResponseDto(
           {
             ...step,
             completed_at: null,
@@ -79,7 +85,7 @@ describe('StepsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1, 1, 0));
 
       expect(
-        service.toResponseDto(
+        service.toAllResponseDto(
           {
             ...step,
             completed_at: null,
@@ -94,7 +100,7 @@ describe('StepsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1, 23, 0));
 
       expect(
-        service.toResponseDto(
+        service.toAllResponseDto(
           {
             ...step,
             completed_at: null,
@@ -107,7 +113,7 @@ describe('StepsService', () => {
 
     it('isOutdated = true, если дата завершения больше даты дедлайна', () => {
       expect(
-        service.toResponseDto(
+        service.toAllResponseDto(
           {
             ...step,
             completed_at: '2026-01-01T20:00:00.000Z',
@@ -120,7 +126,7 @@ describe('StepsService', () => {
 
     it('isOutdated = false, если дата завершения равна дате дедлайна', () => {
       expect(
-        service.toResponseDto(
+        service.toAllResponseDto(
           {
             ...step,
             completed_at: '2025-01-01T20:00:00.000Z',
@@ -133,7 +139,7 @@ describe('StepsService', () => {
 
     it('isOutdated = false, если дата завершения меньше даты дедлайна', () => {
       expect(
-        service.toResponseDto(
+        service.toAllResponseDto(
           {
             ...step,
             completed_at: '2024-01-01T20:00:00.000Z',
@@ -145,7 +151,7 @@ describe('StepsService', () => {
     });
   });
 
-  describe.only('create', () => {
+  describe('create', () => {
     const valid: CreateStepDto = {
       title: 'Test',
       description: 'Desc',

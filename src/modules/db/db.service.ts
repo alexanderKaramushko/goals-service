@@ -37,6 +37,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  getPoolClient() {
+    return this.pool.connect();
+  }
+
   onModuleInit() {
     if (process.env.NODE_ENV === 'development') {
       this.pool.addListener('connect', () => {

@@ -17,7 +17,12 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { StepsService } from 'src/modules/steps/steps.service';
-import { CreatedStepResponseDto, CreateStepDto } from 'src/modules/steps/dto';
+import {
+  CompletedStepResponseDto,
+  CompleteStepDto,
+  CreatedStepResponseDto,
+  CreateStepDto,
+} from 'src/modules/steps/dto';
 import { type Request as ExpressRequest } from 'express';
 import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
 
@@ -44,7 +49,7 @@ export class StepsController {
     @Param('targetId', ParseIntPipe) targetId: number,
     @Body() createStepDto: CreateStepDto,
   ) {
-    return await this.stepsService.create({
+    return this.stepsService.create({
       targetId,
       userTimezone: request.userTimezone as string,
       ...createStepDto,
@@ -67,9 +72,28 @@ export class StepsController {
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
   ) {
-    return await this.stepsService.getAllByTargetId(
+    return this.stepsService.getAllByTargetId(
       targetId,
       request.userTimezone as string,
     );
+  }
+
+  @ApiOperation({ summary: 'Завершить шаг у цели' })
+  @ApiCreatedResponse({
+    description: 'Дата завершения шага',
+    type: CompletedStepResponseDto,
+  })
+  @UseInterceptors(TimezoneInterceptor)
+  @Post('complete')
+  async completeStep(
+    @Request() request: ExpressRequest,
+    @Body() body: CompleteStepDto,
+  ) {
+    return this.stepsService.completeStep({
+      stepId: body.stepId,
+      resultComment: body.resultComment,
+      userId: request.user?.id as string,
+      userTimezone: request.userTimezone as string,
+    });
   }
 }
