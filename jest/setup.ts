@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path, { join } from 'node:path';
 import { loadConfig, register } from 'tsconfig-paths';
 import { sample } from 'openapi-sampler';
+import { isDeepStrictEqual } from 'node:util';
 
 export default async () => {
   const tsconfig = loadConfig(process.cwd());
@@ -52,8 +53,17 @@ export default async () => {
 
     Object.entries(schemas).forEach(([name, schema]) => {
       const mock = sample(schema as any, { skipReadOnly: true });
+      const mockPath = path.join(mocksDir, `${name}.json`);
 
-      writeFileSync(path.join(mocksDir, `${name}.json`), JSON.stringify(mock));
+      if (existsSync(mockPath)) {
+        const result = readFileSync(mockPath, 'utf-8');
+
+        if (!isDeepStrictEqual(JSON.parse(result), mock)) {
+          writeFileSync(mockPath, JSON.stringify(mock));
+        }
+      } else {
+        writeFileSync(mockPath, JSON.stringify(mock));
+      }
     });
   } finally {
     if (app) {
