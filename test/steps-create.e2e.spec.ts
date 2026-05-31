@@ -17,6 +17,7 @@ import { createUserFactory } from './factories/users.factory';
 import { Provider } from 'src/modules/users/dto';
 import { UsersModule } from 'src/modules/users/users.module';
 import { TargetsModule } from 'src/modules/targets/targets.module';
+import { StepWithSameDeadlineExistsException } from 'src/modules/steps/exceptions/step-with-same-deadline-exists.exception';
 
 describe('Steps (e2e) - /POST steps/create', () => {
   jest.setTimeout(60000);
@@ -197,7 +198,7 @@ describe('Steps (e2e) - /POST steps/create', () => {
       .expect((res) => {
         expect(res.status).toBe(400);
         expect(res.body.message).toBe(
-          'Уже есть шаг с датой окончания 2027-02-15',
+          new StepWithSameDeadlineExistsException('2027-02-15').message,
         );
       });
   });

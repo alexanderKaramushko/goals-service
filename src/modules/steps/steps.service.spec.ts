@@ -4,7 +4,7 @@ import { DbService } from 'src/modules/db/db.service';
 
 import steps from 'src/mocks/CreatedStepResponseDto.json';
 import { CreateStepDto } from 'src/modules/steps/dto';
-import { BadRequestException } from '@nestjs/common';
+import { StepDeadlineOutdatedException } from './exceptions/step-deadline-outdated';
 
 describe('StepsService', () => {
   let service: StepsService;
@@ -181,11 +181,7 @@ describe('StepsService', () => {
           targetId: 1,
           userTimezone: 'Europe/Moscow',
         }),
-      ).rejects.toThrow(
-        new BadRequestException(
-          'Дата окончания должна быть больше текущей даты',
-        ),
-      );
+      ).rejects.toThrow(new StepDeadlineOutdatedException());
     });
 
     it('Ошибка валидации, если shouldBeCompletedAt равен текущей дате', async () => {
@@ -198,11 +194,7 @@ describe('StepsService', () => {
           targetId: 1,
           userTimezone: 'Europe/Moscow',
         }),
-      ).rejects.toThrow(
-        new BadRequestException(
-          'Дата окончания должна быть больше текущей даты',
-        ),
-      );
+      ).rejects.toThrow(new StepDeadlineOutdatedException());
     });
   });
 });

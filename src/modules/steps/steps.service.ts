@@ -16,6 +16,7 @@ import { StepDeadlineNotClosestException } from './exceptions/step-deadline-not-
 import { TargetStatus } from 'src/modules/targets/targets.types';
 import { TargetNotActiveException } from './exceptions/target-not-active.exception';
 import { DbService } from '../db/db.service';
+import { StepWithSameDeadlineExistsException } from './exceptions/step-with-same-deadline-exists.exception';
 
 @Injectable()
 export class StepsService {
@@ -47,9 +48,7 @@ export class StepsService {
       shouldBeCompletedAtDate.isBefore(currentDate, 'day') ||
       shouldBeCompletedAtDate.isSame(currentDate, 'day')
     ) {
-      throw new BadRequestException(
-        'Дата окончания должна быть больше текущей даты',
-      );
+      throw new StepDeadlineOutdatedException();
     }
 
     const stepWithSameShouldBeCompletedAt =
@@ -61,8 +60,8 @@ export class StepsService {
     if (stepWithSameShouldBeCompletedAt.length > 0) {
       const [step] = stepWithSameShouldBeCompletedAt;
 
-      throw new BadRequestException(
-        `Уже есть шаг с датой окончания ${dayjs(step.should_be_completed_at).format('YYYY-MM-DD')}`,
+      throw new StepWithSameDeadlineExistsException(
+        dayjs(step.should_be_completed_at).format('YYYY-MM-DD'),
       );
     }
 
