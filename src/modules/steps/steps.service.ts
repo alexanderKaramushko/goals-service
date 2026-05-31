@@ -65,9 +65,13 @@ export class StepsService {
       );
     }
 
-    const steps = await this.stepsRepository.createStep(createStepDto);
+    try {
+      const steps = await this.stepsRepository.createStep(createStepDto);
 
-    return steps.map((step) => this.toCreatedResponseDto(step));
+      return steps.map((step) => this.toCreatedResponseDto(step));
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   toAllResponseDto(stepRaw: StepRaw, userTimezone: string): StepsResponseDto {
