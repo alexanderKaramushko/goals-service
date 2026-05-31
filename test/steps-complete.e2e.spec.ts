@@ -70,20 +70,29 @@ describe('Steps (e2e) - /POST steps/complete', () => {
   });
 
   const valid: CompleteStepDto = {
-    stepId: 1,
     resultComment: 'Посмотрел видео по правильному питанию',
   };
 
+  it('Валидация :stepId', async () => {
+    app = await createTestingApp({
+      modules: [StepsModule],
+    });
+
+    await request(app.getHttpServer())
+      .post('/steps/complete/wrongId')
+      .set({
+        'x-user-timezone': 'Europe/Moscow',
+      })
+      .send(valid)
+      .expect((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.message).toContain(
+          'Validation failed (numeric string is expected)',
+        );
+      });
+  });
+
   it.each<[string, CompleteStepDto, string]>([
-    [
-      'stepId',
-      {
-        ...valid,
-        // проверяем валидацию на целое число
-        stepId: '' as unknown as number,
-      },
-      'stepId must be an integer number',
-    ],
     [
       'resultComment',
       {
@@ -107,7 +116,7 @@ describe('Steps (e2e) - /POST steps/complete', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/steps/complete')
+      .post('/steps/complete/1')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -162,7 +171,7 @@ describe('Steps (e2e) - /POST steps/complete', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete`)
+      .post(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -212,7 +221,7 @@ describe('Steps (e2e) - /POST steps/complete', () => {
     );
 
     await request(app.getHttpServer())
-      .post(`/steps/complete`)
+      .post(`/steps/complete/12345`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -275,7 +284,7 @@ describe('Steps (e2e) - /POST steps/complete', () => {
       });
 
       await request(app.getHttpServer())
-        .post(`/steps/complete`)
+        .post(`/steps/complete/${step.id}`)
         .set({
           'x-user-timezone': 'Europe/Moscow',
         })
@@ -333,7 +342,7 @@ describe('Steps (e2e) - /POST steps/complete', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete`)
+      .post(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -346,7 +355,7 @@ describe('Steps (e2e) - /POST steps/complete', () => {
       });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete`)
+      .post(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -403,19 +412,18 @@ describe('Steps (e2e) - /POST steps/complete', () => {
     });
 
     const payload = {
-      stepId: step.id,
       resultComment: 'Посмотрел видео по правильному питанию',
     };
 
     const [firstResponse, secondResponse] = await Promise.all([
       request(app.getHttpServer())
-        .post('/steps/complete')
+        .post(`/steps/complete/${step.id}`)
         .set({
           'x-user-timezone': 'Europe/Moscow',
         })
         .send(payload),
       request(app.getHttpServer())
-        .post('/steps/complete')
+        .post(`/steps/complete/${step.id}`)
         .set({
           'x-user-timezone': 'Europe/Moscow',
         })
@@ -481,7 +489,7 @@ describe('Steps (e2e) - /POST steps/complete', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete`)
+      .post(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -547,7 +555,7 @@ describe('Steps (e2e) - /POST steps/complete', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete`)
+      .post(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })

@@ -104,7 +104,11 @@ export class StepsService {
   }
 
   async completeStep(
-    payload: CompleteStepDto & { userTimezone: string; userId: string },
+    payload: CompleteStepDto & {
+      stepId: number;
+      userTimezone: string;
+      userId: string;
+    },
   ): Promise<CompletedStepResponseDto> {
     const poolClient = await this.dbService.getPoolClient();
 

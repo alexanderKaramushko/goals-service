@@ -84,13 +84,14 @@ export class StepsController {
     type: CompletedStepResponseDto,
   })
   @UseInterceptors(TimezoneInterceptor)
-  @Post('complete')
+  @Post('complete/:stepId')
   async completeStep(
     @Request() request: ExpressRequest,
     @Body() body: CompleteStepDto,
+    @Param('stepId', ParseIntPipe) stepId: number,
   ) {
     return this.stepsService.completeStep({
-      stepId: body.stepId,
+      stepId: stepId,
       resultComment: body.resultComment,
       userId: request.user?.id as string,
       userTimezone: request.userTimezone as string,
