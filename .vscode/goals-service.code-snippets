@@ -1,0 +1,27 @@
+{
+  "Transaction method": {
+    "scope": "typescript",
+    "prefix": "tr",
+    "body": [
+      "toResponse(rawData: ${1:any}): ${2:any} {",
+      "  return ${3:{}};",
+      "}",
+      "",
+      "async ${4:name}(payload: ${5:any}): Promise<${6:any}> {",
+      "  const poolClient = await this.dbService.getPoolClient();",
+      "",
+      "  try {",
+      "    await poolClient.query('BEGIN');",
+      "",
+      "    return this.toResponse(${7:{}});",
+      "  } catch (error) {",
+      "    await poolClient.query('ROLLBACK');",
+      "    throw error;",
+      "  } finally {",
+      "    poolClient.release();",
+      "  }",
+      "}"
+    ],
+    "description": "Create async service method with BEGIN/ROLLBACK transaction handling"
+  }
+}
