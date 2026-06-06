@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { StepsModule } from 'src/modules/steps/steps.module';
-import { CompleteStepDto } from 'src/modules/steps/dto';
+import { CompleteStepDto } from 'src/modules/steps/steps.dto';
 import { createTestingApp } from 'src/helpers/create-testing-app';
 import {
   PostgreSqlContainer,
@@ -17,7 +17,6 @@ import { createTargetFactory } from './factories/targets.factory';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { StepsRepository } from 'src/modules/steps/steps.repository';
-import { Provider } from 'src/modules/users/dto';
 import { DbService } from 'src/modules/db/db.service';
 import dayjs from 'dayjs';
 import { StepNotFoundException } from 'src/modules/steps/exceptions/step-not-found.exception';
@@ -26,6 +25,7 @@ import { TargetNotActiveException } from 'src/modules/steps/exceptions/target-no
 import { StepAlreadyCompletedException } from 'src/modules/steps/exceptions/step-already-completed.exception';
 import { StepDeadlineOutdatedException } from 'src/modules/steps/exceptions/step-deadline-outdated';
 import { StepDeadlineNotClosestException } from 'src/modules/steps/exceptions/step-deadline-not-closest';
+import { Provider } from 'src/modules/users/users.types';
 
 describe('Steps (e2e) - /POST steps/complete', () => {
   jest.setTimeout(60000);

@@ -1,11 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import {
-  CompletedStepResponseDto,
-  CompleteStepDto,
-  CreatedStepResponseDto,
-  CreateStepDto,
-  StepsResponseDto,
-} from 'src/modules/steps/dto';
 import { dayjs } from 'src/helpers/dayjs';
 import { StepsRepository } from 'src/modules/steps/steps.repository';
 import { StepRaw } from 'src/modules/steps/steps.types';
@@ -17,6 +10,14 @@ import { TargetStatus } from 'src/modules/targets/targets.types';
 import { TargetNotActiveException } from './exceptions/target-not-active.exception';
 import { DbService } from '../db/db.service';
 import { StepWithSameDeadlineExistsException } from './exceptions/step-with-same-deadline-exists.exception';
+import {
+  CompletedStepResponse,
+  CompleteStepPayload,
+  CreateStepPayload,
+  GetStepsPayload,
+  StepCreatedResponse,
+  StepsListItem,
+} from 'src/modules/steps/steps.service.types';
 
 @Injectable()
 export class StepsService {
@@ -25,7 +26,7 @@ export class StepsService {
     private dbService: DbService,
   ) {}
 
-  toCreatedResponseDto(stepRaw: StepRaw): CreatedStepResponseDto {
+  toCreatedResponse(stepRaw: StepRaw): StepCreatedResponse {
     return {
       id: stepRaw.id,
       targetId: stepRaw.target_id,
@@ -38,11 +39,9 @@ export class StepsService {
     };
   }
 
-  async create(
-    createStepDto: CreateStepDto & { targetId: number; userTimezone: string },
-  ): Promise<CreatedStepResponseDto[]> {
-    const currentDate = dayjs(new Date()).tz(createStepDto.userTimezone);
-    const shouldBeCompletedAtDate = dayjs(createStepDto.shouldBeCompletedAt);
+  async create(payload: CreateStepPayload): Promise<StepCreatedResponse[]> {
+    const currentDate = dayjs(new Date()).tz(payload.userTimezone);
+    const shouldBeCompletedAtDate = dayjs(payload.shouldBeCompletedAt);
 
     if (
       shouldBeCompletedAtDate.isBefore(currentDate, 'day') ||
@@ -53,8 +52,8 @@ export class StepsService {
 
     const stepWithSameShouldBeCompletedAt =
       await this.stepsRepository.findByTargetIdAndShouldBeCompletedAt(
-        createStepDto.targetId,
-        createStepDto.shouldBeCompletedAt,
+        payload.targetId,
+        payload.shouldBeCompletedAt,
       );
 
     if (stepWithSameShouldBeCompletedAt.length > 0) {
@@ -66,15 +65,15 @@ export class StepsService {
     }
 
     try {
-      const steps = await this.stepsRepository.createStep(createStepDto);
+      const steps = await this.stepsRepository.createStep(payload);
 
-      return steps.map((step) => this.toCreatedResponseDto(step));
+      return steps.map((step) => this.toCreatedResponse(step));
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
 
-  toAllResponseDto(stepRaw: StepRaw, userTimezone: string): StepsResponseDto {
+  toListItem(stepRaw: StepRaw, userTimezone: string): StepsListItem {
     const currentDate = dayjs(new Date()).tz(userTimezone);
     const completedAtDate = stepRaw.completed_at && dayjs(stepRaw.completed_at);
     const shouldBeCompletedAtDate = dayjs(stepRaw.should_be_completed_at);
@@ -92,28 +91,21 @@ export class StepsService {
     };
   }
 
-  async getAllByTargetId(
-    targetId: number,
-    userTimezone: string,
-  ): Promise<StepsResponseDto[]> {
-    const steps = await this.stepsRepository.getAllByTargetId(targetId);
+  async getAllByTargetId(payload: GetStepsPayload): Promise<StepsListItem[]> {
+    const steps = await this.stepsRepository.getAllByTargetId(payload.targetId);
 
-    return steps.map((step) => this.toAllResponseDto(step, userTimezone));
+    return steps.map((step) => this.toListItem(step, payload.userTimezone));
   }
 
-  toCompletedResponseDto(stepRaw: StepRaw): CompletedStepResponseDto {
+  toCompletedResponse(stepRaw: StepRaw): CompletedStepResponse {
     return {
       completedAt: stepRaw.completed_at,
     };
   }
 
   async completeStep(
-    payload: CompleteStepDto & {
-      stepId: number;
-      userTimezone: string;
-      userId: string;
-    },
-  ): Promise<CompletedStepResponseDto> {
+    payload: CompleteStepPayload,
+  ): Promise<CompletedStepResponse> {
     const poolClient = await this.dbService.getPoolClient();
 
     try {
@@ -171,7 +163,7 @@ export class StepsService {
 
       await poolClient.query('COMMIT');
 
-      return this.toCompletedResponseDto(completedStep);
+      return this.toCompletedResponse(completedStep);
     } catch (error) {
       await poolClient.query('ROLLBACK');
       throw error;

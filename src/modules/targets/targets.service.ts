@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import type {
-  CreatedTargetResponseDto,
-  CreateTargetDto,
-  TargetsResponseDto,
-} from 'src/modules/targets/dto';
+  CreateTargetPayload,
+  GetTargetsPayload,
+  TargetCreatedResponse,
+  TargetListItem,
+} from 'src/modules/targets/targets.service.types';
 import { dayjs } from 'src/helpers/dayjs';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { TargetRaw } from 'src/modules/targets/targets.types';
@@ -12,11 +13,9 @@ import { TargetRaw } from 'src/modules/targets/targets.types';
 export class TargetsService {
   constructor(private targetsRepository: TargetsRepository) {}
 
-  async create(
-    createTargetDto: CreateTargetDto & { userId: string; userTimezone: string },
-  ): Promise<CreatedTargetResponseDto[]> {
-    const currentDate = dayjs(new Date()).tz(createTargetDto.userTimezone);
-    const shouldBeCompletedAtDate = dayjs(createTargetDto.shouldBeCompletedAt);
+  async create(payload: CreateTargetPayload): Promise<TargetCreatedResponse[]> {
+    const currentDate = dayjs(new Date()).tz(payload.userTimezone);
+    const shouldBeCompletedAtDate = dayjs(payload.shouldBeCompletedAt);
 
     if (
       shouldBeCompletedAtDate.isBefore(currentDate, 'day') ||
@@ -27,21 +26,20 @@ export class TargetsService {
       );
     }
 
-    const targets = await this.targetsRepository.createTarget(createTargetDto);
+    const targets = await this.targetsRepository.createTarget(payload);
 
-    return targets.map((target) => this.toCreatedResponseDto(target));
+    return targets.map((target) => this.toCreatedResponse(target));
   }
 
-  async getAllByUserId(
-    userId: string,
-    userTimezone: string,
-  ): Promise<TargetsResponseDto[]> {
-    const targets = await this.targetsRepository.getAllByUserId(userId);
+  async getAllByUserId(payload: GetTargetsPayload): Promise<TargetListItem[]> {
+    const targets = await this.targetsRepository.getAllByUserId(payload.userId);
 
-    return targets.map((target) => this.toResponseDto(target, userTimezone));
+    return targets.map((target) =>
+      this.toListItem(target, payload.userTimezone),
+    );
   }
 
-  toCreatedResponseDto(targetRaw: TargetRaw): CreatedTargetResponseDto {
+  toCreatedResponse(targetRaw: TargetRaw): TargetCreatedResponse {
     return {
       id: targetRaw.id,
       userId: targetRaw.user_id,
@@ -52,10 +50,7 @@ export class TargetsService {
     };
   }
 
-  toResponseDto(
-    targetRaw: TargetRaw,
-    userTimezone: string,
-  ): TargetsResponseDto {
+  toListItem(targetRaw: TargetRaw, userTimezone: string): TargetListItem {
     const currentDate = dayjs(new Date()).tz(userTimezone);
 
     const completedAtDate =

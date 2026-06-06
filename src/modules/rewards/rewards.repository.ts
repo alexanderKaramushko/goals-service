@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/modules/db/db.service';
-import { CreateRewardDto, RewardType } from 'src/modules/rewards/dto';
-import { RewardRaw } from 'src/modules/rewards/rewards.types';
+import { RewardRaw, RewardType } from 'src/modules/rewards/rewards.types';
+import { CreateRewardPayload } from 'src/modules/rewards/rewards.service.types';
 
 @Injectable()
 export class RewardsRepository {
   constructor(private dbService: DbService) {}
 
   async createReward(
-    createRewardDto: CreateRewardDto & { type: RewardType },
+    payload: CreateRewardPayload & { type: RewardType },
   ): Promise<RewardRaw[]> {
     return this.dbService.query(
       `INSERT INTO rewards (user_id, target_id, title, description, type)
@@ -17,11 +17,11 @@ export class RewardsRepository {
         RETURNING *;
       `,
       [
-        createRewardDto.userId ?? null,
-        createRewardDto.targetId ?? null,
-        createRewardDto.title,
-        createRewardDto.description,
-        createRewardDto.type,
+        payload.userId,
+        payload.targetId,
+        payload.title,
+        payload.description,
+        payload.type,
       ],
     );
   }

@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
-import { CreateRewardDto } from 'src/modules/rewards/dto';
+import { CreateRewardDto } from 'src/modules/rewards/rewards.dto';
 import { RewardsModule } from 'src/modules/rewards/rewards.module';
 import { createTestingApp } from 'src/helpers/create-testing-app';
 

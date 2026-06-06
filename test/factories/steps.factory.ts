@@ -1,4 +1,4 @@
-import { CreateStepDto } from 'src/modules/steps/dto';
+import { CreateStepDto } from 'src/modules/steps/steps.dto';
 import { StepsRepository } from 'src/modules/steps/steps.repository';
 
 export function createStepFactory(stepsRepository: StepsRepository) {

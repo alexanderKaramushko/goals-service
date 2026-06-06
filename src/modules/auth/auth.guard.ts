@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthMicroserviceService } from 'src/modules/microservices/auth/auth-microservice.service';
-import { CreateUserDto } from 'src/modules/users/dto';
 import { UsersService } from 'src/modules/users/users.service';
+import { CreateOrUpdateUserPayload } from 'src/modules/users/users.service.types';
 
 type RequestWithJwt = Request & {
   cookies: {
@@ -36,7 +36,7 @@ export class AuthGuard implements CanActivate {
     if (authProviderUser) {
       const [user] =
         (await this.usersService.createOrUpdate(
-          authProviderUser as CreateUserDto,
+          authProviderUser as CreateOrUpdateUserPayload,
         )) ?? [];
 
       request.user = user;

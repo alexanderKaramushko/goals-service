@@ -9,7 +9,8 @@ import { RewardsService } from 'src/modules/rewards/rewards.service';
 import {
   CreatedRewardResponseDto,
   CreateRewardDto,
-} from 'src/modules/rewards/dto';
+} from 'src/modules/rewards/rewards.dto';
+import { CreateRewardPayload } from 'src/modules/rewards/rewards.service.types';
 
 @UseGuards(AuthGuard)
 @ApiCookieAuth('jwt')
@@ -24,6 +25,6 @@ export class RewardsController {
   })
   @Post('create')
   create(@Body() createRewardDto: CreateRewardDto) {
-    return this.rewardsService.create(createRewardDto);
+    return this.rewardsService.create(createRewardDto as CreateRewardPayload);
   }
 }

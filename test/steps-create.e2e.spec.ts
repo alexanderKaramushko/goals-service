@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { StepsModule } from 'src/modules/steps/steps.module';
-import { CreateStepDto } from 'src/modules/steps/dto';
+import { CreateStepDto } from 'src/modules/steps/steps.dto';
 import { createTestingApp } from 'src/helpers/create-testing-app';
 import {
   PostgreSqlContainer,
@@ -14,10 +14,10 @@ import { createTargetFactory } from './factories/targets.factory';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { createUserFactory } from './factories/users.factory';
-import { Provider } from 'src/modules/users/dto';
 import { UsersModule } from 'src/modules/users/users.module';
 import { TargetsModule } from 'src/modules/targets/targets.module';
 import { StepWithSameDeadlineExistsException } from 'src/modules/steps/exceptions/step-with-same-deadline-exists.exception';
+import { Provider } from 'src/modules/users/users.types';
 
 describe('Steps (e2e) - /POST steps/create', () => {
   jest.setTimeout(60000);

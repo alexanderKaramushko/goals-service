@@ -1,39 +1,36 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CreateRewardDto,
-  CreatedRewardResponseDto,
-  RewardType,
-} from 'src/modules/rewards/dto';
 import { RewardsRepository } from 'src/modules/rewards/rewards.repository';
-import { RewardRaw } from 'src/modules/rewards/rewards.types';
+import { RewardRaw, RewardType } from 'src/modules/rewards/rewards.types';
+import {
+  CreatedRewardResponse,
+  CreateRewardPayload,
+} from 'src/modules/rewards/rewards.service.types';
 
 @Injectable()
 export class RewardsService {
   constructor(private rewardsRepository: RewardsRepository) {}
 
-  async create(
-    createRewardDto: CreateRewardDto,
-  ): Promise<CreatedRewardResponseDto[]> {
+  async create(payload: CreateRewardPayload): Promise<CreatedRewardResponse[]> {
     const rewards = await this.rewardsRepository.createReward(
-      this.toCreateDto(createRewardDto),
+      this.toCreatePayload(payload),
     );
 
-    return rewards.map((reward) => this.toCreatedResponseDto(reward));
+    return rewards.map((reward) => this.toCreatedResponse(reward));
   }
 
-  toCreateDto(
-    createRewardDto: CreateRewardDto,
-  ): CreateRewardDto & { type: RewardType } {
+  toCreatePayload(
+    payload: CreateRewardPayload,
+  ): CreateRewardPayload & { type: RewardType } {
     return {
-      targetId: createRewardDto.targetId,
-      userId: createRewardDto.userId,
-      title: createRewardDto.title,
-      description: createRewardDto.description,
-      type: createRewardDto.userId ? RewardType.user : RewardType.target,
+      targetId: payload.targetId,
+      userId: payload.userId,
+      title: payload.title,
+      description: payload.description,
+      type: payload.userId ? RewardType.user : RewardType.target,
     };
   }
 
-  toCreatedResponseDto(rewardRaw: RewardRaw): CreatedRewardResponseDto {
+  toCreatedResponse(rewardRaw: RewardRaw): CreatedRewardResponse {
     return {
       id: rewardRaw.id,
       userId: rewardRaw.user_id,

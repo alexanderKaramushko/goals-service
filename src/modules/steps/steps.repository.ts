@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/modules/db/db.service';
-import { CreateStepDto } from 'src/modules/steps/dto';
 import { StepRaw } from 'src/modules/steps/steps.types';
 import { TargetRaw } from '../targets/targets.types';
 import { PoolClient } from 'pg';
+import { CreateStepPayload } from 'src/modules/steps/steps.service.types';
 
 @Injectable()
 export class StepsRepository {
@@ -24,7 +24,10 @@ export class StepsRepository {
   }
 
   async createStep(
-    createStepDto: CreateStepDto & { targetId: number },
+    payload: Pick<
+      CreateStepPayload,
+      'title' | 'description' | 'shouldBeCompletedAt' | 'targetId'
+    >,
   ): Promise<StepRaw[]> {
     return this.dbService.query(
       `INSERT INTO steps (title, description, target_id, should_be_completed_at)
@@ -33,10 +36,10 @@ export class StepsRepository {
         RETURNING *;
       `,
       [
-        createStepDto.title,
-        createStepDto.description,
-        createStepDto.targetId,
-        createStepDto.shouldBeCompletedAt,
+        payload.title,
+        payload.description,
+        payload.targetId,
+        payload.shouldBeCompletedAt,
       ],
     );
   }

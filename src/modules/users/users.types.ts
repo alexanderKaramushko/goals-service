@@ -1,3 +1,7 @@
+export enum Provider {
+  GOOGLE = 'google',
+}
+
 export type UserRaw = {
   id: string;
   full_name: string;

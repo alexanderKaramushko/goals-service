@@ -12,7 +12,7 @@ import {
   CreatedTargetResponseDto,
   CreateTargetDto,
   TargetsResponseDto,
-} from 'src/modules/targets/dto';
+} from 'src/modules/targets/targets.dto';
 import { TargetsService } from 'src/modules/targets/targets.service';
 
 import { type Request as ExpressRequest } from 'express';
@@ -58,9 +58,9 @@ export class TargetsController {
   @UseInterceptors(TimezoneInterceptor)
   @Get('get-all/:userId')
   getAll(@Request() request: ExpressRequest, @Param('userId') userId: string) {
-    return this.targetsService.getAllByUserId(
+    return this.targetsService.getAllByUserId({
       userId,
-      request.userTimezone as string,
-    );
+      userTimezone: request.userTimezone as string,
+    });
   }
 }

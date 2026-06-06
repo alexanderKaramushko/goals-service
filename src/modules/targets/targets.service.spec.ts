@@ -4,7 +4,7 @@ import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import targets from 'src/mocks/TargetsResponseDto.json';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 import { BadRequestException } from '@nestjs/common';
-import { CreateTargetDto } from 'src/modules/targets/dto';
+import { CreateTargetDto } from 'src/modules/targets/targets.dto';
 
 describe('TargetsService', () => {
   let service: TargetsService;
@@ -43,7 +43,7 @@ describe('TargetsService', () => {
       updated_at: '2026-01-01T10:45:30.000Z',
     };
 
-    expect(service.toCreatedResponseDto(targetRaw)).toEqual({
+    expect(service.toCreatedResponse(targetRaw)).toEqual({
       id: targetRaw.id,
       userId: targetRaw.user_id,
       title: targetRaw.title,
@@ -58,7 +58,7 @@ describe('TargetsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1));
 
       expect(
-        service.toResponseDto(
+        service.toListItem(
           {
             ...target,
             completed_at: '',
@@ -73,7 +73,7 @@ describe('TargetsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1));
 
       expect(
-        service.toResponseDto(
+        service.toListItem(
           {
             ...target,
             completed_at: '',
@@ -88,7 +88,7 @@ describe('TargetsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1));
 
       expect(
-        service.toResponseDto(
+        service.toListItem(
           {
             ...target,
             completed_at: '',
@@ -103,7 +103,7 @@ describe('TargetsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1, 1, 0));
 
       expect(
-        service.toResponseDto(
+        service.toListItem(
           {
             ...target,
             completed_at: '',
@@ -118,7 +118,7 @@ describe('TargetsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1, 23, 0));
 
       expect(
-        service.toResponseDto(
+        service.toListItem(
           {
             ...target,
             completed_at: '',
@@ -131,7 +131,7 @@ describe('TargetsService', () => {
 
     it('isOutdated = true, если дата завершения больше даты дедлайна', () => {
       expect(
-        service.toResponseDto(
+        service.toListItem(
           {
             ...target,
             completed_at: '2026-01-01T20:00:00.000Z',
@@ -144,7 +144,7 @@ describe('TargetsService', () => {
 
     it('isOutdated = false, если дата завершения равна дате дедлайна', () => {
       expect(
-        service.toResponseDto(
+        service.toListItem(
           {
             ...target,
             completed_at: '2025-01-01T20:00:00.000Z',
@@ -157,7 +157,7 @@ describe('TargetsService', () => {
 
     it('isOutdated = false, если дата завершения меньше даты дедлайна', () => {
       expect(
-        service.toResponseDto(
+        service.toListItem(
           {
             ...target,
             completed_at: '2024-01-01T20:00:00.000Z',

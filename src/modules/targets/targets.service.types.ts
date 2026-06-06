@@ -1,0 +1,41 @@
+export type CreateTargetPayload = {
+  title: string;
+  description: string;
+  shouldBeCompletedAt: string;
+  userId: string;
+  userTimezone: string;
+};
+
+export type GetTargetsPayload = {
+  userId: string;
+  userTimezone: string;
+};
+
+export type TargetCreatedResponse = {
+  id: number;
+  userId: string;
+  title: string;
+  description: string;
+  status: string;
+  shouldBeCompletedAt: string;
+};
+
+export type TargetListItem = {
+  id: number;
+  userId: string;
+  title: string;
+  description: string;
+  status: string;
+  shouldBeCompletedAt: string;
+  isOutdated: boolean;
+};
+
+export type CompleteTargetPayload = {
+  targetId: number;
+  userId: string;
+  userTimezone: string;
+};
+
+export type CompletedTargetResponse = {
+  completedAt: string | null;
+};

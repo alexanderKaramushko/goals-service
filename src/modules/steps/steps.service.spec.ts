@@ -3,7 +3,7 @@ import { StepsRepository } from 'src/modules/steps/steps.repository';
 import { DbService } from 'src/modules/db/db.service';
 
 import steps from 'src/mocks/CreatedStepResponseDto.json';
-import { CreateStepDto } from 'src/modules/steps/dto';
+import { CreateStepDto } from 'src/modules/steps/steps.dto';
 import { StepDeadlineOutdatedException } from './exceptions/step-deadline-outdated';
 
 describe('StepsService', () => {
@@ -40,7 +40,7 @@ describe('StepsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1));
 
       expect(
-        service.toAllResponseDto(
+        service.toListItem(
           {
             ...step,
             completed_at: null,
@@ -55,7 +55,7 @@ describe('StepsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1));
 
       expect(
-        service.toAllResponseDto(
+        service.toListItem(
           {
             ...step,
             completed_at: null,
@@ -70,7 +70,7 @@ describe('StepsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1));
 
       expect(
-        service.toAllResponseDto(
+        service.toListItem(
           {
             ...step,
             completed_at: null,
@@ -85,7 +85,7 @@ describe('StepsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1, 1, 0));
 
       expect(
-        service.toAllResponseDto(
+        service.toListItem(
           {
             ...step,
             completed_at: null,
@@ -100,7 +100,7 @@ describe('StepsService', () => {
       jest.setSystemTime(new Date(2026, 0, 1, 23, 0));
 
       expect(
-        service.toAllResponseDto(
+        service.toListItem(
           {
             ...step,
             completed_at: null,
@@ -113,7 +113,7 @@ describe('StepsService', () => {
 
     it('isOutdated = true, если дата завершения больше даты дедлайна', () => {
       expect(
-        service.toAllResponseDto(
+        service.toListItem(
           {
             ...step,
             completed_at: '2026-01-01T20:00:00.000Z',
@@ -126,7 +126,7 @@ describe('StepsService', () => {
 
     it('isOutdated = false, если дата завершения равна дате дедлайна', () => {
       expect(
-        service.toAllResponseDto(
+        service.toListItem(
           {
             ...step,
             completed_at: '2025-01-01T20:00:00.000Z',
@@ -139,7 +139,7 @@ describe('StepsService', () => {
 
     it('isOutdated = false, если дата завершения меньше даты дедлайна', () => {
       expect(
-        service.toAllResponseDto(
+        service.toListItem(
           {
             ...step,
             completed_at: '2024-01-01T20:00:00.000Z',

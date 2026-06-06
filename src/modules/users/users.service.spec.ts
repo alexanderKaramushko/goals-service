@@ -21,7 +21,7 @@ describe('UsersService', () => {
       created_at: '2026-01-01T10:45:30.000Z',
     };
 
-    expect(service.toCreatedResponseDto(userRaw)).toEqual({
+    expect(service.toCreatedResponse(userRaw)).toEqual({
       id: userRaw.id,
       fullName: userRaw.full_name,
       createdAt: userRaw.created_at,

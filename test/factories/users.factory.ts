@@ -1,4 +1,4 @@
-import { CreateUserDto } from 'src/modules/users/dto';
+import { CreateUserDto } from 'src/modules/users/users.dto';
 import { UsersRepository } from 'src/modules/users/users.repository';
 
 export function createUserFactory(usersRepository: UsersRepository) {

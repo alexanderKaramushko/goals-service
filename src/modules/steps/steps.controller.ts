@@ -22,7 +22,7 @@ import {
   CompleteStepDto,
   CreatedStepResponseDto,
   CreateStepDto,
-} from 'src/modules/steps/dto';
+} from 'src/modules/steps/steps.dto';
 import { type Request as ExpressRequest } from 'express';
 import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
 
@@ -72,10 +72,10 @@ export class StepsController {
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
   ) {
-    return this.stepsService.getAllByTargetId(
+    return this.stepsService.getAllByTargetId({
       targetId,
-      request.userTimezone as string,
-    );
+      userTimezone: request.userTimezone as string,
+    });
   }
 
   @ApiOperation({ summary: 'Завершить шаг у цели' })

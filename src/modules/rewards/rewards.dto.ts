@@ -1,10 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsInt, IsString, ValidateIf } from 'class-validator';
-
-export enum RewardType {
-  'user' = 'user',
-  'target' = 'target',
-}
+import { RewardType } from './rewards.types';
 
 export class CreateRewardDto {
   @ApiProperty({ example: 'За составление плана питания' })

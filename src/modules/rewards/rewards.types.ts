@@ -1,3 +1,8 @@
+export enum RewardType {
+  'user' = 'user',
+  'target' = 'target',
+}
+
 export type RewardRaw = {
   id: number;
   user_id: string | null;

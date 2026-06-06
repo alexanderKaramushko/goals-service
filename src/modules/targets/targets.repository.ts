@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import type { CreateTargetDto } from 'src/modules/targets/dto';
 import { DbService } from 'src/modules/db/db.service';
 import { TargetRaw } from 'src/modules/targets/targets.types';
+import { CreateTargetPayload } from 'src/modules/targets/targets.service.types';
 
 @Injectable()
 export class TargetsRepository {
   constructor(private dbService: DbService) {}
 
   async createTarget(
-    createTargetDto: CreateTargetDto & { userId: string },
+    payload: Pick<
+      CreateTargetPayload,
+      'userId' | 'title' | 'description' | 'shouldBeCompletedAt'
+    >,
   ): Promise<TargetRaw[]> {
     return this.dbService.query(
       `INSERT INTO targets (user_id, title, description, should_be_completed_at, status)
@@ -17,10 +20,10 @@ export class TargetsRepository {
         RETURNING *;
       `,
       [
-        createTargetDto.userId,
-        createTargetDto.title,
-        createTargetDto.description,
-        createTargetDto.shouldBeCompletedAt,
+        payload.userId,
+        payload.title,
+        payload.description,
+        payload.shouldBeCompletedAt,
         'created',
       ],
     );

@@ -1,8 +1,5 @@
 import { IsNotEmpty, IsEnum } from 'class-validator';
-
-export enum Provider {
-  GOOGLE = 'google',
-}
+import { Provider } from './users.types';
 
 export class CreateUserDto {
   @IsNotEmpty()

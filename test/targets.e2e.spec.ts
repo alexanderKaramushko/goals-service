@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { TargetsModule } from 'src/modules/targets/targets.module';
-import { CreateTargetDto } from 'src/modules/targets/dto';
+import { CreateTargetDto } from 'src/modules/targets/targets.dto';
 import { createTestingApp } from 'src/helpers/create-testing-app';
 
 describe('Targets (e2e)', () => {

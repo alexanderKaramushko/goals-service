@@ -1,6 +1,6 @@
 import { RewardsService } from 'src/modules/rewards/rewards.service';
 import { RewardsRepository } from 'src/modules/rewards/rewards.repository';
-import { RewardType } from 'src/modules/rewards/dto';
+import { RewardType } from './rewards.types';
 
 describe('RewardsService', () => {
   let service: RewardsService;
@@ -27,7 +27,7 @@ describe('RewardsService', () => {
       accepted_at: null,
     };
 
-    expect(service.toCreatedResponseDto(rewardRaw)).toEqual({
+    expect(service.toCreatedResponse(rewardRaw)).toEqual({
       id: rewardRaw.id,
       userId: rewardRaw.user_id,
       targetId: rewardRaw.target_id,
@@ -39,15 +39,17 @@ describe('RewardsService', () => {
     });
   });
 
-  describe('toCreateDto', () => {
+  describe('toCreatePayload', () => {
     const valid = {
       title: 'Test',
       description: 'Desc',
+      userId: '108266036103493388680',
+      targetId: 1,
     };
 
     it('Выбор типа "user" при передаче userId', () => {
       expect(
-        service.toCreateDto({
+        service.toCreatePayload({
           ...valid,
           userId: '108266036103493388680',
         }),
@@ -60,7 +62,7 @@ describe('RewardsService', () => {
 
     it('Выбор типа "target" при передаче targetId', () => {
       expect(
-        service.toCreateDto({
+        service.toCreatePayload({
           ...valid,
           targetId: 1,
         }),
