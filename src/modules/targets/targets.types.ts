@@ -12,8 +12,10 @@ export type TargetRaw = {
   description: string;
   status: TargetStatus;
   should_be_completed_at: string;
-  completed_at: string;
+  completed_at: string | null;
   closed_at: string;
   created_at: string;
   updated_at: string;
+  result_comment: string | null;
+  can_assign_reward: boolean | null;
 };

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsDateString, IsString } from 'class-validator';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 
 export class CreateTargetDto {
@@ -66,4 +66,23 @@ export class TargetsResponseDto {
 
   @ApiProperty({ example: false })
   isOutdated: boolean;
+}
+
+export class CompleteTargetDto {
+  @ApiProperty({
+    example: 'Сдал на права',
+    description: 'Описание итогов завершаемой цели',
+  })
+  @IsNotEmpty()
+  @IsString()
+  resultComment: string;
+}
+
+export class CompletedTargetResponseDto {
+  @ApiProperty({
+    example: '2024-05-17',
+    description: 'Дата завершения цели',
+  })
+  @IsDateString()
+  completedAt: string | null;
 }
