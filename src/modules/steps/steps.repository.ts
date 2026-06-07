@@ -3,7 +3,13 @@ import { DbService } from 'src/modules/db/db.service';
 import { StepRaw } from 'src/modules/steps/steps.types';
 import { TargetRaw } from '../targets/targets.types';
 import { PoolClient } from 'pg';
-import { CreateStepPayload } from 'src/modules/steps/steps.service.types';
+import {
+  CompleteStepRepositoryPayload,
+  CreateStepRepositoryPayload,
+  GetAllAscDeadlineByTargetIdPayload,
+  GetStepForUserIdPayload,
+  GetTargetByStepIdPayload,
+} from 'src/modules/steps/steps.repository.types';
 
 @Injectable()
 export class StepsRepository {
@@ -23,12 +29,7 @@ export class StepsRepository {
     );
   }
 
-  async createStep(
-    payload: Pick<
-      CreateStepPayload,
-      'title' | 'description' | 'shouldBeCompletedAt' | 'targetId'
-    >,
-  ): Promise<StepRaw[]> {
+  async createStep(payload: CreateStepRepositoryPayload): Promise<StepRaw[]> {
     return this.dbService.query(
       `INSERT INTO steps (title, description, target_id, should_be_completed_at)
         VALUES ($1, $2, $3, $4)
@@ -58,9 +59,7 @@ export class StepsRepository {
 
   async getAllAscDeadlineByTargetId(
     poolClient: PoolClient,
-    payload: {
-      targetId: number;
-    },
+    payload: GetAllAscDeadlineByTargetIdPayload,
   ): Promise<StepRaw[]> {
     const result = await poolClient.query(
       `SELECT s.*
@@ -77,10 +76,7 @@ export class StepsRepository {
 
   async getStepForUserId(
     poolClient: PoolClient,
-    payload: {
-      stepId: number;
-      userId: string;
-    },
+    payload: GetStepForUserIdPayload,
   ): Promise<StepRaw | undefined> {
     const result = await poolClient.query<StepRaw>(
       `SELECT s.*
@@ -99,10 +95,7 @@ export class StepsRepository {
 
   async getTargetByStepId(
     poolClient: PoolClient,
-    payload: {
-      stepId: number;
-      userId: string;
-    },
+    payload: GetTargetByStepIdPayload,
   ): Promise<TargetRaw | undefined> {
     const result = await poolClient.query<TargetRaw>(
       `SELECT t.*
@@ -120,24 +113,33 @@ export class StepsRepository {
   }
 
   async completeStep(
-    poolClient: PoolClient,
-    payload: {
-      stepId: number;
-      resultComment: string;
-    },
+    payload: CompleteStepRepositoryPayload,
+    poolClient?: PoolClient,
   ): Promise<StepRaw | undefined> {
-    const result = await poolClient.query<StepRaw>(
-      `UPDATE steps
-          SET completed_at = NOW(),
-              result_comment = $2
-          WHERE id = $1 AND completed_at IS NULL
+    const query = `
+      UPDATE steps
+        SET completed_at = NOW(),
+            result_comment = $2
+        WHERE id = $1 AND completed_at IS NULL
         RETURNING *;
-      `,
-      [payload.stepId, payload.resultComment],
-    );
+    `;
 
-    const [step] = result.rows;
+    if (poolClient) {
+      const result = await poolClient.query<StepRaw>(query, [
+        payload.stepId,
+        payload.resultComment,
+      ]);
 
-    return step;
+      const [step] = result.rows;
+
+      return step;
+    } else {
+      const [step] = await this.dbService.query<StepRaw>(query, [
+        payload.stepId,
+        payload.resultComment,
+      ]);
+
+      return step;
+    }
   }
 }

@@ -3,8 +3,8 @@ import { StepsRepository } from 'src/modules/steps/steps.repository';
 import { DbService } from 'src/modules/db/db.service';
 
 import steps from 'src/mocks/CreatedStepResponseDto.json';
-import { CreateStepDto } from 'src/modules/steps/steps.dto';
 import { StepDeadlineOutdatedException } from './exceptions/step-deadline-outdated';
+import { CreateStepPayload } from './steps.service.types';
 
 describe('StepsService', () => {
   let service: StepsService;
@@ -152,10 +152,12 @@ describe('StepsService', () => {
   });
 
   describe('create', () => {
-    const valid: CreateStepDto = {
+    const valid: CreateStepPayload = {
       title: 'Test',
       description: 'Desc',
       shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
+      targetId: 1,
+      userTimezone: 'Europe/Moscow',
     };
 
     it('Валидация пройдена, если shouldBeCompletedAt больше текущей даты', async () => {
@@ -164,8 +166,6 @@ describe('StepsService', () => {
       const result = await service.create({
         ...valid,
         shouldBeCompletedAt: '2025-02-03T20:00:00.000Z',
-        targetId: 1,
-        userTimezone: 'Europe/Moscow',
       });
 
       expect(result).toEqual([]);
@@ -178,8 +178,6 @@ describe('StepsService', () => {
         service.create({
           ...valid,
           shouldBeCompletedAt: '2025-02-01T20:00:00.000Z',
-          targetId: 1,
-          userTimezone: 'Europe/Moscow',
         }),
       ).rejects.toThrow(new StepDeadlineOutdatedException());
     });
@@ -191,8 +189,6 @@ describe('StepsService', () => {
         service.create({
           ...valid,
           shouldBeCompletedAt: '2026-01-02T20:00:00.000Z',
-          targetId: 1,
-          userTimezone: 'Europe/Moscow',
         }),
       ).rejects.toThrow(new StepDeadlineOutdatedException());
     });

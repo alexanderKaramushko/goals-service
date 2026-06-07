@@ -4,7 +4,7 @@ import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import targets from 'src/mocks/TargetsResponseDto.json';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 import { BadRequestException } from '@nestjs/common';
-import { CreateTargetDto } from 'src/modules/targets/targets.dto';
+import { CreateTargetPayload } from './targets.service.types';
 
 describe('TargetsService', () => {
   let service: TargetsService;
@@ -170,10 +170,12 @@ describe('TargetsService', () => {
   });
 
   describe('create', () => {
-    const valid: CreateTargetDto = {
+    const valid: CreateTargetPayload = {
       title: 'Test',
       description: 'Desc',
       shouldBeCompletedAt: '2022-01-01T00:00:00.000Z',
+      userId: 'user-1',
+      userTimezone: 'Europe/Moscow',
     };
 
     it('Валидация пройдена, если shouldBeCompletedAt больше текущей даты', async () => {
@@ -182,8 +184,6 @@ describe('TargetsService', () => {
       const result = await service.create({
         ...valid,
         shouldBeCompletedAt: '2025-02-03T20:00:00.000Z',
-        userId: 'user-1',
-        userTimezone: 'Europe/Moscow',
       });
 
       expect(result).toEqual([]);
@@ -196,8 +196,6 @@ describe('TargetsService', () => {
         service.create({
           ...valid,
           shouldBeCompletedAt: '2025-02-01T20:00:00.000Z',
-          userId: '108266036103493388680',
-          userTimezone: 'Europe/Moscow',
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
@@ -209,8 +207,6 @@ describe('TargetsService', () => {
         service.create({
           ...valid,
           shouldBeCompletedAt: '2026-01-02T20:00:00.000Z',
-          userId: '108266036103493388680',
-          userTimezone: 'Europe/Moscow',
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
