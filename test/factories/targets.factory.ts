@@ -1,8 +1,8 @@
-import { CreateTargetDto } from 'src/modules/targets/targets.dto';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
+import { CreateTargetRepositoryPayload } from 'src/modules/targets/targets.repository.types';
 
 export function createTargetFactory(targetsRepository: TargetsRepository) {
-  return (target: CreateTargetDto & { userId: string }) => {
+  return (target: CreateTargetRepositoryPayload) => {
     return targetsRepository.createTarget(target);
   };
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RewardsRepository } from 'src/modules/rewards/rewards.repository';
 import { RewardRaw, RewardType } from 'src/modules/rewards/rewards.types';
+import { CreateRewardRepositoryPayload } from 'src/modules/rewards/rewards.repository.types';
 import {
   CreatedRewardResponse,
   CreateRewardPayload,
@@ -18,9 +19,7 @@ export class RewardsService {
     return rewards.map((reward) => this.toCreatedResponse(reward));
   }
 
-  toCreatePayload(
-    payload: CreateRewardPayload,
-  ): CreateRewardPayload & { type: RewardType } {
+  toCreatePayload(payload: CreateRewardPayload): CreateRewardRepositoryPayload {
     return {
       targetId: payload.targetId,
       userId: payload.userId,

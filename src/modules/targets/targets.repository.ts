@@ -1,18 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/modules/db/db.service';
 import { TargetRaw } from 'src/modules/targets/targets.types';
-import { CreateTargetPayload } from 'src/modules/targets/targets.service.types';
 import { PoolClient } from 'pg';
+import {
+  CompleteTargetRepositoryPayload,
+  CreateTargetRepositoryPayload,
+  GetAllTargetStepsPayload,
+  GetTargetByUserIdPayload,
+} from 'src/modules/targets/targets.repository.types';
 
 @Injectable()
 export class TargetsRepository {
   constructor(private dbService: DbService) {}
 
   async createTarget(
-    payload: Pick<
-      CreateTargetPayload,
-      'userId' | 'title' | 'description' | 'shouldBeCompletedAt'
-    >,
+    payload: CreateTargetRepositoryPayload,
   ): Promise<TargetRaw[]> {
     return this.dbService.query(
       `INSERT INTO targets (user_id, title, description, should_be_completed_at, status)
@@ -42,10 +44,7 @@ export class TargetsRepository {
 
   async getByUserId(
     poolClient: PoolClient,
-    payload: {
-      userId: string;
-      targetId: number;
-    },
+    payload: GetTargetByUserIdPayload,
   ): Promise<TargetRaw[]> {
     const result = await poolClient.query<TargetRaw>(
       `SELECT *
@@ -61,9 +60,7 @@ export class TargetsRepository {
 
   async getAllTargetSteps(
     poolClient: PoolClient,
-    payload: {
-      targetId: number;
-    },
+    payload: GetAllTargetStepsPayload,
   ): Promise<TargetRaw[]> {
     const result = await poolClient.query<TargetRaw>(
       `SELECT *
@@ -79,11 +76,7 @@ export class TargetsRepository {
 
   async completeTarget(
     poolClient: PoolClient,
-    payload: {
-      targetId: number;
-      canAssignReward: boolean;
-      resultComment: string;
-    },
+    payload: CompleteTargetRepositoryPayload,
   ): Promise<TargetRaw | undefined> {
     const result = await poolClient.query<TargetRaw>(
       `UPDATE targets

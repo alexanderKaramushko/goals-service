@@ -1,0 +1,21 @@
+export type CreateTargetRepositoryPayload = {
+  userId: string;
+  title: string;
+  description: string;
+  shouldBeCompletedAt: string;
+};
+
+export type GetTargetByUserIdPayload = {
+  userId: string;
+  targetId: number;
+};
+
+export type GetAllTargetStepsPayload = {
+  targetId: number;
+};
+
+export type CompleteTargetRepositoryPayload = {
+  targetId: number;
+  canAssignReward: boolean;
+  resultComment: string;
+};

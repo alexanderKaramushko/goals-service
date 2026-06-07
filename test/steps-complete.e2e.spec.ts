@@ -27,7 +27,7 @@ import { StepDeadlineOutdatedException } from 'src/modules/steps/exceptions/step
 import { StepDeadlineNotClosestException } from 'src/modules/steps/exceptions/step-deadline-not-closest';
 import { Provider } from 'src/modules/users/users.types';
 
-describe('Steps (e2e) - /POST steps/complete', () => {
+describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
   jest.setTimeout(60000);
 
   let app: INestApplication;

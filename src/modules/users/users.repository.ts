@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/modules/db/db.service';
 import { UserRaw } from 'src/modules/users/users.types';
-import { CreateOrUpdateUserPayload } from 'src/modules/users/users.service.types';
+import { CreateOrUpdateUserRepositoryPayload } from 'src/modules/users/users.repository.types';
 
 @Injectable()
 export class UsersRepository {
   constructor(private dbService: DbService) {}
 
   async createOrUpdateUser(
-    payload: CreateOrUpdateUserPayload,
+    payload: CreateOrUpdateUserRepositoryPayload,
   ): Promise<UserRaw[]> {
     return this.dbService.query(
       `INSERT INTO users (id, full_name)
