@@ -1,0 +1,8 @@
+{
+  "jestrunner.jestCommand": "pnpm exec cross-env MOCKS_DIR=src/mocks jest",
+  "jestrunner.configPath": {
+    "**/*.e2e.spec.ts": "./test/jest-e2e.json",
+    "**/*.spec.ts": "./jest.config.mjs"
+  },
+  "jestrunner.changeDirectoryToWorkspaceRoot": true
+}
