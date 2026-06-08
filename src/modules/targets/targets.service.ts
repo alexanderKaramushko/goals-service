@@ -11,7 +11,7 @@ import { dayjs } from 'src/helpers/dayjs';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { TargetRaw, TargetStatus } from 'src/modules/targets/targets.types';
 import { DbService } from '../db/db.service';
-import { TargetNotFoundException } from './exceptions/step-not-found.exception';
+import { TargetNotFoundException } from './exceptions/target-not-found.exception';
 import { TargetNotActiveException } from './exceptions/target-not-active.exception';
 import { TargetDeadlineOutdatedException } from './exceptions/target-deadline-outdated';
 import { TargetHasUncompletedStepsException } from './exceptions/target-has-uncompleted-steps.exception';

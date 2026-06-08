@@ -85,7 +85,19 @@ export class TargetsRepository {
               can_assign_reward = $2,
               result_comment = $3
         WHERE id = $1 AND completed_at IS NULL
-        RETURNING *;
+        RETURNING
+            id,
+            user_id,
+            title,
+            description,
+            status,
+            should_be_completed_at::text AS should_be_completed_at,
+            completed_at::text AS completed_at,
+            closed_at,
+            created_at,
+            updated_at,
+            result_comment,
+            can_assign_reward;
       `,
       [payload.targetId, payload.canAssignReward, payload.resultComment],
     );
