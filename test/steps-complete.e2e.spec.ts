@@ -12,6 +12,7 @@ import { execSync } from 'child_process';
 import {
   clearTables,
   createStepFactory,
+  getStepFactory,
   setTargetStatusFactory,
 } from './factories';
 import { UsersModule } from 'src/modules/users/users.module';
@@ -142,9 +143,10 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     const createUser = createUserFactory(app.get(UsersRepository));
     const createTarget = createTargetFactory(app.get(TargetsRepository));
     const createStep = createStepFactory(app.get(StepsRepository));
+    const getStep = getStepFactory(app.get(StepsRepository));
     const setTargetStatus = setTargetStatusFactory(app.get(DbService));
 
-    await createUser({
+    const [user] = await createUser({
       name: 'Test User',
       provider: Provider.GOOGLE,
       subjectId: '1',
@@ -176,9 +178,22 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         resultComment: 'Посмотрел видео по правильному питанию',
       })
       .expect((res) => {
-        expect(res.body.completedAt).toBeDefined();
         expect(res.status).toBe(201);
+        expect(res.body.message).not.toBeDefined();
+        expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
       });
+
+    const completedStep = await getStep({
+      stepId: step.id,
+      userId: user.id,
+    });
+
+    expect(completedStep).toEqual(
+      expect.objectContaining({
+        completed_at: dayjs().format('YYYY-MM-DD'),
+        result_comment: 'Посмотрел видео по правильному питанию',
+      }),
+    );
   });
 
   it('ошибка, если шаг не существует', async () => {
@@ -219,6 +234,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
       })
       .expect((res) => {
         expect(res.body.message).toBe(new StepNotFoundException().message);
+        expect(res.status).toBe(404);
       });
   });
 
@@ -274,6 +290,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         })
         .expect((res) => {
           expect(res.body.message).toBe(message);
+          expect(res.status).toBe(409);
         });
     },
   );
@@ -324,6 +341,8 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
       })
       .expect((res) => {
         expect(res.status).toBe(201);
+        expect(res.body.message).not.toBeDefined();
+        expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
       });
 
     await request(app.getHttpServer())
@@ -339,6 +358,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         expect(res.body.message).toBe(
           new StepAlreadyCompletedException().message,
         );
+        expect(res.status).toBe(409);
       });
   });
 
@@ -459,6 +479,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         expect(res.body.message).toBe(
           new StepDeadlineOutdatedException().message,
         );
+        expect(res.status).toBe(409);
       });
   });
 
@@ -517,6 +538,78 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         expect(res.body.message).toBe(
           new StepDeadlineNotClosestException().message,
         );
+        expect(res.status).toBe(409);
       });
+  });
+
+  it('[edge case] успешно завершается ближайший не просроченный шаг', async () => {
+    app = await createTestingApp(
+      {
+        modules: [UsersModule, TargetsModule, StepsModule],
+      },
+      { useRealDbService: true },
+    );
+
+    const createUser = createUserFactory(app.get(UsersRepository));
+    const createTarget = createTargetFactory(app.get(TargetsRepository));
+    const createStep = createStepFactory(app.get(StepsRepository));
+    const getStep = getStepFactory(app.get(StepsRepository));
+    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+
+    const [user] = await createUser({
+      name: 'Test User',
+      provider: Provider.GOOGLE,
+      subjectId: '1',
+    });
+
+    const [target] = await createTarget({
+      userId: '1',
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
+    });
+
+    await setTargetStatus(target.id, TargetStatus.Active);
+
+    await createStep({
+      targetId: target.id,
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      shouldBeCompletedAt: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
+    });
+
+    const [step] = await createStep({
+      targetId: target.id,
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
+    });
+
+    await request(app.getHttpServer())
+      .post(`/steps/complete/${step.id}`)
+      .set({
+        'x-user-timezone': 'Europe/Moscow',
+      })
+      .send({
+        stepId: step.id,
+        resultComment: 'Посмотрел видео по правильному питанию',
+      })
+      .expect((res) => {
+        expect(res.status).toBe(201);
+        expect(res.body.message).not.toBeDefined();
+        expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
+      });
+
+    const completedStep = await getStep({
+      stepId: step.id,
+      userId: user.id,
+    });
+
+    expect(completedStep).toEqual(
+      expect.objectContaining({
+        completed_at: dayjs().format('YYYY-MM-DD'),
+        result_comment: 'Посмотрел видео по правильному питанию',
+      }),
+    );
   });
 });

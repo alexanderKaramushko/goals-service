@@ -75,22 +75,43 @@ export class StepsRepository {
   }
 
   async getStepForUserId(
-    poolClient: PoolClient,
     payload: GetStepForUserIdPayload,
+    poolClient?: PoolClient,
   ): Promise<StepRaw | undefined> {
-    const result = await poolClient.query<StepRaw>(
-      `SELECT s.*
-        FROM steps s
-        INNER JOIN targets t ON t.id = s.target_id
-        WHERE s.id = $1 AND t.user_id = $2
-        FOR UPDATE;
-      `,
-      [payload.stepId, payload.userId],
-    );
+    const query = `
+      SELECT
+        s.id,
+        s.target_id,
+        s.title,
+        s.description,
+        s.should_be_completed_at::text AS should_be_completed_at,
+        s.closed_at,
+        s.created_at,
+        s.completed_at::text AS completed_at,
+        s.result_comment
+      FROM steps s
+      INNER JOIN targets t ON t.id = s.target_id
+      WHERE s.id = $1 AND t.user_id = $2
+      FOR UPDATE;
+    `;
 
-    const [step] = result.rows;
+    if (poolClient) {
+      const result = await poolClient.query<StepRaw>(query, [
+        payload.stepId,
+        payload.userId,
+      ]);
 
-    return step;
+      const [step] = result.rows;
+
+      return step;
+    } else {
+      const [step] = await this.dbService.query<StepRaw>(query, [
+        payload.stepId,
+        payload.userId,
+      ]);
+
+      return step;
+    }
   }
 
   async getTargetByStepId(
@@ -118,10 +139,19 @@ export class StepsRepository {
   ): Promise<StepRaw | undefined> {
     const query = `
       UPDATE steps
-        SET completed_at = NOW(),
-            result_comment = $2
-        WHERE id = $1 AND completed_at IS NULL
-        RETURNING *;
+      SET completed_at = NOW(),
+          result_comment = $2
+      WHERE id = $1 AND completed_at IS NULL
+      RETURNING
+        id,
+        target_id,
+        title,
+        description,
+        should_be_completed_at::text AS should_be_completed_at,
+        closed_at,
+        created_at,
+        completed_at::text AS completed_at,
+        result_comment;
     `;
 
     if (poolClient) {

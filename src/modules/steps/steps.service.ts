@@ -111,10 +111,13 @@ export class StepsService {
     try {
       await poolClient.query('BEGIN');
 
-      const step = await this.stepsRepository.getStepForUserId(poolClient, {
-        stepId: payload.stepId,
-        userId: payload.userId,
-      });
+      const step = await this.stepsRepository.getStepForUserId(
+        {
+          stepId: payload.stepId,
+          userId: payload.userId,
+        },
+        poolClient,
+      );
 
       if (!step) {
         throw new StepNotFoundException();
@@ -140,21 +143,32 @@ export class StepsService {
         throw new StepDeadlineOutdatedException();
       }
 
-      const [closestStep] =
-        await this.stepsRepository.getAllAscDeadlineByTargetId(poolClient, {
+      const steps = await this.stepsRepository.getAllAscDeadlineByTargetId(
+        poolClient,
+        {
           targetId: step.target_id,
-        });
+        },
+      );
 
-      if (closestStep && closestStep.id !== payload.stepId) {
+      const closestNotOutdatedStep = steps.find(
+        (step) =>
+          !step.completed_at &&
+          !currentDate.isAfter(step.should_be_completed_at, 'day'),
+      );
+
+      if (
+        closestNotOutdatedStep &&
+        closestNotOutdatedStep.id !== payload.stepId
+      ) {
         throw new StepDeadlineNotClosestException();
       }
 
       const completedStep = await this.stepsRepository.completeStep(
-        poolClient,
         {
           stepId: payload.stepId,
           resultComment: payload.resultComment,
         },
+        poolClient,
       );
 
       if (!completedStep) {

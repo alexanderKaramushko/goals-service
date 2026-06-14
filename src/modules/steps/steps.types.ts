@@ -7,4 +7,5 @@ export type StepRaw = {
   closed_at: string | null;
   created_at: string;
   completed_at: string | null;
+  result_comment: string | null;
 };

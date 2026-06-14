@@ -79,6 +79,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
   const valid: CompleteTargetDto = {
     resultComment: 'Сдал на права',
   };
+
   it('Валидация :targetId', async () => {
     app = await createTestingApp({
       modules: [TargetsModule],
