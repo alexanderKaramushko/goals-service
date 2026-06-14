@@ -196,10 +196,10 @@ describe('Steps (e2e) - /POST steps/create', () => {
         shouldBeCompletedAt: '2027-02-15T06:45:30.000Z',
       })
       .expect((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.message).toBe(
-          new StepWithSameDeadlineExistsException('2027-02-15').message,
-        );
+        const error = new StepWithSameDeadlineExistsException('2027-02-15');
+
+        expect(res.status).toBe(error.getStatus());
+        expect(res.body.message).toBe(error.message);
       });
   });
 });

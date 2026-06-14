@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsDateString, IsString } from 'class-validator';
+import { IsNotEmpty, IsDateString, IsString, IsInt } from 'class-validator';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 
 export class CreateTargetDto {
@@ -85,4 +85,13 @@ export class CompletedTargetResponseDto {
   })
   @IsDateString()
   completedAt: string | null;
+}
+
+export class ActivatedTargetResponseDto {
+  @ApiProperty({
+    example: 1,
+    description: 'Id активированной цели',
+  })
+  @IsInt()
+  id: string | null;
 }
