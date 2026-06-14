@@ -98,11 +98,13 @@ export class TargetsService {
     try {
       await poolClient.query('BEGIN');
 
-      const [target] =
-        (await this.targetsRepository.getByUserId(poolClient, {
+      const target = await this.targetsRepository.getByUserId(
+        {
           userId: payload.userId,
           targetId: payload.targetId,
-        })) ?? [];
+        },
+        poolClient,
+      );
 
       if (!target) {
         throw new TargetNotFoundException();

@@ -43,19 +43,45 @@ export class TargetsRepository {
   }
 
   async getByUserId(
-    poolClient: PoolClient,
     payload: GetTargetByUserIdPayload,
-  ): Promise<TargetRaw[]> {
-    const result = await poolClient.query<TargetRaw>(
-      `SELECT *
-        FROM targets t
-        WHERE t.user_id = $1 and t.id = $2
-        FOR UPDATE;
-      `,
-      [payload.userId, payload.targetId],
-    );
+    poolClient?: PoolClient,
+  ): Promise<TargetRaw> {
+    const query = `
+      SELECT
+        t.id,
+        t.user_id,
+        t.title,
+        t.description,
+        t.status,
+        t.should_be_completed_at::text AS should_be_completed_at,
+        t.completed_at::text AS completed_at,
+        t.closed_at,
+        t.created_at,
+        t.updated_at,
+        t.result_comment,
+        t.can_assign_reward
+      FROM targets t
+      WHERE t.user_id = $1 and t.id = $2
+      FOR UPDATE;
+    `;
 
-    return result.rows;
+    if (poolClient) {
+      const result = await poolClient.query<TargetRaw>(query, [
+        payload.userId,
+        payload.targetId,
+      ]);
+
+      const [target] = result.rows;
+
+      return target;
+    } else {
+      const [target] = await this.dbService.query<TargetRaw>(query, [
+        payload.userId,
+        payload.targetId,
+      ]);
+
+      return target;
+    }
   }
 
   async getAllTargetSteps(

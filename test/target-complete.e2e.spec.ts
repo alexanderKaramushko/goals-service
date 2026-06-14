@@ -1,7 +1,5 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
-import { StepsModule } from 'src/modules/steps/steps.module';
-import { CompleteStepDto } from 'src/modules/steps/steps.dto';
 import { createTestingApp } from 'src/helpers/create-testing-app';
 import {
   PostgreSqlContainer,
@@ -11,27 +9,32 @@ import { Client } from 'pg';
 import { execSync } from 'child_process';
 import {
   clearTables,
+  completeStepFactory,
   createStepFactory,
-  setTargetStatusFactory,
 } from './factories';
 import { UsersModule } from 'src/modules/users/users.module';
 import { TargetsModule } from 'src/modules/targets/targets.module';
 import { createUserFactory } from './factories/users.factory';
-import { createTargetFactory } from './factories/targets.factory';
+import {
+  createTargetFactory,
+  getTargetFactory,
+  setTargetStatusFactory,
+} from './factories/targets.factory';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { StepsRepository } from 'src/modules/steps/steps.repository';
 import { DbService } from 'src/modules/db/db.service';
 import dayjs from 'dayjs';
-import { StepNotFoundException } from 'src/modules/steps/exceptions/step-not-found.exception';
 import { TargetStatus } from 'src/modules/targets/targets.types';
-import { TargetNotActiveException } from 'src/modules/steps/exceptions/target-not-active.exception';
-import { StepAlreadyCompletedException } from 'src/modules/steps/exceptions/step-already-completed.exception';
-import { StepDeadlineOutdatedException } from 'src/modules/steps/exceptions/step-deadline-outdated';
-import { StepDeadlineNotClosestException } from 'src/modules/steps/exceptions/step-deadline-not-closest';
 import { Provider } from 'src/modules/users/users.types';
+import { CompleteTargetDto } from 'src/modules/targets/targets.dto';
+import { StepsModule } from 'src/modules/steps/steps.module';
+import { TargetNotFoundException } from 'src/modules/targets/exceptions/target-not-found.exception';
+import { TargetNotActiveException } from 'src/modules/targets/exceptions/target-not-active.exception';
+import { TargetDeadlineOutdatedException } from 'src/modules/targets/exceptions/target-deadline-outdated';
+import { TargetHasUncompletedStepsException } from 'src/modules/targets/exceptions/target-has-uncompleted-steps.exception';
 
-describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
+describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
   jest.setTimeout(60000);
 
   let app: INestApplication;
@@ -73,17 +76,16 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     await postgresContainer?.stop();
   });
 
-  const valid: CompleteStepDto = {
-    resultComment: 'Посмотрел видео по правильному питанию',
+  const valid: CompleteTargetDto = {
+    resultComment: 'Сдал на права',
   };
-
-  it('Валидация :stepId', async () => {
+  it('Валидация :targetId', async () => {
     app = await createTestingApp({
-      modules: [StepsModule],
+      modules: [TargetsModule],
     });
 
     await request(app.getHttpServer())
-      .post('/steps/complete/wrongId')
+      .post('/targets/complete/wrongId')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -96,7 +98,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
       });
   });
 
-  it.each<[string, CompleteStepDto, string]>([
+  it.each<[string, CompleteTargetDto, string]>([
     [
       'resultComment',
       {
@@ -116,11 +118,11 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     ],
   ])('Валидация параметра: %s\n', async (_, data, message) => {
     app = await createTestingApp({
-      modules: [StepsModule],
+      modules: [TargetsModule],
     });
 
     await request(app.getHttpServer())
-      .post('/steps/complete/1')
+      .post('/targets/complete/1')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -131,7 +133,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
       });
   });
 
-  it('успешно завершает шаг на активной цели', async () => {
+  it('успешно завершает активную цель с завершенным шагом', async () => {
     app = await createTestingApp(
       {
         modules: [UsersModule, TargetsModule, StepsModule],
@@ -141,10 +143,12 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
 
     const createUser = createUserFactory(app.get(UsersRepository));
     const createTarget = createTargetFactory(app.get(TargetsRepository));
+    const getTarget = getTargetFactory(app.get(TargetsRepository));
     const createStep = createStepFactory(app.get(StepsRepository));
+    const completeStep = completeStepFactory(app.get(StepsRepository));
     const setTargetStatus = setTargetStatusFactory(app.get(DbService));
 
-    await createUser({
+    const [user] = await createUser({
       name: 'Test User',
       provider: Provider.GOOGLE,
       subjectId: '1',
@@ -166,303 +170,40 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
       shouldBeCompletedAt: dayjs().add(2, 'day').format('YYYY-MM-DD'),
     });
 
+    await completeStep({
+      stepId: step.id,
+      resultComment: 'Составил план питания',
+    });
+
     await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
+      .post(`/targets/complete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
       .send({
-        stepId: step.id,
-        resultComment: 'Посмотрел видео по правильному питанию',
+        resultComment: 'Составил план питания',
       })
       .expect((res) => {
-        expect(res.body.completedAt).toBeDefined();
+        expect(res.body.message).not.toBeDefined();
         expect(res.status).toBe(201);
-      });
-  });
-
-  it('ошибка, если шаг не существует', async () => {
-    app = await createTestingApp(
-      {
-        modules: [UsersModule, TargetsModule, StepsModule],
-      },
-      { useRealDbService: true },
-    );
-
-    const createUser = createUserFactory(app.get(UsersRepository));
-    const createTarget = createTargetFactory(app.get(TargetsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
-
-    await createUser({
-      name: 'Test User',
-      provider: Provider.GOOGLE,
-      subjectId: '1',
-    });
-
-    const [target] = await createTarget({
-      userId: '1',
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
-    });
-
-    await setTargetStatus(target.id, TargetStatus.Active);
-
-    await request(app.getHttpServer())
-      .post(`/steps/complete/12345`)
-      .set({
-        'x-user-timezone': 'Europe/Moscow',
-      })
-      .send({
-        stepId: 999,
-        resultComment: 'Посмотрел видео по правильному питанию',
-      })
-      .expect((res) => {
-        expect(res.body.message).toBe(new StepNotFoundException().message);
-      });
-  });
-
-  it.each<[TargetStatus, string]>([
-    [TargetStatus.Created, new TargetNotActiveException().message],
-    [TargetStatus.Cancelled, new TargetNotActiveException().message],
-    [TargetStatus.Completed, new TargetNotActiveException().message],
-  ])(
-    'Ошибка при завершении шага у цели в статусе %s\n',
-    async (status, message) => {
-      app = await createTestingApp(
-        {
-          modules: [UsersModule, TargetsModule, StepsModule],
-        },
-        { useRealDbService: true },
-      );
-
-      const createUser = createUserFactory(app.get(UsersRepository));
-      const createTarget = createTargetFactory(app.get(TargetsRepository));
-      const createStep = createStepFactory(app.get(StepsRepository));
-      const setTargetStatus = setTargetStatusFactory(app.get(DbService));
-
-      await createUser({
-        name: 'Test User',
-        provider: Provider.GOOGLE,
-        subjectId: '1',
+        expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
       });
 
-      const [target] = await createTarget({
-        userId: '1',
-        title: 'Составить план питания',
-        description: 'Расписать план питания и составить список продуктов',
-        shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
-      });
-
-      await setTargetStatus(target.id, status);
-
-      const [step] = await createStep({
-        targetId: target.id,
-        title: 'Составить план питания',
-        description: 'Расписать план питания и составить список продуктов',
-        shouldBeCompletedAt: dayjs().add(2, 'day').format('YYYY-MM-DD'),
-      });
-
-      await request(app.getHttpServer())
-        .post(`/steps/complete/${step.id}`)
-        .set({
-          'x-user-timezone': 'Europe/Moscow',
-        })
-        .send({
-          stepId: step.id,
-          resultComment: 'Посмотрел видео по правильному питанию',
-        })
-        .expect((res) => {
-          expect(res.body.message).toBe(message);
-        });
-    },
-  );
-
-  it('ошибка при повторном завершении шага', async () => {
-    app = await createTestingApp(
-      {
-        modules: [UsersModule, TargetsModule, StepsModule],
-      },
-      { useRealDbService: true },
-    );
-
-    const createUser = createUserFactory(app.get(UsersRepository));
-    const createTarget = createTargetFactory(app.get(TargetsRepository));
-    const createStep = createStepFactory(app.get(StepsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
-
-    await createUser({
-      name: 'Test User',
-      provider: Provider.GOOGLE,
-      subjectId: '1',
-    });
-
-    const [target] = await createTarget({
-      userId: '1',
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
-    });
-
-    await setTargetStatus(target.id, TargetStatus.Active);
-
-    const [step] = await createStep({
+    const completedTarget = await getTarget({
+      userId: user.id,
       targetId: target.id,
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      shouldBeCompletedAt: dayjs().add(2, 'day').format('YYYY-MM-DD'),
     });
 
-    await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
-      .set({
-        'x-user-timezone': 'Europe/Moscow',
-      })
-      .send({
-        stepId: step.id,
-        resultComment: 'Посмотрел видео по правильному питанию',
-      })
-      .expect((res) => {
-        expect(res.status).toBe(201);
-      });
-
-    await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
-      .set({
-        'x-user-timezone': 'Europe/Moscow',
-      })
-      .send({
-        stepId: step.id,
-        resultComment: 'Посмотрел видео по правильному питанию',
-      })
-      .expect((res) => {
-        expect(res.body.message).toBe(
-          new StepAlreadyCompletedException().message,
-        );
-      });
-  });
-
-  it('два параллельных запроса на завершение одного шага: успешен только один', async () => {
-    app = await createTestingApp(
-      {
-        modules: [UsersModule, TargetsModule, StepsModule],
-      },
-      { useRealDbService: true },
-    );
-
-    const createUser = createUserFactory(app.get(UsersRepository));
-    const createTarget = createTargetFactory(app.get(TargetsRepository));
-    const createStep = createStepFactory(app.get(StepsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
-
-    await createUser({
-      name: 'Test User',
-      provider: Provider.GOOGLE,
-      subjectId: '1',
-    });
-
-    const [target] = await createTarget({
-      userId: '1',
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
-    });
-
-    await setTargetStatus(target.id, TargetStatus.Active);
-
-    const [step] = await createStep({
-      targetId: target.id,
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      shouldBeCompletedAt: dayjs().add(2, 'day').format('YYYY-MM-DD'),
-    });
-
-    const payload = {
-      resultComment: 'Посмотрел видео по правильному питанию',
-    };
-
-    const [firstResponse, secondResponse] = await Promise.all([
-      request(app.getHttpServer())
-        .post(`/steps/complete/${step.id}`)
-        .set({
-          'x-user-timezone': 'Europe/Moscow',
-        })
-        .send(payload),
-      request(app.getHttpServer())
-        .post(`/steps/complete/${step.id}`)
-        .set({
-          'x-user-timezone': 'Europe/Moscow',
-        })
-        .send(payload),
-    ]);
-
-    const statuses = [firstResponse.status, secondResponse.status].sort(
-      (a, b) => a - b,
-    );
-
-    expect(statuses).toEqual([201, 409]);
-
-    const conflictResponse = [firstResponse, secondResponse].find(
-      (response) => response.status === 409,
-    );
-
-    expect(conflictResponse?.body.message).toBe(
-      new StepAlreadyCompletedException().message,
+    expect(completedTarget).toEqual(
+      expect.objectContaining({
+        completed_at: dayjs().format('YYYY-MM-DD'),
+        status: 'completed',
+        result_comment: 'Составил план питания',
+      }),
     );
   });
 
-  it('ошибка, если дедлайн уже прошел', async () => {
-    app = await createTestingApp(
-      {
-        modules: [UsersModule, TargetsModule, StepsModule],
-      },
-      { useRealDbService: true },
-    );
-
-    const createUser = createUserFactory(app.get(UsersRepository));
-    const createTarget = createTargetFactory(app.get(TargetsRepository));
-    const createStep = createStepFactory(app.get(StepsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
-
-    await createUser({
-      name: 'Test User',
-      provider: Provider.GOOGLE,
-      subjectId: '1',
-    });
-
-    const [target] = await createTarget({
-      userId: '1',
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
-    });
-
-    await setTargetStatus(target.id, TargetStatus.Active);
-
-    const [step] = await createStep({
-      targetId: target.id,
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      shouldBeCompletedAt: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
-    });
-
-    await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
-      .set({
-        'x-user-timezone': 'Europe/Moscow',
-      })
-      .send({
-        stepId: step.id,
-        resultComment: 'Посмотрел видео по правильному питанию',
-      })
-      .expect((res) => {
-        expect(res.body.message).toBe(
-          new StepDeadlineOutdatedException().message,
-        );
-      });
-  });
-
-  it('ошибка, если завершается не самый ранний шаг', async () => {
+  it('ошибка, если есть незавершенный шаг', async () => {
     app = await createTestingApp(
       {
         modules: [UsersModule, TargetsModule, StepsModule],
@@ -497,26 +238,194 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
       shouldBeCompletedAt: dayjs().add(2, 'day').format('YYYY-MM-DD'),
     });
 
-    const [step] = await createStep({
-      targetId: target.id,
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      shouldBeCompletedAt: dayjs().add(4, 'day').format('YYYY-MM-DD'),
-    });
-
     await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
+      .post(`/targets/complete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
       .send({
-        stepId: step.id,
-        resultComment: 'Посмотрел видео по правильному питанию',
+        resultComment: 'Составил план питания',
       })
       .expect((res) => {
         expect(res.body.message).toBe(
-          new StepDeadlineNotClosestException().message,
+          new TargetHasUncompletedStepsException().message,
         );
+        expect(res.status).toBe(409);
+      });
+  });
+
+  it('успешно завершает активную цель с просроченными шагами', async () => {
+    app = await createTestingApp(
+      {
+        modules: [UsersModule, TargetsModule, StepsModule],
+      },
+      { useRealDbService: true },
+    );
+
+    const createUser = createUserFactory(app.get(UsersRepository));
+    const createTarget = createTargetFactory(app.get(TargetsRepository));
+    const getTarget = getTargetFactory(app.get(TargetsRepository));
+    const createStep = createStepFactory(app.get(StepsRepository));
+    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+
+    const [user] = await createUser({
+      name: 'Test User',
+      provider: Provider.GOOGLE,
+      subjectId: '1',
+    });
+
+    const [target] = await createTarget({
+      userId: '1',
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
+    });
+
+    await setTargetStatus(target.id, TargetStatus.Active);
+
+    await createStep({
+      targetId: target.id,
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      shouldBeCompletedAt: dayjs().subtract(2, 'day').format('YYYY-MM-DD'),
+    });
+
+    await request(app.getHttpServer())
+      .post(`/targets/complete/${target.id}`)
+      .set({
+        'x-user-timezone': 'Europe/Moscow',
+      })
+      .send({
+        resultComment: 'Составил план питания',
+      })
+      .expect((res) => {
+        expect(res.body.message).not.toBeDefined();
+        expect(res.status).toBe(201);
+        expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
+      });
+
+    const completedTarget = await getTarget({
+      userId: user.id,
+      targetId: target.id,
+    });
+
+    expect(completedTarget).toEqual(
+      expect.objectContaining({
+        completed_at: dayjs().format('YYYY-MM-DD'),
+        status: 'completed',
+        result_comment: 'Составил план питания',
+      }),
+    );
+  });
+
+  it('ошибка, если цель не найдена', async () => {
+    app = await createTestingApp(
+      {
+        modules: [UsersModule, TargetsModule, StepsModule],
+      },
+      { useRealDbService: true },
+    );
+
+    const createUser = createUserFactory(app.get(UsersRepository));
+
+    await createUser({
+      name: 'Test User',
+      provider: Provider.GOOGLE,
+      subjectId: '1',
+    });
+
+    await request(app.getHttpServer())
+      .post(`/targets/complete/12345`)
+      .set({
+        'x-user-timezone': 'Europe/Moscow',
+      })
+      .send({
+        resultComment: 'Составил план питания',
+      })
+      .expect((res) => {
+        expect(res.body.message).toBe(new TargetNotFoundException().message);
+        expect(res.status).toBe(404);
+      });
+  });
+
+  it('ошибка, если завершается неактивная цель', async () => {
+    app = await createTestingApp(
+      {
+        modules: [UsersModule, TargetsModule, StepsModule],
+      },
+      { useRealDbService: true },
+    );
+
+    const createUser = createUserFactory(app.get(UsersRepository));
+    const createTarget = createTargetFactory(app.get(TargetsRepository));
+
+    await createUser({
+      name: 'Test User',
+      provider: Provider.GOOGLE,
+      subjectId: '1',
+    });
+
+    const [target] = await createTarget({
+      userId: '1',
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
+    });
+
+    await request(app.getHttpServer())
+      .post(`/targets/complete/${target.id}`)
+      .set({
+        'x-user-timezone': 'Europe/Moscow',
+      })
+      .send({
+        resultComment: 'Составил план питания',
+      })
+      .expect((res) => {
+        expect(res.body.message).toBe(new TargetNotActiveException().message);
+        expect(res.status).toBe(409);
+      });
+  });
+
+  it('ошибка, если завершается просроченная цель', async () => {
+    app = await createTestingApp(
+      {
+        modules: [UsersModule, TargetsModule, StepsModule],
+      },
+      { useRealDbService: true },
+    );
+
+    const createUser = createUserFactory(app.get(UsersRepository));
+    const createTarget = createTargetFactory(app.get(TargetsRepository));
+    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+
+    await createUser({
+      name: 'Test User',
+      provider: Provider.GOOGLE,
+      subjectId: '1',
+    });
+
+    const [target] = await createTarget({
+      userId: '1',
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      shouldBeCompletedAt: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
+    });
+
+    await setTargetStatus(target.id, TargetStatus.Active);
+
+    await request(app.getHttpServer())
+      .post(`/targets/complete/${target.id}`)
+      .set({
+        'x-user-timezone': 'Europe/Moscow',
+      })
+      .send({
+        resultComment: 'Составил план питания',
+      })
+      .expect((res) => {
+        expect(res.body.message).toBe(
+          new TargetDeadlineOutdatedException().message,
+        );
+        expect(res.status).toBe(409);
       });
   });
 });
