@@ -1,4 +1,3 @@
-import { DbService } from 'src/modules/db/db.service';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import {
   CreateTargetRepositoryPayload,
@@ -18,15 +17,11 @@ export function getTargetFactory(targetsRepository: TargetsRepository) {
   };
 }
 
-export function setTargetStatusFactory(dbService: DbService) {
+export function setTargetStatusFactory(targetsRepository: TargetsRepository) {
   return (targetId: number, status: TargetStatus) => {
-    return dbService.query(
-      `
-        UPDATE targets t
-        SET status = $1
-        WHERE t.id = $2
-      `,
-      [status, targetId],
-    );
+    return targetsRepository.updateTargetStatus(undefined, {
+      targetId,
+      status,
+    });
   };
 }

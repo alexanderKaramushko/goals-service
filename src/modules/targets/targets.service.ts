@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import type {
+  ActivatedTargetResponse,
+  ActivateTargetPayload,
   CompletedTargetResponse,
   CompleteTargetPayload,
   CreateTargetPayload,
@@ -12,11 +14,13 @@ import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { TargetRaw, TargetStatus } from 'src/modules/targets/targets.types';
 import { DbService } from '../db/db.service';
 import { TargetNotFoundException } from './exceptions/target-not-found.exception';
-import { TargetNotActiveException } from './exceptions/target-not-active.exception';
+import { TargetNotInStatusException } from './exceptions/target-not-in-status.exception';
 import { TargetDeadlineOutdatedException } from './exceptions/target-deadline-outdated';
 import { TargetHasUncompletedStepsException } from './exceptions/target-has-uncompleted-steps.exception';
 import { ConfigService } from '@nestjs/config';
 import { MAX_OUTDATED_STEPS_PERCENTAGE_FALLBACK } from 'src/constants';
+import { TargetWasNotActivatedException } from './exceptions/target-was-not-activated';
+import { TargetHasOutdatedStepsException } from './exceptions/target-has-outdated-steps.exception';
 
 @Injectable()
 export class TargetsService {
@@ -111,7 +115,7 @@ export class TargetsService {
       }
 
       if (target.status !== TargetStatus.Active) {
-        throw new TargetNotActiveException();
+        throw new TargetNotInStatusException(TargetStatus.Active);
       }
 
       const currentDate = dayjs(new Date()).tz(payload.userTimezone);
@@ -172,6 +176,78 @@ export class TargetsService {
       await poolClient.query('COMMIT');
 
       return this.toCompletedResponse(completedTarget);
+    } catch (error) {
+      await poolClient.query('ROLLBACK');
+      throw error;
+    } finally {
+      poolClient.release();
+    }
+  }
+
+  toActivatedResponse(rawData: TargetRaw): ActivatedTargetResponse {
+    return {
+      id: rawData.id,
+    };
+  }
+
+  async activate(
+    payload: ActivateTargetPayload,
+  ): Promise<ActivatedTargetResponse> {
+    const poolClient = await this.dbService.getPoolClient();
+
+    try {
+      await poolClient.query('BEGIN');
+
+      const target = await this.targetsRepository.getByUserId(
+        {
+          userId: payload.userId,
+          targetId: payload.targetId,
+        },
+        poolClient,
+      );
+
+      if (!target) {
+        throw new TargetNotFoundException();
+      }
+
+      if (target.status !== TargetStatus.Created) {
+        throw new TargetNotInStatusException(TargetStatus.Created);
+      }
+
+      const currentDate = dayjs(new Date()).tz(payload.userTimezone);
+      const shouldBeCompletedAtDate = dayjs(target.should_be_completed_at);
+
+      if (currentDate.isAfter(shouldBeCompletedAtDate, 'day')) {
+        throw new TargetDeadlineOutdatedException();
+      }
+
+      const steps = await this.targetsRepository.getAllTargetSteps(poolClient, {
+        targetId: target.id,
+      });
+
+      if (
+        steps.find((step) =>
+          currentDate.isAfter(dayjs(step.should_be_completed_at), 'day'),
+        )
+      ) {
+        throw new TargetHasOutdatedStepsException();
+      }
+
+      const activatedTarget = await this.targetsRepository.updateTargetStatus(
+        poolClient,
+        {
+          targetId: payload.targetId,
+          status: TargetStatus.Active,
+        },
+      );
+
+      if (!activatedTarget) {
+        throw new TargetWasNotActivatedException();
+      }
+
+      await poolClient.query('COMMIT');
+
+      return this.toActivatedResponse(target);
     } catch (error) {
       await poolClient.query('ROLLBACK');
       throw error;
