@@ -4,6 +4,8 @@ import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import targets from 'src/mocks/TargetsResponseDto.json';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 import { BadRequestException } from '@nestjs/common';
+import { DbService } from 'src/modules/db/db.service';
+import { ConfigService } from '@nestjs/config';
 import { CreateTargetPayload } from './targets.service.types';
 
 describe('TargetsService', () => {
@@ -19,10 +21,18 @@ describe('TargetsService', () => {
   });
 
   beforeEach(() => {
-    service = new TargetsService({
-      createTarget: () => [],
-      getAllByUserId: () => [],
-    } as unknown as TargetsRepository);
+    service = new TargetsService(
+      {
+        createTarget: () => [],
+        getAllByUserId: () => [],
+      } as unknown as TargetsRepository,
+      {
+        getPoolClient: () => {},
+      } as DbService,
+      {
+        get: () => '',
+      } as unknown as ConfigService,
+    );
   });
 
   it('сервис создается', () => {
@@ -41,6 +51,8 @@ describe('TargetsService', () => {
       closed_at: '',
       created_at: '2026-01-01T10:45:30.000Z',
       updated_at: '2026-01-01T10:45:30.000Z',
+      result_comment: null,
+      can_assign_reward: null,
     };
 
     expect(service.toCreatedResponse(targetRaw)).toEqual({

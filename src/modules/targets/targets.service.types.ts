@@ -34,6 +34,7 @@ export type CompleteTargetPayload = {
   targetId: number;
   userId: string;
   userTimezone: string;
+  resultComment: string;
 };
 
 export type CompletedTargetResponse = {

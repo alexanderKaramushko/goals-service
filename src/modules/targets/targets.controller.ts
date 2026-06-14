@@ -3,12 +3,15 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
+  CompletedTargetResponseDto,
+  CompleteTargetDto,
   CreatedTargetResponseDto,
   CreateTargetDto,
   TargetsResponseDto,
@@ -27,6 +30,7 @@ import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.intercep
 import { CurrentUser } from '../users/users.types';
 
 @UseGuards(AuthGuard)
+@UseInterceptors(TimezoneInterceptor)
 @ApiCookieAuth('jwt')
 @Controller('targets')
 export class TargetsController {
@@ -37,7 +41,6 @@ export class TargetsController {
     description: 'Цель создана',
     type: CreatedTargetResponseDto,
   })
-  @UseInterceptors(TimezoneInterceptor)
   @Post('create')
   create(
     @Body() createTargetDto: CreateTargetDto,
@@ -55,12 +58,30 @@ export class TargetsController {
     description: 'Список всех целей пользователя',
     type: [TargetsResponseDto],
   })
-  @UseInterceptors(TimezoneInterceptor)
   @Get('get-all/:userId')
   getAll(@Request() request: ExpressRequest, @Param('userId') userId: string) {
     return this.targetsService.getAllByUserId({
       userId,
       userTimezone: request.userTimezone as string,
+    });
+  }
+
+  @ApiOperation({ summary: 'Завершить цель' })
+  @ApiResponse({
+    description: 'Цель завершена',
+    type: CompletedTargetResponseDto,
+  })
+  @Post('complete/:targetId')
+  completeTarget(
+    @Request() request: ExpressRequest,
+    @Param('targetId', ParseIntPipe) targetId: number,
+    @Body() body: CompleteTargetDto,
+  ) {
+    return this.targetsService.complete({
+      targetId,
+      userId: request.user?.id as string,
+      userTimezone: request.userTimezone as string,
+      resultComment: body.resultComment,
     });
   }
 }
