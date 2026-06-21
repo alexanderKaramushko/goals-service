@@ -12,6 +12,12 @@
 [JSON-api](http://localhost:3000/api-json) <br />
 [Проектная документация (ТЗ)](https://goals-service-alpha.vercel.app)
 
+### Туннелирование через tuna
+
+brew install yuccastream/tap/tuna
+tuna config save-token <token>
+tuna http 3000
+
 ### Документация
 
 - Техническая документация сервиса: текущий `README.md`.
