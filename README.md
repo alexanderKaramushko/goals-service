@@ -14,9 +14,9 @@
 
 ### Туннелирование через tuna
 
-brew install yuccastream/tap/tuna
-tuna config save-token <token>
-tuna http 3000
+`brew install yuccastream/tap/tuna` <br />
+`tuna config save-token <token>` <br />
+`tuna http 3000`
 
 ### Документация
 
