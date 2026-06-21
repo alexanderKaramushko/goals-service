@@ -10,6 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {
+  ActivatedTargetResponseDto,
   CompletedTargetResponseDto,
   CompleteTargetDto,
   CreatedTargetResponseDto,
@@ -82,6 +83,23 @@ export class TargetsController {
       userId: request.user?.id as string,
       userTimezone: request.userTimezone as string,
       resultComment: body.resultComment,
+    });
+  }
+
+  @ApiOperation({ summary: 'Активировать цель' })
+  @ApiResponse({
+    description: 'Цель активирована',
+    type: ActivatedTargetResponseDto,
+  })
+  @Post('activate/:targetId')
+  activateTarget(
+    @Request() request: ExpressRequest,
+    @Param('targetId', ParseIntPipe) targetId: number,
+  ) {
+    return this.targetsService.activate({
+      targetId,
+      userId: request.user?.id as string,
+      userTimezone: request.userTimezone as string,
     });
   }
 }

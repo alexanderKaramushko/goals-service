@@ -40,3 +40,13 @@ export type CompleteTargetPayload = {
 export type CompletedTargetResponse = {
   completedAt: string | null;
 };
+
+export type ActivateTargetPayload = {
+  targetId: number;
+  userId: string;
+  userTimezone: string;
+};
+
+export type ActivatedTargetResponse = {
+  id: number;
+};
