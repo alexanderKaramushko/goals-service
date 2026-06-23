@@ -22,7 +22,6 @@ import { createTargetFactory } from './factories/targets.factory';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { StepsRepository } from 'src/modules/steps/steps.repository';
-import { DbService } from 'src/modules/db/db.service';
 import dayjs from 'dayjs';
 import { StepNotFoundException } from 'src/modules/steps/exceptions/step-not-found.exception';
 import { TargetStatus } from 'src/modules/targets/targets.types';
@@ -144,7 +143,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     const createTarget = createTargetFactory(app.get(TargetsRepository));
     const createStep = createStepFactory(app.get(StepsRepository));
     const getStep = getStepFactory(app.get(StepsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+    const setTargetStatus = setTargetStatusFactory(app.get(TargetsRepository));
 
     const [user] = await createUser({
       name: 'Test User',
@@ -206,7 +205,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
 
     const createUser = createUserFactory(app.get(UsersRepository));
     const createTarget = createTargetFactory(app.get(TargetsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+    const setTargetStatus = setTargetStatusFactory(app.get(TargetsRepository));
 
     await createUser({
       name: 'Test User',
@@ -233,67 +232,68 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         resultComment: 'Посмотрел видео по правильному питанию',
       })
       .expect((res) => {
-        expect(res.body.message).toBe(new StepNotFoundException().message);
-        expect(res.status).toBe(404);
+        const error = new StepNotFoundException();
+
+        expect(res.status).toBe(error.getStatus());
+        expect(res.body.message).toBe(error.message);
       });
   });
 
-  it.each<[TargetStatus, string]>([
-    [TargetStatus.Created, new TargetNotActiveException().message],
-    [TargetStatus.Cancelled, new TargetNotActiveException().message],
-    [TargetStatus.Completed, new TargetNotActiveException().message],
-  ])(
-    'Ошибка при завершении шага у цели в статусе %s\n',
-    async (status, message) => {
-      app = await createTestingApp(
-        {
-          modules: [UsersModule, TargetsModule, StepsModule],
-        },
-        { useRealDbService: true },
-      );
+  it.each<[TargetStatus]>([
+    [TargetStatus.Created],
+    [TargetStatus.Cancelled],
+    [TargetStatus.Completed],
+  ])('Ошибка при завершении шага у цели в статусе %s\n', async (status) => {
+    app = await createTestingApp(
+      {
+        modules: [UsersModule, TargetsModule, StepsModule],
+      },
+      { useRealDbService: true },
+    );
 
-      const createUser = createUserFactory(app.get(UsersRepository));
-      const createTarget = createTargetFactory(app.get(TargetsRepository));
-      const createStep = createStepFactory(app.get(StepsRepository));
-      const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+    const createUser = createUserFactory(app.get(UsersRepository));
+    const createTarget = createTargetFactory(app.get(TargetsRepository));
+    const createStep = createStepFactory(app.get(StepsRepository));
+    const setTargetStatus = setTargetStatusFactory(app.get(TargetsRepository));
 
-      await createUser({
-        name: 'Test User',
-        provider: Provider.GOOGLE,
-        subjectId: '1',
+    await createUser({
+      name: 'Test User',
+      provider: Provider.GOOGLE,
+      subjectId: '1',
+    });
+
+    const [target] = await createTarget({
+      userId: '1',
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
+    });
+
+    await setTargetStatus(target.id, status);
+
+    const [step] = await createStep({
+      targetId: target.id,
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      shouldBeCompletedAt: dayjs().add(2, 'day').format('YYYY-MM-DD'),
+    });
+
+    await request(app.getHttpServer())
+      .post(`/steps/complete/${step.id}`)
+      .set({
+        'x-user-timezone': 'Europe/Moscow',
+      })
+      .send({
+        stepId: step.id,
+        resultComment: 'Посмотрел видео по правильному питанию',
+      })
+      .expect((res) => {
+        const error = new TargetNotActiveException();
+
+        expect(res.status).toBe(error.getStatus());
+        expect(res.body.message).toBe(error.message);
       });
-
-      const [target] = await createTarget({
-        userId: '1',
-        title: 'Составить план питания',
-        description: 'Расписать план питания и составить список продуктов',
-        shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
-      });
-
-      await setTargetStatus(target.id, status);
-
-      const [step] = await createStep({
-        targetId: target.id,
-        title: 'Составить план питания',
-        description: 'Расписать план питания и составить список продуктов',
-        shouldBeCompletedAt: dayjs().add(2, 'day').format('YYYY-MM-DD'),
-      });
-
-      await request(app.getHttpServer())
-        .post(`/steps/complete/${step.id}`)
-        .set({
-          'x-user-timezone': 'Europe/Moscow',
-        })
-        .send({
-          stepId: step.id,
-          resultComment: 'Посмотрел видео по правильному питанию',
-        })
-        .expect((res) => {
-          expect(res.body.message).toBe(message);
-          expect(res.status).toBe(409);
-        });
-    },
-  );
+  });
 
   it('ошибка при повторном завершении шага', async () => {
     app = await createTestingApp(
@@ -306,7 +306,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     const createUser = createUserFactory(app.get(UsersRepository));
     const createTarget = createTargetFactory(app.get(TargetsRepository));
     const createStep = createStepFactory(app.get(StepsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+    const setTargetStatus = setTargetStatusFactory(app.get(TargetsRepository));
 
     await createUser({
       name: 'Test User',
@@ -355,10 +355,10 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         resultComment: 'Посмотрел видео по правильному питанию',
       })
       .expect((res) => {
-        expect(res.body.message).toBe(
-          new StepAlreadyCompletedException().message,
-        );
-        expect(res.status).toBe(409);
+        const error = new StepAlreadyCompletedException();
+
+        expect(res.status).toBe(error.getStatus());
+        expect(res.body.message).toBe(error.message);
       });
   });
 
@@ -373,7 +373,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     const createUser = createUserFactory(app.get(UsersRepository));
     const createTarget = createTargetFactory(app.get(TargetsRepository));
     const createStep = createStepFactory(app.get(StepsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+    const setTargetStatus = setTargetStatusFactory(app.get(TargetsRepository));
 
     await createUser({
       name: 'Test User',
@@ -426,9 +426,10 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
       (response) => response.status === 409,
     );
 
-    expect(conflictResponse?.body.message).toBe(
-      new StepAlreadyCompletedException().message,
-    );
+    const error = new StepAlreadyCompletedException();
+
+    expect(conflictResponse?.status).toBe(error.getStatus());
+    expect(conflictResponse?.body.message).toBe(error.message);
   });
 
   it('ошибка, если дедлайн уже прошел', async () => {
@@ -442,7 +443,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     const createUser = createUserFactory(app.get(UsersRepository));
     const createTarget = createTargetFactory(app.get(TargetsRepository));
     const createStep = createStepFactory(app.get(StepsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+    const setTargetStatus = setTargetStatusFactory(app.get(TargetsRepository));
 
     await createUser({
       name: 'Test User',
@@ -476,10 +477,10 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         resultComment: 'Посмотрел видео по правильному питанию',
       })
       .expect((res) => {
-        expect(res.body.message).toBe(
-          new StepDeadlineOutdatedException().message,
-        );
-        expect(res.status).toBe(409);
+        const error = new StepDeadlineOutdatedException();
+
+        expect(res.status).toBe(error.getStatus());
+        expect(res.body.message).toBe(error.message);
       });
   });
 
@@ -494,7 +495,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     const createUser = createUserFactory(app.get(UsersRepository));
     const createTarget = createTargetFactory(app.get(TargetsRepository));
     const createStep = createStepFactory(app.get(StepsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+    const setTargetStatus = setTargetStatusFactory(app.get(TargetsRepository));
 
     await createUser({
       name: 'Test User',
@@ -535,10 +536,10 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         resultComment: 'Посмотрел видео по правильному питанию',
       })
       .expect((res) => {
-        expect(res.body.message).toBe(
-          new StepDeadlineNotClosestException().message,
-        );
-        expect(res.status).toBe(409);
+        const error = new StepDeadlineNotClosestException();
+
+        expect(res.status).toBe(error.getStatus());
+        expect(res.body.message).toBe(error.message);
       });
   });
 
@@ -554,7 +555,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     const createTarget = createTargetFactory(app.get(TargetsRepository));
     const createStep = createStepFactory(app.get(StepsRepository));
     const getStep = getStepFactory(app.get(StepsRepository));
-    const setTargetStatus = setTargetStatusFactory(app.get(DbService));
+    const setTargetStatus = setTargetStatusFactory(app.get(TargetsRepository));
 
     const [user] = await createUser({
       name: 'Test User',

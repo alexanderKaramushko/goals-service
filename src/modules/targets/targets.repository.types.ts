@@ -1,3 +1,5 @@
+import { TargetStatus } from './targets.types';
+
 export type CreateTargetRepositoryPayload = {
   userId: string;
   title: string;
@@ -18,4 +20,9 @@ export type CompleteTargetRepositoryPayload = {
   targetId: number;
   canAssignReward: boolean;
   resultComment: string;
+};
+
+export type UpdateTargetStatusRepositoryPayload = {
+  targetId: number;
+  status: TargetStatus;
 };

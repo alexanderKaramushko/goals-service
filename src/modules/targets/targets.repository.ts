@@ -7,6 +7,7 @@ import {
   CreateTargetRepositoryPayload,
   GetAllTargetStepsPayload,
   GetTargetByUserIdPayload,
+  UpdateTargetStatusRepositoryPayload,
 } from 'src/modules/targets/targets.repository.types';
 
 @Injectable()
@@ -131,5 +132,35 @@ export class TargetsRepository {
     const [target] = result.rows;
 
     return target;
+  }
+
+  async updateTargetStatus(
+    poolClient: PoolClient | undefined,
+    payload: UpdateTargetStatusRepositoryPayload,
+  ): Promise<TargetRaw | undefined> {
+    const query = `
+      UPDATE targets
+      SET status = $2
+      WHERE id = $1
+      RETURNING *;
+    `;
+
+    if (poolClient) {
+      const result = await poolClient.query<TargetRaw>(query, [
+        payload.targetId,
+        payload.status,
+      ]);
+
+      const [target] = result.rows;
+
+      return target;
+    } else {
+      const [target] = await this.dbService.query<TargetRaw>(query, [
+        payload.targetId,
+        payload.status,
+      ]);
+
+      return target;
+    }
   }
 }
