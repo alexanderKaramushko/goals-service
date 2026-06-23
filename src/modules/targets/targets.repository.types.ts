@@ -7,8 +7,12 @@ export type CreateTargetRepositoryPayload = {
   shouldBeCompletedAt: string;
 };
 
-export type GetTargetByUserIdPayload = {
+export type GetTargetByIdAndUserIdPayload = {
   userId: string;
+  targetId: number;
+};
+
+export type GetTargetById = {
   targetId: number;
 };
 

@@ -1,4 +1,12 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  ParseIntPipe,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import {
   ApiCookieAuth,
@@ -7,10 +15,11 @@ import {
 } from '@nestjs/swagger';
 import { RewardsService } from 'src/modules/rewards/rewards.service';
 import {
-  CreatedRewardResponseDto,
-  CreateRewardDto,
+  CreatedRewardOnTargetResponseDto,
+  CreateRewardOnTargetDto,
 } from 'src/modules/rewards/rewards.dto';
-import { CreateRewardPayload } from 'src/modules/rewards/rewards.service.types';
+import { type Request as ExpressRequest } from 'express';
+import { CurrentUserId } from '../users/users.types';
 
 @UseGuards(AuthGuard)
 @ApiCookieAuth('jwt')
@@ -21,10 +30,19 @@ export class RewardsController {
   @ApiOperation({ summary: 'Создать награду' })
   @ApiCreatedResponse({
     description: 'Награда создана',
-    type: CreatedRewardResponseDto,
+    type: CreatedRewardOnTargetResponseDto,
   })
-  @Post('create')
-  create(@Body() createRewardDto: CreateRewardDto) {
-    return this.rewardsService.create(createRewardDto as CreateRewardPayload);
+  @Post('create/:targetId')
+  create(
+    @Request() request: ExpressRequest,
+    @Body() createRewardDto: CreateRewardOnTargetDto,
+    @Param('targetId', ParseIntPipe) targetId: number,
+  ) {
+    return this.rewardsService.createOnTarget({
+      title: createRewardDto.title,
+      description: createRewardDto.description,
+      targetId,
+      senderUserId: request.user?.id as CurrentUserId,
+    });
   }
 }

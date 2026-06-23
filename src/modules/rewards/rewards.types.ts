@@ -5,7 +5,8 @@ export enum RewardType {
 
 export type RewardRaw = {
   id: number;
-  user_id: string | null;
+  recipient_user_id: string | null;
+  sender_user_id: string | null;
   target_id: number | null;
   title: string;
   description: string;

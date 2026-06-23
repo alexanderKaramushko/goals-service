@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
-import { CreateRewardDto } from 'src/modules/rewards/rewards.dto';
+import { CreateRewardOnTargetDto } from 'src/modules/rewards/rewards.dto';
 import { RewardsModule } from 'src/modules/rewards/rewards.module';
 import { createTestingApp } from 'src/helpers/create-testing-app';
 
@@ -18,12 +18,31 @@ describe('Rewards (e2e)', () => {
   });
 
   describe('/POST rewards/create', () => {
-    const valid: CreateRewardDto = {
+    const valid: CreateRewardOnTargetDto = {
       title: 'Test',
       description: 'Desc',
     };
 
-    it.each<[string, CreateRewardDto, string]>([
+    it('Валидация :targetId', async () => {
+      app = await createTestingApp({
+        modules: [RewardsModule],
+      });
+
+      await request(app.getHttpServer())
+        .post('/rewards/create/wrongId')
+        .set({
+          'x-user-timezone': 'Europe/Moscow',
+        })
+        .send(valid)
+        .expect((res) => {
+          expect(res.status).toBe(400);
+          expect(res.body.message).toContain(
+            'Validation failed (numeric string is expected)',
+          );
+        });
+    });
+
+    it.each<[string, CreateRewardOnTargetDto, string]>([
       [
         'title',
         {
@@ -40,27 +59,11 @@ describe('Rewards (e2e)', () => {
         },
         'description should not be empty',
       ],
-      [
-        'userId',
-        {
-          ...valid,
-          userId: 1,
-        },
-        'userId must be a string',
-      ],
-      [
-        'targetId',
-        {
-          ...valid,
-          targetId: '1',
-        } as any, // `as any` для проверки, что валидация упадет в 400-ю
-        'targetId must be an integer number',
-      ],
     ])(
       '/POST rewards/create\n\tВалидация параметра: %s\n',
       async (_, data, message) => {
         await request(app.getHttpServer())
-          .post('/rewards/create')
+          .post('/rewards/create/1')
           .send(data)
           .expect((res) => {
             expect(res.status).toBe(400);
