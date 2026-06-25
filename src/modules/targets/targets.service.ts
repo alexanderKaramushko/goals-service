@@ -161,12 +161,12 @@ export class TargetsService {
         : Number.parseInt(maxOutdatedStepsPercentageRaw, 10);
 
       const completedTarget = await this.targetsRepository.completeTarget(
-        poolClient,
         {
           targetId: target.id,
           canAssignReward: outdatedPercentage < maxOutdatedStepsPercentage,
           resultComment: payload.resultComment,
         },
+        poolClient,
       );
 
       if (!completedTarget) {

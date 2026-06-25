@@ -1,5 +1,6 @@
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import {
+  CompleteTargetRepositoryPayload,
   CreateTargetRepositoryPayload,
   GetTargetByIdAndUserIdPayload,
 } from 'src/modules/targets/targets.repository.types';
@@ -23,5 +24,11 @@ export function setTargetStatusFactory(targetsRepository: TargetsRepository) {
       targetId,
       status,
     });
+  };
+}
+
+export function completeTargetFactory(targetsRepository: TargetsRepository) {
+  return (payload: CompleteTargetRepositoryPayload) => {
+    return targetsRepository.completeTarget(payload);
   };
 }
