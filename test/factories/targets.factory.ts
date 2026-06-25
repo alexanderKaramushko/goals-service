@@ -1,19 +1,20 @@
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import {
+  CompleteTargetRepositoryPayload,
   CreateTargetRepositoryPayload,
-  GetTargetByUserIdPayload,
+  GetTargetByIdAndUserIdPayload,
 } from 'src/modules/targets/targets.repository.types';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 
 export function createTargetFactory(targetsRepository: TargetsRepository) {
-  return (target: CreateTargetRepositoryPayload) => {
-    return targetsRepository.createTarget(target);
+  return (payload: CreateTargetRepositoryPayload) => {
+    return targetsRepository.createTarget(payload);
   };
 }
 
 export function getTargetFactory(targetsRepository: TargetsRepository) {
-  return (target: GetTargetByUserIdPayload) => {
-    return targetsRepository.getByUserId(target);
+  return (payload: GetTargetByIdAndUserIdPayload) => {
+    return targetsRepository.getByIdAndUserId(payload);
   };
 }
 
@@ -23,5 +24,11 @@ export function setTargetStatusFactory(targetsRepository: TargetsRepository) {
       targetId,
       status,
     });
+  };
+}
+
+export function completeTargetFactory(targetsRepository: TargetsRepository) {
+  return (payload: CompleteTargetRepositoryPayload) => {
+    return targetsRepository.completeTarget(payload);
   };
 }

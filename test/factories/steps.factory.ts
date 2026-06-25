@@ -6,14 +6,14 @@ import {
 } from 'src/modules/steps/steps.repository.types';
 
 export function createStepFactory(stepsRepository: StepsRepository) {
-  return (step: CreateStepRepositoryPayload) => {
-    return stepsRepository.createStep(step);
+  return (payload: CreateStepRepositoryPayload) => {
+    return stepsRepository.createStep(payload);
   };
 }
 
 export function completeStepFactory(stepsRepository: StepsRepository) {
-  return (step: CompleteStepRepositoryPayload) => {
-    return stepsRepository.completeStep(step);
+  return (payload: CompleteStepRepositoryPayload) => {
+    return stepsRepository.completeStep(payload);
   };
 }
 

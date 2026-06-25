@@ -1,43 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsInt, IsString, ValidateIf } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { RewardType } from './rewards.types';
 
-export class CreateRewardDto {
+export class CreateRewardOnTargetDto {
   @ApiProperty({ example: 'За составление плана питания' })
   @IsNotEmpty()
+  @IsString()
   title: string;
 
   @ApiProperty({
     example: 'План питания составлен без штрафов',
   })
   @IsNotEmpty()
-  description: string;
-
-  @ApiProperty({
-    example: '108266036103493388680',
-  })
-  @ValidateIf(
-    (_, value) => value !== '' && value !== null && value !== undefined,
-  )
   @IsString()
-  userId?: string;
-
-  @ApiProperty({
-    example: 1,
-  })
-  @ValidateIf(
-    (_, value) => value !== '' && value !== null && value !== undefined,
-  )
-  @IsInt()
-  targetId?: number;
+  description: string;
 }
 
-export class CreatedRewardResponseDto {
+export class CreatedRewardOnTargetResponseDto {
   @ApiProperty({ example: 1 })
   id: number;
-
-  @ApiProperty({ example: '108266036103493388680', nullable: true })
-  userId: string | null;
 
   @ApiProperty({ example: 1, nullable: true })
   targetId: number | null;

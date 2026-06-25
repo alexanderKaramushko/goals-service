@@ -102,7 +102,7 @@ export class TargetsService {
     try {
       await poolClient.query('BEGIN');
 
-      const target = await this.targetsRepository.getByUserId(
+      const target = await this.targetsRepository.getByIdAndUserId(
         {
           userId: payload.userId,
           targetId: payload.targetId,
@@ -161,12 +161,12 @@ export class TargetsService {
         : Number.parseInt(maxOutdatedStepsPercentageRaw, 10);
 
       const completedTarget = await this.targetsRepository.completeTarget(
-        poolClient,
         {
           targetId: target.id,
           canAssignReward: outdatedPercentage < maxOutdatedStepsPercentage,
           resultComment: payload.resultComment,
         },
+        poolClient,
       );
 
       if (!completedTarget) {
@@ -198,10 +198,10 @@ export class TargetsService {
     try {
       await poolClient.query('BEGIN');
 
-      const target = await this.targetsRepository.getByUserId(
+      const target = await this.targetsRepository.getByIdAndUserId(
         {
-          userId: payload.userId,
           targetId: payload.targetId,
+          userId: payload.userId,
         },
         poolClient,
       );

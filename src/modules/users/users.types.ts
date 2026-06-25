@@ -18,3 +18,5 @@ export type CurrentUser = {
   fullName: string;
   createdAt: string | null;
 };
+
+export type CurrentUserId = CurrentUser['id'];

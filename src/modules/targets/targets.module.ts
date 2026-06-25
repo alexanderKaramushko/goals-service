@@ -10,5 +10,6 @@ import { ConfigModule } from '@nestjs/config';
   imports: [AuthModule, UsersModule, ConfigModule],
   controllers: [TargetsController],
   providers: [TargetsService, TargetsRepository],
+  exports: [TargetsRepository],
 })
 export class TargetsModule {}

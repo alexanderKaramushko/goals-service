@@ -1,13 +1,14 @@
-export type CreateRewardPayload = {
+import { CurrentUserId } from '../users/users.types';
+
+export type CreateRewardOnTargetPayload = {
   title: string;
   description: string;
-  userId: string;
   targetId: number;
+  senderUserId: CurrentUserId;
 };
 
-export type CreatedRewardResponse = {
+export type CreatedRewardOnTargetResponse = {
   id: number;
-  userId: string | null;
   targetId: number | null;
   title: string;
   description: string;

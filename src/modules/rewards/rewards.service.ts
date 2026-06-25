@@ -3,36 +3,98 @@ import { RewardsRepository } from 'src/modules/rewards/rewards.repository';
 import { RewardRaw, RewardType } from 'src/modules/rewards/rewards.types';
 import { CreateRewardRepositoryPayload } from 'src/modules/rewards/rewards.repository.types';
 import {
-  CreatedRewardResponse,
-  CreateRewardPayload,
+  CreatedRewardOnTargetResponse,
+  CreateRewardOnTargetPayload,
 } from 'src/modules/rewards/rewards.service.types';
+import { DbService } from 'src/modules/db/db.service';
+import { TargetsRepository } from 'src/modules/targets/targets.repository';
+import { TargetNotFoundException } from 'src/modules/targets/exceptions/target-not-found.exception';
+import { TargetStatus } from 'src/modules/targets/targets.types';
+import { RewardOnUncompletedTargetException } from './exceptions/reward-on-uncompleted-target.exception';
+import { RewardUnassignableException } from './exceptions/reward-unassignable.exception';
+import { RewardAlreadyAssignedException } from './exceptions/reward-already-assigned.exception';
+import { RewardOnOwnTargetException } from './exceptions/reward-on-own-target.exception';
 
 @Injectable()
 export class RewardsService {
-  constructor(private rewardsRepository: RewardsRepository) {}
+  constructor(
+    private rewardsRepository: RewardsRepository,
+    private targetsRepository: TargetsRepository,
+    private dbService: DbService,
+  ) {}
 
-  async create(payload: CreateRewardPayload): Promise<CreatedRewardResponse[]> {
-    const rewards = await this.rewardsRepository.createReward(
-      this.toCreatePayload(payload),
-    );
+  async createOnTarget(
+    payload: CreateRewardOnTargetPayload,
+  ): Promise<CreatedRewardOnTargetResponse> {
+    const poolClient = await this.dbService.getPoolClient();
 
-    return rewards.map((reward) => this.toCreatedResponse(reward));
+    try {
+      await poolClient.query('BEGIN');
+
+      const target = await this.targetsRepository.getById(
+        { targetId: payload.targetId },
+        poolClient,
+      );
+
+      if (!target) {
+        throw new TargetNotFoundException();
+      }
+
+      if (target.user_id === payload.senderUserId) {
+        throw new RewardOnOwnTargetException();
+      }
+
+      if (target.status !== TargetStatus.Completed) {
+        throw new RewardOnUncompletedTargetException();
+      }
+
+      if (!target.can_assign_reward) {
+        throw new RewardUnassignableException();
+      }
+
+      const senderRewardsOnTarget =
+        await this.rewardsRepository.getRewardsOnTargetBySenderUserId(
+          { senderUserId: payload.senderUserId, targetId: payload.targetId },
+          poolClient,
+        );
+
+      if (senderRewardsOnTarget.length > 0) {
+        throw new RewardAlreadyAssignedException();
+      }
+
+      const createdReward = await this.rewardsRepository.createRewardOnTarget(
+        this.toCreateOnTargetPayload(payload),
+        poolClient,
+      );
+
+      await poolClient.query('COMMIT');
+
+      return this.toCreatedOnTargetResponse(createdReward);
+    } catch (error) {
+      await poolClient.query('ROLLBACK');
+      throw error;
+    } finally {
+      poolClient.release();
+    }
   }
 
-  toCreatePayload(payload: CreateRewardPayload): CreateRewardRepositoryPayload {
+  toCreateOnTargetPayload(
+    payload: CreateRewardOnTargetPayload,
+  ): CreateRewardRepositoryPayload {
     return {
       targetId: payload.targetId,
-      userId: payload.userId,
+      senderUserId: payload.senderUserId,
       title: payload.title,
       description: payload.description,
-      type: payload.userId ? RewardType.user : RewardType.target,
+      type: RewardType.target,
     };
   }
 
-  toCreatedResponse(rewardRaw: RewardRaw): CreatedRewardResponse {
+  toCreatedOnTargetResponse(
+    rewardRaw: RewardRaw,
+  ): CreatedRewardOnTargetResponse {
     return {
       id: rewardRaw.id,
-      userId: rewardRaw.user_id,
       targetId: rewardRaw.target_id,
       title: rewardRaw.title,
       description: rewardRaw.description,

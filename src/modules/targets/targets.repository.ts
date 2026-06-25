@@ -6,8 +6,9 @@ import {
   CompleteTargetRepositoryPayload,
   CreateTargetRepositoryPayload,
   GetAllTargetStepsPayload,
-  GetTargetByUserIdPayload,
   UpdateTargetStatusRepositoryPayload,
+  GetTargetById,
+  GetTargetByIdAndUserIdPayload,
 } from 'src/modules/targets/targets.repository.types';
 
 @Injectable()
@@ -43,8 +44,8 @@ export class TargetsRepository {
     );
   }
 
-  async getByUserId(
-    payload: GetTargetByUserIdPayload,
+  async getByIdAndUserId(
+    payload: GetTargetByIdAndUserIdPayload,
     poolClient?: PoolClient,
   ): Promise<TargetRaw> {
     const query = `
@@ -85,6 +86,46 @@ export class TargetsRepository {
     }
   }
 
+  async getById(
+    payload: GetTargetById,
+    poolClient?: PoolClient,
+  ): Promise<TargetRaw | undefined> {
+    const query = `
+      SELECT
+        t.id,
+        t.user_id,
+        t.title,
+        t.description,
+        t.status,
+        t.should_be_completed_at::text AS should_be_completed_at,
+        t.completed_at::text AS completed_at,
+        t.closed_at,
+        t.created_at,
+        t.updated_at,
+        t.result_comment,
+        t.can_assign_reward
+      FROM targets t
+      WHERE t.id = $1
+      FOR UPDATE;
+    `;
+
+    if (poolClient) {
+      const result = await poolClient.query<TargetRaw>(query, [
+        payload.targetId,
+      ]);
+
+      const [target] = result.rows ?? [];
+
+      return target;
+    } else {
+      const [target] =
+        (await this.dbService.query<TargetRaw>(query, [payload.targetId])) ??
+        [];
+
+      return target;
+    }
+  }
+
   async getAllTargetSteps(
     poolClient: PoolClient,
     payload: GetAllTargetStepsPayload,
@@ -102,11 +143,11 @@ export class TargetsRepository {
   }
 
   async completeTarget(
-    poolClient: PoolClient,
     payload: CompleteTargetRepositoryPayload,
+    poolClient?: PoolClient,
   ): Promise<TargetRaw | undefined> {
-    const result = await poolClient.query<TargetRaw>(
-      `UPDATE targets
+    const query = `
+      UPDATE targets
           SET completed_at = NOW(),
               status = 'completed',
               can_assign_reward = $2,
@@ -125,13 +166,27 @@ export class TargetsRepository {
             updated_at,
             result_comment,
             can_assign_reward;
-      `,
-      [payload.targetId, payload.canAssignReward, payload.resultComment],
-    );
+    `;
 
-    const [target] = result.rows;
+    if (poolClient) {
+      const result = await poolClient.query<TargetRaw>(query, [
+        payload.targetId,
+        payload.canAssignReward,
+        payload.resultComment,
+      ]);
 
-    return target;
+      const [target] = result.rows;
+
+      return target;
+    } else {
+      const [target] = await this.dbService.query<TargetRaw>(query, [
+        payload.targetId,
+        payload.canAssignReward,
+        payload.resultComment,
+      ]);
+
+      return target;
+    }
   }
 
   async updateTargetStatus(
