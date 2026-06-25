@@ -22,7 +22,19 @@ export class TargetsRepository {
       `INSERT INTO targets (user_id, title, description, should_be_completed_at, status)
         VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (id) DO NOTHING
-        RETURNING *;
+        RETURNING
+          id,
+          user_id,
+          title,
+          description,
+          status,
+          should_be_completed_at::text AS should_be_completed_at,
+          completed_at::text AS completed_at,
+          closed_at,
+          created_at,
+          updated_at,
+          result_comment,
+          can_assign_reward;
       `,
       [
         payload.userId,
@@ -197,7 +209,19 @@ export class TargetsRepository {
       UPDATE targets
       SET status = $2
       WHERE id = $1
-      RETURNING *;
+      RETURNING
+        id,
+        user_id,
+        title,
+        description,
+        status,
+        should_be_completed_at::text AS should_be_completed_at,
+        completed_at::text AS completed_at,
+        closed_at,
+        created_at,
+        updated_at,
+        result_comment,
+        can_assign_reward;
     `;
 
     if (poolClient) {

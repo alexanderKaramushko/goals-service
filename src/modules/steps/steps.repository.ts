@@ -34,7 +34,16 @@ export class StepsRepository {
       `INSERT INTO steps (title, description, target_id, should_be_completed_at)
         VALUES ($1, $2, $3, $4)
         ON CONFLICT (id) DO NOTHING
-        RETURNING *;
+        RETURNING
+          id,
+          target_id,
+          title,
+          description,
+          should_be_completed_at::text AS should_be_completed_at,
+          closed_at,
+          created_at,
+          completed_at::text AS completed_at,
+          result_comment;
       `,
       [
         payload.title,

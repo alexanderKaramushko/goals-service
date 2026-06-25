@@ -31,6 +31,7 @@ import { RewardOnOwnTargetException } from 'src/modules/rewards/exceptions/rewar
 import { RewardOnUncompletedTargetException } from 'src/modules/rewards/exceptions/reward-on-uncompleted-target.exception';
 import { RewardUnassignableException } from 'src/modules/rewards/exceptions/reward-unassignable.exception';
 import { RewardAlreadyAssignedException } from 'src/modules/rewards/exceptions/reward-already-assigned.exception';
+import { dayjs } from 'src/helpers/dayjs';
 
 describe('Rewards (e2e) – /POST rewards/create/:targetId', () => {
   jest.setTimeout(60000);
@@ -217,8 +218,10 @@ describe('Rewards (e2e) – /POST rewards/create/:targetId', () => {
             description: 'За успешное завершение цели',
             type: RewardType.target,
             acceptedAt: null,
-            createdAt: expect.any(String),
           }),
+        );
+        expect(dayjs(res.body.createdAt).format('YYYY-MM-DD')).toBe(
+          dayjs().format('YYYY-MM-DD'),
         );
 
         createdRewardId = res.body.id;
