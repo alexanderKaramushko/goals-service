@@ -22,7 +22,7 @@ import { createTargetFactory } from './factories/targets.factory';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { StepsRepository } from 'src/modules/steps/steps.repository';
-import dayjs from 'dayjs';
+import { dayjs } from 'src/helpers/dayjs';
 import { StepNotFoundException } from 'src/modules/steps/exceptions/step-not-found.exception';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 import { TargetNotActiveException } from 'src/modules/steps/exceptions/target-not-active.exception';
@@ -31,7 +31,7 @@ import { StepDeadlineOutdatedException } from 'src/modules/steps/exceptions/step
 import { StepDeadlineNotClosestException } from 'src/modules/steps/exceptions/step-deadline-not-closest';
 import { Provider } from 'src/modules/users/users.types';
 
-describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
+describe('Steps (e2e) - /PUT steps/complete/:stepId', () => {
   jest.setTimeout(60000);
 
   let app: INestApplication;
@@ -83,7 +83,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/steps/complete/wrongId')
+      .put('/steps/complete/wrongId')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -120,7 +120,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/steps/complete/1')
+      .put('/steps/complete/1')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -168,7 +168,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
+      .put(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -177,7 +177,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         resultComment: 'Посмотрел видео по правильному питанию',
       })
       .expect((res) => {
-        expect(res.status).toBe(201);
+        expect(res.status).toBe(200);
         expect(res.body.message).not.toBeDefined();
         expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
       });
@@ -223,7 +223,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     await setTargetStatus(target.id, TargetStatus.Active);
 
     await request(app.getHttpServer())
-      .post(`/steps/complete/12345`)
+      .put(`/steps/complete/12345`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -279,7 +279,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
+      .put(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -331,7 +331,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
+      .put(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -340,13 +340,13 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         resultComment: 'Посмотрел видео по правильному питанию',
       })
       .expect((res) => {
-        expect(res.status).toBe(201);
+        expect(res.status).toBe(200);
         expect(res.body.message).not.toBeDefined();
         expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
       });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
+      .put(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -403,13 +403,13 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
 
     const [firstResponse, secondResponse] = await Promise.all([
       request(app.getHttpServer())
-        .post(`/steps/complete/${step.id}`)
+        .put(`/steps/complete/${step.id}`)
         .set({
           'x-user-timezone': 'Europe/Moscow',
         })
         .send(payload),
       request(app.getHttpServer())
-        .post(`/steps/complete/${step.id}`)
+        .put(`/steps/complete/${step.id}`)
         .set({
           'x-user-timezone': 'Europe/Moscow',
         })
@@ -420,7 +420,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
       (a, b) => a - b,
     );
 
-    expect(statuses).toEqual([201, 409]);
+    expect(statuses).toEqual([200, 409]);
 
     const conflictResponse = [firstResponse, secondResponse].find(
       (response) => response.status === 409,
@@ -468,7 +468,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
+      .put(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -527,7 +527,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
+      .put(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -587,7 +587,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/complete/${step.id}`)
+      .put(`/steps/complete/${step.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -596,7 +596,7 @@ describe('Steps (e2e) - /POST steps/complete/:stepId', () => {
         resultComment: 'Посмотрел видео по правильному питанию',
       })
       .expect((res) => {
-        expect(res.status).toBe(201);
+        expect(res.status).toBe(200);
         expect(res.body.message).not.toBeDefined();
         expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
       });

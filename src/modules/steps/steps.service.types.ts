@@ -42,3 +42,12 @@ export type CompleteStepPayload = {
 export type CompletedStepResponse = {
   completedAt: string | null;
 };
+
+export type DeleteStepPayload = {
+  stepId: number;
+  userId: string;
+};
+
+export type DeletedStepResponse = {
+  id: number;
+};

@@ -1,20 +1,24 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
   ActivatedTargetResponseDto,
+  CancelledTargetResponseDto,
   CompletedTargetResponseDto,
   CompleteTargetDto,
   CreatedTargetResponseDto,
   CreateTargetDto,
+  DeletedTargetResponseDto,
   TargetsResponseDto,
 } from 'src/modules/targets/targets.dto';
 import { TargetsService } from 'src/modules/targets/targets.service';
@@ -72,7 +76,7 @@ export class TargetsController {
     description: 'Цель завершена',
     type: CompletedTargetResponseDto,
   })
-  @Post('complete/:targetId')
+  @Put('complete/:targetId')
   completeTarget(
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
@@ -91,7 +95,7 @@ export class TargetsController {
     description: 'Цель активирована',
     type: ActivatedTargetResponseDto,
   })
-  @Post('activate/:targetId')
+  @Put('activate/:targetId')
   activateTarget(
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
@@ -100,6 +104,38 @@ export class TargetsController {
       targetId,
       userId: request.user?.id as string,
       userTimezone: request.userTimezone as string,
+    });
+  }
+
+  @ApiOperation({ summary: 'Отменить активную цель' })
+  @ApiResponse({
+    description: 'Цель отменена',
+    type: CancelledTargetResponseDto,
+  })
+  @Post('cancel/:targetId')
+  cancelTarget(
+    @Request() request: ExpressRequest,
+    @Param('targetId', ParseIntPipe) targetId: number,
+  ) {
+    return this.targetsService.cancel({
+      targetId,
+      userId: request.user?.id as string,
+    });
+  }
+
+  @ApiOperation({ summary: 'Удалить не запущенную цель' })
+  @ApiResponse({
+    description: 'Цель удалена',
+    type: DeletedTargetResponseDto,
+  })
+  @Delete('delete/:targetId')
+  deleteTarget(
+    @Request() request: ExpressRequest,
+    @Param('targetId', ParseIntPipe) targetId: number,
+  ) {
+    return this.targetsService.delete({
+      targetId,
+      userId: request.user?.id as string,
     });
   }
 }
