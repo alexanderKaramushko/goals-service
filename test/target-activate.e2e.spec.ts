@@ -25,7 +25,7 @@ import { TargetHasOutdatedStepsException } from 'src/modules/targets/exceptions/
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { StepsModule } from 'src/modules/steps/steps.module';
 
-describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
+describe('Targets (e2e) - /PUT targets/activate/:targetId', () => {
   jest.setTimeout(60000);
 
   let app: INestApplication;
@@ -75,7 +75,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/targets/activate/wrongId')
+      .put('/targets/activate/wrongId')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -121,13 +121,13 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/activate/${target.id}`)
+      .put(`/targets/activate/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
       .expect((res) => {
         expect(res.body.message).not.toBeDefined();
-        expect(res.status).toBe(201);
+        expect(res.status).toBe(200);
         expect(res.body).toEqual({ id: target.id });
       });
 
@@ -161,7 +161,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/targets/activate/12345')
+      .put('/targets/activate/12345')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -204,7 +204,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/activate/${target.id}`)
+      .put(`/targets/activate/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -244,7 +244,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     await setTargetStatus(target.id, TargetStatus.Active);
 
     await request(app.getHttpServer())
-      .post(`/targets/activate/${target.id}`)
+      .put(`/targets/activate/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -289,7 +289,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/activate/${target.id}`)
+      .put(`/targets/activate/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -334,7 +334,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/activate/${target.id}`)
+      .put(`/targets/activate/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })

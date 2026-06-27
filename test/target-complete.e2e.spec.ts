@@ -33,7 +33,7 @@ import { TargetNotInStatusException } from 'src/modules/targets/exceptions/targe
 import { TargetDeadlineOutdatedException } from 'src/modules/targets/exceptions/target-deadline-outdated';
 import { TargetHasUncompletedStepsException } from 'src/modules/targets/exceptions/target-has-uncompleted-steps.exception';
 
-describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
+describe('Steps (e2e) - /PUT targets/complete/:targetId', () => {
   jest.setTimeout(60000);
 
   let app: INestApplication;
@@ -85,7 +85,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/targets/complete/wrongId')
+      .put('/targets/complete/wrongId')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -122,7 +122,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/targets/complete/1')
+      .put('/targets/complete/1')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -176,7 +176,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/complete/${target.id}`)
+      .put(`/targets/complete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -185,7 +185,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
       })
       .expect((res) => {
         expect(res.body.message).not.toBeDefined();
-        expect(res.status).toBe(201);
+        expect(res.status).toBe(200);
         expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
       });
 
@@ -239,7 +239,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/complete/${target.id}`)
+      .put(`/targets/complete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -291,7 +291,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/complete/${target.id}`)
+      .put(`/targets/complete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -300,7 +300,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
       })
       .expect((res) => {
         expect(res.body.message).not.toBeDefined();
-        expect(res.status).toBe(201);
+        expect(res.status).toBe(200);
         expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
       });
 
@@ -335,7 +335,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/complete/12345`)
+      .put(`/targets/complete/12345`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -375,7 +375,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/complete/${target.id}`)
+      .put(`/targets/complete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -418,7 +418,7 @@ describe('Steps (e2e) - /POST targets/complete/:targetId', () => {
     await setTargetStatus(target.id, TargetStatus.Active);
 
     await request(app.getHttpServer())
-      .post(`/targets/complete/${target.id}`)
+      .put(`/targets/complete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })

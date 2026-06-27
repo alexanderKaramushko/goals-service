@@ -27,7 +27,7 @@ import { TargetStatus } from 'src/modules/targets/targets.types';
 import { TargetNotInStatusException } from 'src/modules/targets/exceptions/target-not-in-status.exception';
 import { Provider } from 'src/modules/users/users.types';
 
-describe('Steps (e2e) - /POST steps/delete/:stepId', () => {
+describe('Steps (e2e) - /DELETE steps/delete/:stepId', () => {
   jest.setTimeout(60000);
 
   let app: INestApplication;
@@ -74,7 +74,7 @@ describe('Steps (e2e) - /POST steps/delete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/steps/delete/wrongId')
+      .delete('/steps/delete/wrongId')
       .expect((res) => {
         expect(res.status).toBe(400);
         expect(res.body.message).toContain(
@@ -117,10 +117,10 @@ describe('Steps (e2e) - /POST steps/delete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/delete/${step.id}`)
+      .delete(`/steps/delete/${step.id}`)
       .expect((res) => {
         expect(res.body.message).not.toBeDefined();
-        expect(res.status).toBe(201);
+        expect(res.status).toBe(200);
         expect(res.body).toEqual({ id: step.id });
       });
 
@@ -149,7 +149,7 @@ describe('Steps (e2e) - /POST steps/delete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/steps/delete/12345')
+      .delete('/steps/delete/12345')
       .expect((res) => {
         const error = new StepNotFoundException();
 
@@ -197,7 +197,7 @@ describe('Steps (e2e) - /POST steps/delete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/delete/${step.id}`)
+      .delete(`/steps/delete/${step.id}`)
       .expect((res) => {
         const error = new StepNotFoundException();
 
@@ -246,7 +246,7 @@ describe('Steps (e2e) - /POST steps/delete/:stepId', () => {
     await setTargetStatus(target.id, status);
 
     await request(app.getHttpServer())
-      .post(`/steps/delete/${step.id}`)
+      .delete(`/steps/delete/${step.id}`)
       .expect((res) => {
         const error = new TargetNotInStatusException(TargetStatus.Created);
 
@@ -288,11 +288,11 @@ describe('Steps (e2e) - /POST steps/delete/:stepId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/steps/delete/${step.id}`)
-      .expect(201);
+      .delete(`/steps/delete/${step.id}`)
+      .expect(200);
 
     await request(app.getHttpServer())
-      .post(`/steps/delete/${step.id}`)
+      .delete(`/steps/delete/${step.id}`)
       .expect((res) => {
         const error = new StepNotFoundException();
 

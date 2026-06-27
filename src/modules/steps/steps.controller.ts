@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Request,
   UseGuards,
   UseInterceptors,
@@ -85,7 +87,7 @@ export class StepsController {
     type: CompletedStepResponseDto,
   })
   @UseInterceptors(TimezoneInterceptor)
-  @Post('complete/:stepId')
+  @Put('complete/:stepId')
   async completeStep(
     @Request() request: ExpressRequest,
     @Body() body: CompleteStepDto,
@@ -104,7 +106,7 @@ export class StepsController {
     description: 'Шаг удален',
     type: DeletedStepResponseDto,
   })
-  @Post('delete/:stepId')
+  @Delete('delete/:stepId')
   deleteStep(
     @Request() request: ExpressRequest,
     @Param('stepId', ParseIntPipe) stepId: number,

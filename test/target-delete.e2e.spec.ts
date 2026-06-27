@@ -26,7 +26,7 @@ import { Provider } from 'src/modules/users/users.types';
 import { TargetNotFoundException } from 'src/modules/targets/exceptions/target-not-found.exception';
 import { TargetNotInStatusException } from 'src/modules/targets/exceptions/target-not-in-status.exception';
 
-describe('Targets (e2e) - /POST targets/delete/:targetId', () => {
+describe('Targets (e2e) - /DELETE targets/delete/:targetId', () => {
   jest.setTimeout(60000);
 
   let app: INestApplication;
@@ -73,7 +73,7 @@ describe('Targets (e2e) - /POST targets/delete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/targets/delete/wrongId')
+      .delete('/targets/delete/wrongId')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -119,13 +119,13 @@ describe('Targets (e2e) - /POST targets/delete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/delete/${target.id}`)
+      .delete(`/targets/delete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
       .expect((res) => {
         expect(res.body.message).not.toBeDefined();
-        expect(res.status).toBe(201);
+        expect(res.status).toBe(200);
         expect(res.body).toEqual({ id: target.id });
       });
 
@@ -165,7 +165,7 @@ describe('Targets (e2e) - /POST targets/delete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/targets/delete/12345')
+      .delete('/targets/delete/12345')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -208,7 +208,7 @@ describe('Targets (e2e) - /POST targets/delete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/delete/${target.id}`)
+      .delete(`/targets/delete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -252,7 +252,7 @@ describe('Targets (e2e) - /POST targets/delete/:targetId', () => {
     await setTargetStatus(target.id, status);
 
     await request(app.getHttpServer())
-      .post(`/targets/delete/${target.id}`)
+      .delete(`/targets/delete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -289,14 +289,14 @@ describe('Targets (e2e) - /POST targets/delete/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/delete/${target.id}`)
+      .delete(`/targets/delete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
-      .expect(201);
+      .expect(200);
 
     await request(app.getHttpServer())
-      .post(`/targets/delete/${target.id}`)
+      .delete(`/targets/delete/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })

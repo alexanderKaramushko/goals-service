@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Request,
   UseGuards,
   UseInterceptors,
@@ -74,7 +76,7 @@ export class TargetsController {
     description: 'Цель завершена',
     type: CompletedTargetResponseDto,
   })
-  @Post('complete/:targetId')
+  @Put('complete/:targetId')
   completeTarget(
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
@@ -93,7 +95,7 @@ export class TargetsController {
     description: 'Цель активирована',
     type: ActivatedTargetResponseDto,
   })
-  @Post('activate/:targetId')
+  @Put('activate/:targetId')
   activateTarget(
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
@@ -126,7 +128,7 @@ export class TargetsController {
     description: 'Цель удалена',
     type: DeletedTargetResponseDto,
   })
-  @Post('delete/:targetId')
+  @Delete('delete/:targetId')
   deleteTarget(
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
