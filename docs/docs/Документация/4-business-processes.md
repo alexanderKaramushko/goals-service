@@ -79,7 +79,7 @@ flowchart TD
 10. Система возвращает успешный ответ.
 
 <details>
-<summary>Flow удаления цели</summary>
+<summary>Flow удаления цели (`DELETE /targets/delete/:targetId`)</summary>
 ```mermaid
 ---
 config:
@@ -115,7 +115,7 @@ flowchart TD
 10. Система возвращает успешный ответ.
 
 <details>
-<summary>Flow отмены цели</summary>
+<summary>Flow отмены цели (`POST /targets/cancel/:targetId`)</summary>
 ```mermaid
 ---
 config:
@@ -190,7 +190,7 @@ flowchart TD
 10. Система возвращает успешный ответ.
 
 <details>
-<summary>Flow удаления шага</summary>
+<summary>Flow удаления шага (`DELETE /steps/delete/:stepId`)</summary>
 ```mermaid
 ---
 config:
@@ -230,7 +230,7 @@ flowchart TD
 14. Система возвращает активированную цель.
 
 <details>
-<summary>Flow активации цели</summary>
+<summary>Flow активации цели (`PUT /targets/activate/:targetId`)</summary>
 ```mermaid
 ---
 config:
@@ -282,7 +282,7 @@ flowchart TD
 
 ## 4.11 Завершение цели
 
-1. Пользователь отправляет запрос на завершение цели `POST /targets/complete/:targetId`.
+1. Пользователь отправляет запрос на завершение цели.
 2. Система открывает транзакцию.
 3. Система ищет цель по `targetId` и `userId` текущего пользователя.
 4. Если цель не найдена, система возвращает ошибку `TargetNotFound`.
@@ -302,7 +302,7 @@ flowchart TD
 16. Система возвращает данные завершенной цели.
 
 <details>
-<summary>Flow завершения цели (`POST /targets/complete/:targetId`)</summary>
+<summary>Flow завершения цели (`PUT /targets/complete/:targetId`)</summary>
 ```mermaid
 ---
 config:
@@ -310,7 +310,7 @@ config:
     wrappingWidth: 320
 ---
 flowchart TD
-    A["POST /targets/complete/:targetId"] --> B["Предусловие: flow авторизации пройден"]
+    A["PUT /targets/complete/:targetId"] --> B["Предусловие: flow авторизации пройден"]
     B --> C["Открыть транзакцию"]
     C --> D["Найти цель по targetId и userId"]
     D --> E{"Цель найдена?"}
