@@ -23,3 +23,7 @@ export type CompleteStepRepositoryPayload = {
   stepId: number;
   resultComment: string;
 };
+
+export type DeleteStepRepositoryPayload = {
+  stepId: number;
+};

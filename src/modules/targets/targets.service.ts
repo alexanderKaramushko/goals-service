@@ -2,9 +2,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import type {
   ActivatedTargetResponse,
   ActivateTargetPayload,
+  CancelTargetPayload,
+  CancelledTargetResponse,
   CompletedTargetResponse,
   CompleteTargetPayload,
   CreateTargetPayload,
+  DeletedTargetResponse,
+  DeletedTargetPayload,
   GetTargetsPayload,
   TargetCreatedResponse,
   TargetListItem,
@@ -190,6 +194,12 @@ export class TargetsService {
     };
   }
 
+  toCancelledResponse(rawData: TargetRaw): CancelledTargetResponse {
+    return {
+      id: rawData.id,
+    };
+  }
+
   async activate(
     payload: ActivateTargetPayload,
   ): Promise<ActivatedTargetResponse> {
@@ -234,11 +244,11 @@ export class TargetsService {
       }
 
       const activatedTarget = await this.targetsRepository.updateTargetStatus(
-        poolClient,
         {
           targetId: payload.targetId,
           status: TargetStatus.Active,
         },
+        poolClient,
       );
 
       if (!activatedTarget) {
@@ -248,6 +258,101 @@ export class TargetsService {
       await poolClient.query('COMMIT');
 
       return this.toActivatedResponse(target);
+    } catch (error) {
+      await poolClient.query('ROLLBACK');
+      throw error;
+    } finally {
+      poolClient.release();
+    }
+  }
+
+  async cancel(payload: CancelTargetPayload): Promise<CancelledTargetResponse> {
+    const poolClient = await this.dbService.getPoolClient();
+
+    try {
+      await poolClient.query('BEGIN');
+
+      const target = await this.targetsRepository.getByIdAndUserId(
+        {
+          targetId: payload.targetId,
+          userId: payload.userId,
+        },
+        poolClient,
+      );
+
+      if (!target) {
+        throw new TargetNotFoundException();
+      }
+
+      if (target.status !== TargetStatus.Active) {
+        throw new TargetNotInStatusException(TargetStatus.Active);
+      }
+
+      const cancelledTarget = await this.targetsRepository.cancelTarget(
+        {
+          targetId: payload.targetId,
+        },
+        poolClient,
+      );
+
+      if (!cancelledTarget) {
+        throw new BadRequestException('Не удалось отменить цель');
+      }
+
+      await poolClient.query('COMMIT');
+
+      return this.toCancelledResponse(cancelledTarget);
+    } catch (error) {
+      await poolClient.query('ROLLBACK');
+      throw error;
+    } finally {
+      poolClient.release();
+    }
+  }
+
+  toDeletedResponse(rawData: TargetRaw): DeletedTargetResponse {
+    return {
+      id: rawData.id,
+    };
+  }
+
+  async delete(payload: DeletedTargetPayload): Promise<DeletedTargetResponse> {
+    const poolClient = await this.dbService.getPoolClient();
+
+    try {
+      await poolClient.query('BEGIN');
+
+      const target = await this.targetsRepository.getByIdAndUserId(
+        {
+          userId: payload.userId,
+          targetId: payload.targetId,
+        },
+        poolClient,
+      );
+
+      if (!target) {
+        throw new TargetNotFoundException();
+      }
+
+      if (target.status !== TargetStatus.Created) {
+        throw new TargetNotInStatusException(TargetStatus.Created);
+      }
+
+      const deletedTarget = await this.targetsRepository.deleteTarget(
+        {
+          userId: payload.userId,
+          targetId: payload.targetId,
+        },
+        poolClient,
+      );
+
+      if (!deletedTarget) {
+        throw new BadRequestException('Не удалось удалить цель');
+      }
+
+      await poolClient.query('COMMIT');
+
+      return this.toDeletedResponse(deletedTarget);
     } catch (error) {
       await poolClient.query('ROLLBACK');
       throw error;

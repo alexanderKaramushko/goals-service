@@ -6,6 +6,7 @@ import { PoolClient } from 'pg';
 import {
   CompleteStepRepositoryPayload,
   CreateStepRepositoryPayload,
+  DeleteStepRepositoryPayload,
   GetAllAscDeadlineByTargetIdPayload,
   GetStepForUserIdPayload,
   GetTargetByStepIdPayload,
@@ -177,6 +178,38 @@ export class StepsRepository {
         payload.stepId,
         payload.resultComment,
       ]);
+
+      return step;
+    }
+  }
+
+  async deleteStep(
+    payload: DeleteStepRepositoryPayload,
+    poolClient?: PoolClient,
+  ): Promise<StepRaw | undefined> {
+    const query = `
+      DELETE FROM steps
+      WHERE id = $1
+      RETURNING
+        id,
+        target_id,
+        title,
+        description,
+        should_be_completed_at::text AS should_be_completed_at,
+        closed_at,
+        created_at,
+        completed_at::text AS completed_at,
+        result_comment;
+    `;
+
+    if (poolClient) {
+      const result = await poolClient.query<StepRaw>(query, [payload.stepId]);
+
+      const [step] = result.rows;
+
+      return step;
+    } else {
+      const [step] = await this.dbService.query<StepRaw>(query, [payload.stepId]);
 
       return step;
     }

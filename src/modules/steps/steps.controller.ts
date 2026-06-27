@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Request,
   UseGuards,
   UseInterceptors,
@@ -22,6 +24,7 @@ import {
   CompleteStepDto,
   CreatedStepResponseDto,
   CreateStepDto,
+  DeletedStepResponseDto,
 } from 'src/modules/steps/steps.dto';
 import { type Request as ExpressRequest } from 'express';
 import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
@@ -84,7 +87,7 @@ export class StepsController {
     type: CompletedStepResponseDto,
   })
   @UseInterceptors(TimezoneInterceptor)
-  @Post('complete/:stepId')
+  @Put('complete/:stepId')
   async completeStep(
     @Request() request: ExpressRequest,
     @Body() body: CompleteStepDto,
@@ -95,6 +98,22 @@ export class StepsController {
       resultComment: body.resultComment,
       userId: request.user?.id as string,
       userTimezone: request.userTimezone as string,
+    });
+  }
+
+  @ApiOperation({ summary: 'Удалить шаг у цели' })
+  @ApiCreatedResponse({
+    description: 'Шаг удален',
+    type: DeletedStepResponseDto,
+  })
+  @Delete('delete/:stepId')
+  deleteStep(
+    @Request() request: ExpressRequest,
+    @Param('stepId', ParseIntPipe) stepId: number,
+  ) {
+    return this.stepsService.deleteStep({
+      stepId,
+      userId: request.user?.id as string,
     });
   }
 }

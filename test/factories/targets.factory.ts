@@ -20,7 +20,7 @@ export function getTargetFactory(targetsRepository: TargetsRepository) {
 
 export function setTargetStatusFactory(targetsRepository: TargetsRepository) {
   return (targetId: number, status: TargetStatus) => {
-    return targetsRepository.updateTargetStatus(undefined, {
+    return targetsRepository.updateTargetStatus({
       targetId,
       status,
     });

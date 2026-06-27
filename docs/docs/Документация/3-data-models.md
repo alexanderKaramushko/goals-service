@@ -25,13 +25,13 @@ erDiagram
       string status "NULL, CHECK (status IN ('created', 'active', 'completed', 'cancelled'))"
       date should_be_completed_at
       date completed_at "NULL"
-      timestamp closed_at "NULL"
+      timestamp cancelled_at "NULL"
       timestamp created_at "NULL"
       timestamp updated_at "NULL"
     }
     STEPS {
       int id PK
-      int target_id FK "NULL, ON DELETE SET NULL"
+      int target_id FK "NULL, ON DELETE CASCADE"
       string title
       string description
       date should_be_completed_at

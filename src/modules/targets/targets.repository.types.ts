@@ -30,3 +30,12 @@ export type UpdateTargetStatusRepositoryPayload = {
   targetId: number;
   status: TargetStatus;
 };
+
+export type DeleteTargetRepositoryPayload = {
+  targetId: number;
+  userId: string;
+};
+
+export type CancelTargetRepositoryPayload = {
+  targetId: number;
+};

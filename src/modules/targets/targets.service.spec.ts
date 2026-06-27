@@ -48,7 +48,7 @@ describe('TargetsService', () => {
       status: TargetStatus.Created,
       should_be_completed_at: '2026-02-14T10:45:30.000Z',
       completed_at: '',
-      closed_at: '',
+      cancelled_at: '',
       created_at: '2026-01-01T10:45:30.000Z',
       updated_at: '2026-01-01T10:45:30.000Z',
       result_comment: null,
