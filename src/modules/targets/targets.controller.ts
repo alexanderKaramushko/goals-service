@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ActivatedTargetResponseDto,
+  CancelledTargetResponseDto,
   CompletedTargetResponseDto,
   CompleteTargetDto,
   CreatedTargetResponseDto,
@@ -101,6 +102,22 @@ export class TargetsController {
       targetId,
       userId: request.user?.id as string,
       userTimezone: request.userTimezone as string,
+    });
+  }
+
+  @ApiOperation({ summary: 'Отменить активную цель' })
+  @ApiResponse({
+    description: 'Цель отменена',
+    type: CancelledTargetResponseDto,
+  })
+  @Post('cancel/:targetId')
+  cancelTarget(
+    @Request() request: ExpressRequest,
+    @Param('targetId', ParseIntPipe) targetId: number,
+  ) {
+    return this.targetsService.cancel({
+      targetId,
+      userId: request.user?.id as string,
     });
   }
 

@@ -23,7 +23,7 @@ import {
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { StepsRepository } from 'src/modules/steps/steps.repository';
-import dayjs from 'dayjs';
+import { dayjs } from 'src/helpers/dayjs';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 import { Provider } from 'src/modules/users/users.types';
 import { CompleteTargetDto } from 'src/modules/targets/targets.dto';

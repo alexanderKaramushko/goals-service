@@ -25,7 +25,7 @@ erDiagram
       string status "NULL, CHECK (status IN ('created', 'active', 'completed', 'cancelled'))"
       date should_be_completed_at
       date completed_at "NULL"
-      timestamp closed_at "NULL"
+      timestamp cancelled_at "NULL"
       timestamp created_at "NULL"
       timestamp updated_at "NULL"
     }

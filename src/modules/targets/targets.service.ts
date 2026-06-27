@@ -2,6 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import type {
   ActivatedTargetResponse,
   ActivateTargetPayload,
+  CancelTargetPayload,
+  CancelledTargetResponse,
   CompletedTargetResponse,
   CompleteTargetPayload,
   CreateTargetPayload,
@@ -192,6 +194,12 @@ export class TargetsService {
     };
   }
 
+  toCancelledResponse(rawData: TargetRaw): CancelledTargetResponse {
+    return {
+      id: rawData.id,
+    };
+  }
+
   async activate(
     payload: ActivateTargetPayload,
   ): Promise<ActivatedTargetResponse> {
@@ -250,6 +258,50 @@ export class TargetsService {
       await poolClient.query('COMMIT');
 
       return this.toActivatedResponse(target);
+    } catch (error) {
+      await poolClient.query('ROLLBACK');
+      throw error;
+    } finally {
+      poolClient.release();
+    }
+  }
+
+  async cancel(payload: CancelTargetPayload): Promise<CancelledTargetResponse> {
+    const poolClient = await this.dbService.getPoolClient();
+
+    try {
+      await poolClient.query('BEGIN');
+
+      const target = await this.targetsRepository.getByIdAndUserId(
+        {
+          targetId: payload.targetId,
+          userId: payload.userId,
+        },
+        poolClient,
+      );
+
+      if (!target) {
+        throw new TargetNotFoundException();
+      }
+
+      if (target.status !== TargetStatus.Active) {
+        throw new TargetNotInStatusException(TargetStatus.Active);
+      }
+
+      const cancelledTarget = await this.targetsRepository.cancelTarget(
+        {
+          targetId: payload.targetId,
+        },
+        poolClient,
+      );
+
+      if (!cancelledTarget) {
+        throw new BadRequestException('Не удалось отменить цель');
+      }
+
+      await poolClient.query('COMMIT');
+
+      return this.toCancelledResponse(cancelledTarget);
     } catch (error) {
       await poolClient.query('ROLLBACK');
       throw error;

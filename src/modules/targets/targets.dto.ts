@@ -96,6 +96,15 @@ export class ActivatedTargetResponseDto {
   id: string | null;
 }
 
+export class CancelledTargetResponseDto {
+  @ApiProperty({
+    example: 1,
+    description: 'Id отмененной цели',
+  })
+  @IsInt()
+  id: string | null;
+}
+
 export class DeletedTargetResponseDto {
   @ApiProperty({
     example: 1,

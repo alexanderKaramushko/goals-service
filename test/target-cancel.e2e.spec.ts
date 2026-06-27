@@ -1,9 +1,13 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { createTestingApp } from 'src/helpers/create-testing-app';
+import {
+  PostgreSqlContainer,
+  StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql';
 import { Client } from 'pg';
 import { execSync } from 'child_process';
-import { clearTables, createStepFactory } from './factories';
+import { clearTables } from './factories';
 import { UsersModule } from 'src/modules/users/users.module';
 import { TargetsModule } from 'src/modules/targets/targets.module';
 import { createUserFactory } from './factories/users.factory';
@@ -14,25 +18,17 @@ import {
 } from './factories/targets.factory';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
-import { StepsRepository } from 'src/modules/steps/steps.repository';
-import { dayjs } from 'src/helpers/dayjs';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 import { Provider } from 'src/modules/users/users.types';
 import { TargetNotFoundException } from 'src/modules/targets/exceptions/target-not-found.exception';
 import { TargetNotInStatusException } from 'src/modules/targets/exceptions/target-not-in-status.exception';
-import { TargetDeadlineOutdatedException } from 'src/modules/targets/exceptions/target-deadline-outdated';
-import { TargetHasOutdatedStepsException } from 'src/modules/targets/exceptions/target-has-outdated-steps.exception';
-import { PostgreSqlContainer } from '@testcontainers/postgresql';
-import { StepsModule } from 'src/modules/steps/steps.module';
+import { dayjs } from 'src/helpers/dayjs';
 
-describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
+describe('Targets (e2e) - /POST targets/cancel/:targetId', () => {
   jest.setTimeout(60000);
 
   let app: INestApplication;
-
-  let postgresContainer: Awaited<
-    ReturnType<InstanceType<typeof PostgreSqlContainer>['start']>
-  >;
+  let postgresContainer: StartedPostgreSqlContainer;
   let postgresClient: Client;
 
   beforeAll(async () => {
@@ -61,7 +57,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
       await app.close();
     }
 
-    await clearTables(postgresClient, ['steps']);
+    await clearTables(postgresClient, ['targets', 'users']);
   });
 
   afterAll(async () => {
@@ -75,7 +71,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/targets/activate/wrongId')
+      .post('/targets/cancel/wrongId')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -87,10 +83,10 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
       });
   });
 
-  it('успешно активирует цель с не просроченным шагом', async () => {
+  it('успешно отменяет активную цель', async () => {
     app = await createTestingApp(
       {
-        modules: [UsersModule, TargetsModule, StepsModule],
+        modules: [UsersModule, TargetsModule],
       },
       { useRealDbService: true },
     );
@@ -98,7 +94,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     const createUser = createUserFactory(app.get(UsersRepository));
     const createTarget = createTargetFactory(app.get(TargetsRepository));
     const getTarget = getTargetFactory(app.get(TargetsRepository));
-    const createStep = createStepFactory(app.get(StepsRepository));
+    const setTargetStatus = setTargetStatusFactory(app.get(TargetsRepository));
 
     const [user] = await createUser({
       name: 'Test User',
@@ -113,15 +109,10 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
       shouldBeCompletedAt: dayjs().add(5, 'day').format('YYYY-MM-DD'),
     });
 
-    await createStep({
-      targetId: target.id,
-      title: 'Купить продукты',
-      description: 'Составить список и купить продукты',
-      shouldBeCompletedAt: dayjs().add(2, 'day').format('YYYY-MM-DD'),
-    });
+    await setTargetStatus(target.id, TargetStatus.Active);
 
     await request(app.getHttpServer())
-      .post(`/targets/activate/${target.id}`)
+      .post(`/targets/cancel/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -131,23 +122,33 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
         expect(res.body).toEqual({ id: target.id });
       });
 
-    const activatedTarget = await getTarget({
+    const cancelledTarget = await getTarget({
       userId: user.id,
       targetId: target.id,
     });
 
-    expect(activatedTarget).toEqual(
+    expect(cancelledTarget).toEqual(
       expect.objectContaining({
         id: target.id,
-        status: TargetStatus.Active,
+        status: TargetStatus.Cancelled,
       }),
+    );
+
+    expect(
+      dayjs(cancelledTarget?.cancelled_at)
+        .tz('Europe/Moscow')
+        .format('YYYY-MM-DD'),
+    ).toBe(
+      dayjs(cancelledTarget?.cancelled_at)
+        .tz('Europe/Moscow')
+        .format('YYYY-MM-DD'),
     );
   });
 
   it('ошибка, если цель не найдена', async () => {
     app = await createTestingApp(
       {
-        modules: [UsersModule, TargetsModule, StepsModule],
+        modules: [UsersModule, TargetsModule],
       },
       { useRealDbService: true },
     );
@@ -161,7 +162,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post('/targets/activate/12345')
+      .post('/targets/cancel/12345')
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -176,7 +177,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
   it('ошибка, если цель принадлежит другому пользователю', async () => {
     app = await createTestingApp(
       {
-        modules: [UsersModule, TargetsModule, StepsModule],
+        modules: [UsersModule, TargetsModule],
       },
       { useRealDbService: true },
     );
@@ -204,7 +205,7 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/targets/activate/${target.id}`)
+      .post(`/targets/cancel/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
@@ -216,10 +217,54 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
       });
   });
 
-  it('ошибка, если цель не в статусе created', async () => {
+  it.each<[TargetStatus]>([
+    [TargetStatus.Created],
+    [TargetStatus.Completed],
+    [TargetStatus.Cancelled],
+  ])('ошибка, если цель в статусе %s', async (status) => {
     app = await createTestingApp(
       {
-        modules: [UsersModule, TargetsModule, StepsModule],
+        modules: [UsersModule, TargetsModule],
+      },
+      { useRealDbService: true },
+    );
+
+    const createUser = createUserFactory(app.get(UsersRepository));
+    const createTarget = createTargetFactory(app.get(TargetsRepository));
+    const setTargetStatus = setTargetStatusFactory(app.get(TargetsRepository));
+
+    await createUser({
+      name: 'Test User',
+      provider: Provider.GOOGLE,
+      subjectId: '1',
+    });
+
+    const [target] = await createTarget({
+      userId: '1',
+      title: 'Составить план питания',
+      description: 'Расписать план питания и составить список продуктов',
+      shouldBeCompletedAt: dayjs().add(5, 'day').format('YYYY-MM-DD'),
+    });
+
+    await setTargetStatus(target.id, status);
+
+    await request(app.getHttpServer())
+      .post(`/targets/cancel/${target.id}`)
+      .set({
+        'x-user-timezone': 'Europe/Moscow',
+      })
+      .expect((res) => {
+        const error = new TargetNotInStatusException(TargetStatus.Active);
+
+        expect(res.status).toBe(error.getStatus());
+        expect(res.body.message).toBe(error.message);
+      });
+  });
+
+  it('ошибка, если цель уже была отменена', async () => {
+    app = await createTestingApp(
+      {
+        modules: [UsersModule, TargetsModule],
       },
       { useRealDbService: true },
     );
@@ -244,102 +289,19 @@ describe('Targets (e2e) - /POST targets/activate/:targetId', () => {
     await setTargetStatus(target.id, TargetStatus.Active);
 
     await request(app.getHttpServer())
-      .post(`/targets/activate/${target.id}`)
+      .post(`/targets/cancel/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
-      .expect((res) => {
-        const error = new TargetNotInStatusException(TargetStatus.Created);
-
-        expect(res.status).toBe(error.getStatus());
-        expect(res.body.message).toBe(error.message);
-      });
-  });
-
-  it('ошибка, если активируется просроченная цель', async () => {
-    app = await createTestingApp(
-      {
-        modules: [UsersModule, TargetsModule, StepsModule],
-      },
-      { useRealDbService: true },
-    );
-
-    const createUser = createUserFactory(app.get(UsersRepository));
-    const createTarget = createTargetFactory(app.get(TargetsRepository));
-    const createStep = createStepFactory(app.get(StepsRepository));
-
-    await createUser({
-      name: 'Test User',
-      provider: Provider.GOOGLE,
-      subjectId: '1',
-    });
-
-    const [target] = await createTarget({
-      userId: '1',
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      shouldBeCompletedAt: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
-    });
-
-    await createStep({
-      targetId: target.id,
-      title: 'Купить продукты',
-      description: 'Составить список и купить продукты',
-      shouldBeCompletedAt: dayjs().add(1, 'day').format('YYYY-MM-DD'),
-    });
+      .expect(201);
 
     await request(app.getHttpServer())
-      .post(`/targets/activate/${target.id}`)
+      .post(`/targets/cancel/${target.id}`)
       .set({
         'x-user-timezone': 'Europe/Moscow',
       })
       .expect((res) => {
-        const error = new TargetDeadlineOutdatedException();
-
-        expect(res.status).toBe(error.getStatus());
-        expect(res.body.message).toBe(error.message);
-      });
-  });
-
-  it('ошибка, если у цели есть просроченный шаг', async () => {
-    app = await createTestingApp(
-      {
-        modules: [UsersModule, TargetsModule, StepsModule],
-      },
-      { useRealDbService: true },
-    );
-
-    const createUser = createUserFactory(app.get(UsersRepository));
-    const createTarget = createTargetFactory(app.get(TargetsRepository));
-    const createStep = createStepFactory(app.get(StepsRepository));
-
-    await createUser({
-      name: 'Test User',
-      provider: Provider.GOOGLE,
-      subjectId: '1',
-    });
-
-    const [target] = await createTarget({
-      userId: '1',
-      title: 'Составить план питания',
-      description: 'Расписать план питания и составить список продуктов',
-      shouldBeCompletedAt: dayjs().add(5, 'day').format('YYYY-MM-DD'),
-    });
-
-    await createStep({
-      targetId: target.id,
-      title: 'Купить продукты',
-      description: 'Составить список и купить продукты',
-      shouldBeCompletedAt: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
-    });
-
-    await request(app.getHttpServer())
-      .post(`/targets/activate/${target.id}`)
-      .set({
-        'x-user-timezone': 'Europe/Moscow',
-      })
-      .expect((res) => {
-        const error = new TargetHasOutdatedStepsException();
+        const error = new TargetNotInStatusException(TargetStatus.Active);
 
         expect(res.status).toBe(error.getStatus());
         expect(res.body.message).toBe(error.message);

@@ -51,6 +51,15 @@ export type ActivatedTargetResponse = {
   id: number;
 };
 
+export type CancelTargetPayload = {
+  targetId: number;
+  userId: string;
+};
+
+export type CancelledTargetResponse = {
+  id: number;
+};
+
 export type DeletedTargetPayload = {
   targetId: number;
   userId: string;

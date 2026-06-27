@@ -22,7 +22,7 @@ import { createTargetFactory } from './factories/targets.factory';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { StepsRepository } from 'src/modules/steps/steps.repository';
-import dayjs from 'dayjs';
+import { dayjs } from 'src/helpers/dayjs';
 import { StepNotFoundException } from 'src/modules/steps/exceptions/step-not-found.exception';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 import { TargetNotActiveException } from 'src/modules/steps/exceptions/target-not-active.exception';
