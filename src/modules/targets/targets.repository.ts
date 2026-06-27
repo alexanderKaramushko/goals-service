@@ -9,6 +9,7 @@ import {
   UpdateTargetStatusRepositoryPayload,
   GetTargetById,
   GetTargetByIdAndUserIdPayload,
+  DeleteTargetRepositoryPayload,
 } from 'src/modules/targets/targets.repository.types';
 
 @Injectable()
@@ -202,8 +203,8 @@ export class TargetsRepository {
   }
 
   async updateTargetStatus(
-    poolClient: PoolClient | undefined,
     payload: UpdateTargetStatusRepositoryPayload,
+    poolClient?: PoolClient,
   ): Promise<TargetRaw | undefined> {
     const query = `
       UPDATE targets
@@ -237,6 +238,47 @@ export class TargetsRepository {
       const [target] = await this.dbService.query<TargetRaw>(query, [
         payload.targetId,
         payload.status,
+      ]);
+
+      return target;
+    }
+  }
+
+  async deleteTarget(
+    payload: DeleteTargetRepositoryPayload,
+    poolClient?: PoolClient,
+  ): Promise<TargetRaw | undefined> {
+    const query = `
+      DELETE FROM targets
+      WHERE id = $1 AND user_id = $2
+      RETURNING
+        id,
+        user_id,
+        title,
+        description,
+        status,
+        should_be_completed_at::text AS should_be_completed_at,
+        completed_at::text AS completed_at,
+        closed_at,
+        created_at,
+        updated_at,
+        result_comment,
+        can_assign_reward;
+    `;
+
+    if (poolClient) {
+      const result = await poolClient.query<TargetRaw>(query, [
+        payload.targetId,
+        payload.userId,
+      ]);
+
+      const [target] = result.rows;
+
+      return target;
+    } else {
+      const [target] = await this.dbService.query<TargetRaw>(query, [
+        payload.targetId,
+        payload.userId,
       ]);
 
       return target;

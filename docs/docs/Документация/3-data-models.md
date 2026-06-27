@@ -31,7 +31,7 @@ erDiagram
     }
     STEPS {
       int id PK
-      int target_id FK "NULL, ON DELETE SET NULL"
+      int target_id FK "NULL, ON DELETE CASCADE"
       string title
       string description
       date should_be_completed_at

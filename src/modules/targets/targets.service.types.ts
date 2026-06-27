@@ -50,3 +50,12 @@ export type ActivateTargetPayload = {
 export type ActivatedTargetResponse = {
   id: number;
 };
+
+export type DeletedTargetPayload = {
+  targetId: number;
+  userId: string;
+};
+
+export type DeletedTargetResponse = {
+  id: number;
+};

@@ -15,6 +15,7 @@ import {
   CompleteTargetDto,
   CreatedTargetResponseDto,
   CreateTargetDto,
+  DeletedTargetResponseDto,
   TargetsResponseDto,
 } from 'src/modules/targets/targets.dto';
 import { TargetsService } from 'src/modules/targets/targets.service';
@@ -100,6 +101,22 @@ export class TargetsController {
       targetId,
       userId: request.user?.id as string,
       userTimezone: request.userTimezone as string,
+    });
+  }
+
+  @ApiOperation({ summary: 'Удалить не запущенную цель' })
+  @ApiResponse({
+    description: 'Цель удалена',
+    type: DeletedTargetResponseDto,
+  })
+  @Post('delete/:targetId')
+  deleteTarget(
+    @Request() request: ExpressRequest,
+    @Param('targetId', ParseIntPipe) targetId: number,
+  ) {
+    return this.targetsService.delete({
+      targetId,
+      userId: request.user?.id as string,
     });
   }
 }
