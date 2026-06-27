@@ -103,3 +103,11 @@ export class CompletedStepResponseDto {
   @IsDateString()
   completedAt: string | null;
 }
+
+export class DeletedStepResponseDto {
+  @ApiProperty({
+    example: 1,
+    description: 'Id удаленного шага',
+  })
+  id: number;
+}

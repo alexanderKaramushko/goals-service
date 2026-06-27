@@ -14,10 +14,13 @@ import {
   CompletedStepResponse,
   CompleteStepPayload,
   CreateStepPayload,
+  DeletedStepResponse,
+  DeleteStepPayload,
   GetStepsPayload,
   StepCreatedResponse,
   StepsListItem,
 } from 'src/modules/steps/steps.service.types';
+import { TargetNotInStatusException } from '../targets/exceptions/target-not-in-status.exception';
 
 @Injectable()
 export class StepsService {
@@ -103,6 +106,12 @@ export class StepsService {
     };
   }
 
+  toDeletedResponse(stepRaw: StepRaw): DeletedStepResponse {
+    return {
+      id: stepRaw.id,
+    };
+  }
+
   async completeStep(
     payload: CompleteStepPayload,
   ): Promise<CompletedStepResponse> {
@@ -178,6 +187,59 @@ export class StepsService {
       await poolClient.query('COMMIT');
 
       return this.toCompletedResponse(completedStep);
+    } catch (error) {
+      await poolClient.query('ROLLBACK');
+      throw error;
+    } finally {
+      poolClient.release();
+    }
+  }
+
+  async deleteStep(payload: DeleteStepPayload): Promise<DeletedStepResponse> {
+    const poolClient = await this.dbService.getPoolClient();
+
+    try {
+      await poolClient.query('BEGIN');
+
+      const step = await this.stepsRepository.getStepForUserId(
+        {
+          stepId: payload.stepId,
+          userId: payload.userId,
+        },
+        poolClient,
+      );
+
+      if (!step) {
+        throw new StepNotFoundException();
+      }
+
+      const target = await this.stepsRepository.getTargetByStepId(poolClient, {
+        stepId: payload.stepId,
+        userId: payload.userId,
+      });
+
+      if (!target) {
+        throw new StepNotFoundException();
+      }
+
+      if (target.status !== TargetStatus.Created) {
+        throw new TargetNotInStatusException(TargetStatus.Created);
+      }
+
+      const deletedStep = await this.stepsRepository.deleteStep(
+        {
+          stepId: payload.stepId,
+        },
+        poolClient,
+      );
+
+      if (!deletedStep) {
+        throw new BadRequestException('Не удалось удалить шаг');
+      }
+
+      await poolClient.query('COMMIT');
+
+      return this.toDeletedResponse(deletedStep);
     } catch (error) {
       await poolClient.query('ROLLBACK');
       throw error;
