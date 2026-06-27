@@ -50,5 +50,7 @@ async function bootstrap() {
   await app.listen(process.env.SERVICE_PORT ?? 3002);
 }
 
+console.log('wwww');
+
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
