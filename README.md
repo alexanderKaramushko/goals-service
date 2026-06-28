@@ -10,16 +10,16 @@
 [JSON-api](http://localhost:3000/api-json) <br />
 [Проектная документация (ТЗ)](https://goals-service-alpha.vercel.app) <br />
 
-## prod
-
-[Docker Image](https://hub.docker.com/r/melkor73/goals-service) <br />
-[Сервер](https://goals.melkor-apps.ru/api/v1/)
-
 ### Туннелирование через tuna
 
 `brew install yuccastream/tap/tuna` <br />
 `tuna config save-token <token>` <br />
 `tuna http 3000`
+
+## prod
+
+[Docker Image](https://hub.docker.com/r/melkor73/goals-service) <br />
+[Сервер](https://goals.melkor-apps.ru/api/v1/)
 
 ### Документация
 
