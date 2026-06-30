@@ -24,6 +24,6 @@ RUN npm install -g pnpm && pnpm install --prod --frozen-lockfile
 
 COPY --from=builder /app/dist ./dist
 
-COPY /migrations ./
+COPY /migrations ./migrations
 
 CMD ["node", "dist/src/main.js"]

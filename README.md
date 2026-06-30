@@ -10,16 +10,16 @@
 [JSON-api](http://localhost:3000/api-json) <br />
 [Проектная документация (ТЗ)](https://goals-service-alpha.vercel.app) <br />
 
-## prod
-
-[Docker Image](https://hub.docker.com/repository/docker/melkor73/goals-service/tags/latest/sha256-1a1c812e1074b49f085fd75924eda87072e3a6c0fd3f82a0eaf7560891a9be07) <br />
-[Сервер](https://goals.melkor-apps.ru/api/v1/)
-
 ### Туннелирование через tuna
 
 `brew install yuccastream/tap/tuna` <br />
 `tuna config save-token <token>` <br />
 `tuna http 3000`
+
+## prod
+
+[Docker Image](https://hub.docker.com/r/melkor73/goals-service) <br />
+[Сервер](https://goals.melkor-apps.ru/api/v1/)
 
 ### Документация
 
@@ -102,6 +102,9 @@ pnpm start
 * [x] ~~Поднять стенд с документацией~~ [Стенд на Vercel](https://goals-service-alpha.vercel.app)
 * [ ] Настроить версионирование и историю изменений *
 * [ ] Настроить деплой релизов и выпустить бета-версию *
+* [ ] Настроить автопродление сертификатов
+* [ ] Настроить бэкапы
+* [ ] Настроить миграции на VPS с инструкцией ручного запуска
 
 Функиональность:
 
