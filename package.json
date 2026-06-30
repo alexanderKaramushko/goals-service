@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "nest build",
+    "publish:docker": "chmod +x ./scripts/build.sh && pnpm ./scripts/build.sh",
     "docs:start": "pnpm --dir docs start",
     "docs:build": "pnpm --dir docs build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
