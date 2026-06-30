@@ -26,4 +26,6 @@ COPY --from=builder /app/dist ./dist
 
 COPY /migrations ./migrations
 
+COPY /node-pg-migrate.config.mjs ./
+
 CMD ["node", "dist/src/main.js"]
