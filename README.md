@@ -25,7 +25,7 @@
 
 Продление сертификата: `docker compose run --rm goals-certbot certonly --webroot --webroot-path=./certbot/www --email a.morgoth.b@gmail.com --agree-tos --no-eff-email -d goals.melkor-apps.ru` <br />
 
-cron: `24 3,15 * * * ~/apps/goals-app/cert-renew.sh >> ~/apps/goals-app/logs/certbot_cron.log 2>&1`
+Автопродление сертификата: `24 3,15 * * * ~/apps/goals-app/cert-renew.sh >> ~/apps/goals-app/logs/certbot_cron.log 2>&1`
 
 ### Документация
 
