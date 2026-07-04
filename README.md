@@ -20,8 +20,11 @@
 
 [Docker Image](https://hub.docker.com/r/melkor73/goals-service) <br />
 [Сервер](https://goals.melkor-apps.ru/api/v1/) <br />
+
 Запуск миграций после обновления образа: `docker compose run --rm goals-service-migrations npx node-pg-migrate --config node-pg-migrate.config.mjs up` <br />
-Продление сертификата: `docker compose run --rm goals-certbot certonly --webroot --webroot-path=./certbot/www --email a.morgoth.b@gmail.com --agree-tos --no-eff-email -d goals.melkor-apps.ru`
+
+Продление сертификата: `docker compose run --rm goals-certbot certonly --webroot --webroot-path=./certbot/www --email a.morgoth.b@gmail.com --agree-tos --no-eff-email -d goals.melkor-apps.ru` <br />
+cron: `24 3,15 * * * ~/apps/goals-app/cert-renew.sh >> ~/apps/goals-app/logs/certbot_cron.log 2>&1`
 
 ### Документация
 
