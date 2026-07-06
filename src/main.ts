@@ -47,6 +47,8 @@ async function bootstrap() {
     }),
   );
 
+  app.enableShutdownHooks();
+
   await app.listen(process.env.SERVICE_PORT ?? 3002);
 }
 
