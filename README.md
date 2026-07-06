@@ -19,7 +19,17 @@
 ## prod
 
 [Docker Image](https://hub.docker.com/r/melkor73/goals-service) <br />
-[Сервер](https://goals.melkor-apps.ru/api/v1/)
+[Сервер](https://goals.melkor-apps.ru/api/v1/) <br />
+
+Запуск миграций после обновления образа: `docker compose run --rm goals-service-migrations npx node-pg-migrate --config node-pg-migrate.config.mjs up` <br />
+
+Продление сертификата: `docker compose run --rm goals-certbot certonly --webroot --webroot-path=./certbot/www --email a.morgoth.b@gmail.com --agree-tos --no-eff-email -d goals.melkor-apps.ru` <br />
+
+Автопродление сертификата: `24 3,15 * * * $HOME/apps/goals-app/cert-renew.sh >> $HOME/apps/goals-app/logs/certbot_cron.log 2>&1`
+
+Автобэкапы: `0 3 * * * $HOME/app/goals-app/goals-backup.sh >> $HOME/apps/goals-app/logs/backup.log 2>&1` <br />
+
+Восстановление бэкапа: `docker compose exec goals-postgres pg_restore -h localhost -U goals-user -d goals /var/lib/backups/<backup>.dump`
 
 ### Документация
 
