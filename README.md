@@ -19,7 +19,7 @@
 ## prod
 
 [Docker Image](https://hub.docker.com/r/melkor73/goals-service) <br />
-[Сервер](https://goals.melkor-apps.ru/api/v1/) <br />
+[Сервер](https://goals.melkor-apps.ru/api/v1/api) <br />
 
 Запуск миграций после обновления образа: `docker compose run --rm goals-service-migrations npx node-pg-migrate --config node-pg-migrate.config.mjs up` <br />
 
