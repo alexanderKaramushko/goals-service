@@ -6,6 +6,6 @@ export class AppController {
   @ApiResponse({ status: 200, description: 'OK' })
   @Get('health')
   test() {
-    return 'OK!';
+    return 'OK';
   }
 }
