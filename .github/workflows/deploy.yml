@@ -21,4 +21,5 @@ jobs:
             docker compose pull goals-service
             docker compose run --rm goals-service-migrations npx node-pg-migrate --config node-pg-migrate.config.mjs up
             docker compose up -d --no-deps goals-service
+            docker compose restart goals-nginx
             docker compose ps
