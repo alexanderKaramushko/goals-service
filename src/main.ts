@@ -49,7 +49,10 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
-  await app.listen(process.env.SERVICE_PORT ?? 3002);
+  await app.listen(
+    Number.parseInt(process.env.SERVICE_PORT ?? '3000', 10),
+    process.env.SERVICE_HOST ?? '0.0.0.0',
+  );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
