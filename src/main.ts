@@ -39,7 +39,7 @@ async function bootstrap() {
   });
 
   SwaggerModule.setup(
-    'health',
+    'health/docs',
     app,
     SwaggerModule.createDocument(app, documentBuilder.build(), {
       include: [AppModule],
@@ -47,7 +47,7 @@ async function bootstrap() {
   );
 
   SwaggerModule.setup(
-    'api',
+    'api/v1/docs',
     app,
     SwaggerModule.createDocument(app, secureDocumentBuilder.build(), {
       include: [TargetsModule, StepsModule, RewardsModule],
