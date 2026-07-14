@@ -31,6 +31,15 @@
 
 Восстановление бэкапа: `docker compose exec goals-postgres pg_restore -h localhost -U goals-user -d goals /var/lib/backups/<backup>.dump`
 
+## Релиз
+
+Происходит из main после сборки CI-workflow.
+
+Порядок действий:
+1. Дождаться успешного завершения CI-workflow
+2. Провести ручной деплой, запустив deploy-workflow
+3. Создать Github-релиз с релизным Docker-тегом через release-workflow
+
 ### Документация
 
 - Техническая документация сервиса: текущий `README.md`.
@@ -116,7 +125,7 @@ pnpm start
 * [x] ~~Настроить миграции на VPS с инструкцией ручного запуска~~
 * [x] ~~Настроить healthchecks liveliness для goals-service~~
 * [x] ~~Настроить деплой релизов*~~
-* [ ] Настроить SHA-релизы c выпуском тэгов *
+* [x] ~~Настроить SHA-релизы c выпуском тэгов~~
 * [ ] выпустить бета-версию *
 * [ ] Настроить healthchecks liveliness для goals-auth
 
