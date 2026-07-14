@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from 'src/app.module';
 import cookieParser from 'cookie-parser';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { createDocumentBuilderFactory } from 'src/infra/swagger';
 import { SwaggerModule } from '@nestjs/swagger';
 import { TargetsModule } from 'src/modules/targets/targets.module';
@@ -14,6 +14,13 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.useGlobalPipes(new ValidationPipe());
+
+  app.setGlobalPrefix('api');
+
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
 
   const documentBuilder = createDocumentBuilderFactory({
     title: 'Health service',
