@@ -43,17 +43,17 @@ export class CreatedStepResponseDto {
     type: String,
     nullable: true,
   })
-  closed_at: string | null;
+  closedAt: string | null;
 
   @ApiProperty({ example: '2026-02-14T10:45:30.000Z' })
-  created_at: string;
+  createdAt: string;
 
   @ApiProperty({
     example: null,
     type: String,
     nullable: true,
   })
-  completed_at: string | null;
+  completedAt: string | null;
 }
 
 export class StepsResponseDto {
