@@ -311,7 +311,9 @@ export class TargetsRepository {
     `;
 
     if (poolClient) {
-      const result = await poolClient.query<TargetRaw>(query, [payload.targetId]);
+      const result = await poolClient.query<TargetRaw>(query, [
+        payload.targetId,
+      ]);
 
       const [target] = result.rows;
 

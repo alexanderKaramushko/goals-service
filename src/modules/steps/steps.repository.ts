@@ -209,7 +209,9 @@ export class StepsRepository {
 
       return step;
     } else {
-      const [step] = await this.dbService.query<StepRaw>(query, [payload.stepId]);
+      const [step] = await this.dbService.query<StepRaw>(query, [
+        payload.stepId,
+      ]);
 
       return step;
     }
