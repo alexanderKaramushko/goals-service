@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  ServiceUnavailableException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -29,9 +30,17 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    const [authProviderUser] = await this.authMicroserviceService.verifyJwt(
-      request.cookies.jwt,
-    );
+    let authProviderUser;
+
+    try {
+      [authProviderUser] = await this.authMicroserviceService.verifyJwt(
+        request.cookies.jwt,
+      );
+    } catch (error) {
+      throw new ServiceUnavailableException(
+        `Ошибка проверки токена: ${error.message}`,
+      );
+    }
 
     if (authProviderUser) {
       const [user] =

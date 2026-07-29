@@ -31,4 +31,4 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   ],
   exports: [AuthMicroserviceService],
 })
-export class AuthMicroserviceModule {}
+export class AuthMicroServiceModule {}

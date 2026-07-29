@@ -7,6 +7,7 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { TargetsModule } from 'src/modules/targets/targets.module';
 import { StepsModule } from 'src/modules/steps/steps.module';
 import { RewardsModule } from 'src/modules/rewards/rewards.module';
+import { UsersModule } from './modules/users/users.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -50,7 +51,7 @@ async function bootstrap() {
     'api/v1/docs',
     app,
     SwaggerModule.createDocument(app, secureDocumentBuilder.build(), {
-      include: [TargetsModule, StepsModule, RewardsModule],
+      include: [TargetsModule, StepsModule, RewardsModule, UsersModule],
     }),
   );
 

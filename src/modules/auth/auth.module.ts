@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
-import { AuthMicroserviceModule } from 'src/modules/microservices/auth/auth-microservice.module';
-import { UsersModule } from '../users/users.module';
+import { AuthMicroServiceModule } from 'src/modules/microservices/auth/auth-microservice.module';
+import { UsersModule } from 'src/modules/users/users.module';
 
 @Module({
-  imports: [AuthMicroserviceModule, UsersModule],
+  imports: [AuthMicroServiceModule, forwardRef(() => UsersModule)],
   providers: [AuthGuard],
-  exports: [AuthGuard, AuthMicroserviceModule, UsersModule],
+  exports: [AuthGuard, AuthMicroServiceModule],
 })
 export class AuthModule {}

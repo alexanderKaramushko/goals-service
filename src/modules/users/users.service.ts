@@ -4,6 +4,7 @@ import { UserRaw } from 'src/modules/users/users.types';
 import {
   CreateOrUpdateUserPayload,
   CreatedUserResponse,
+  UserListItem,
 } from 'src/modules/users/users.service.types';
 
 @Injectable()
@@ -23,6 +24,20 @@ export class UsersService {
       id: userRaw.id,
       fullName: userRaw.full_name,
       createdAt: userRaw.created_at!,
+    };
+  }
+
+  async getAllUsers(): Promise<UserListItem[]> {
+    const users = await this.usersRepository.getAllUsers();
+
+    return users.map((user) => this.toListItem(user));
+  }
+
+  toListItem(userRaw: UserRaw): UserListItem {
+    return {
+      id: userRaw.id,
+      fullName: userRaw.full_name,
+      createdAt: userRaw.created_at,
     };
   }
 }

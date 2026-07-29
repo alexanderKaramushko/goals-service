@@ -5,9 +5,10 @@ import { AuthModule } from 'src/modules/auth/auth.module';
 import { UsersModule } from 'src/modules/users/users.module';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { ConfigModule } from '@nestjs/config';
+import { DbModule } from 'src/modules/db/db.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ConfigModule],
+  imports: [AuthModule, UsersModule, ConfigModule, DbModule],
   controllers: [TargetsController],
   providers: [TargetsService, TargetsRepository],
   exports: [TargetsRepository],

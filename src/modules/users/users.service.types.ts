@@ -11,3 +11,9 @@ export type CreatedUserResponse = {
   fullName: string;
   createdAt: string;
 };
+
+export type UserListItem = {
+  id: string;
+  fullName: string;
+  createdAt: string | null;
+};

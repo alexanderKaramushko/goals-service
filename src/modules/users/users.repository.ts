@@ -21,4 +21,8 @@ export class UsersRepository {
       [payload.subjectId, payload.name],
     );
   }
+
+  async getAllUsers(): Promise<UserRaw[]> {
+    return this.dbService.query(`SELECT * from users;`, []);
+  }
 }
