@@ -1,138 +1,257 @@
-# goals-service
+# Goals Service
 
-Сервис управления целями.
+Backend-сервис для социальной системы целей и наград.
+Он хранит пользователей, цели, шаги и награды, применяет правила жизненного цикла целей и предоставляет HTTP API для работы с ними.
 
-## dev-разработка
+Сервис не выполняет аутентификацию самостоятельно: JWT из cookie проверяется отдельным auth-микросервисом,
+после чего пользователь создаётся или обновляется в локальной базе.
 
-[Service](http://localhost:3000) <br />
-[Swagger Health service](http://localhost:3000/health) <br />
-[Swagger Goals service](http://localhost:3000/api) <br />
-[JSON-api](http://localhost:3000/api-json) <br />
-[Проектная документация (ТЗ)](https://goals-service-alpha.vercel.app) <br />
+## Возможности
 
-### Туннелирование через tuna
+Актуальный список задач и планы развития находятся в проекте [GitHub](https://github.com/users/alexanderKaramushko/projects/2).
 
-`brew install yuccastream/tap/tuna` <br />
-`tuna config save-token <token>` <br />
-`tuna http 3000`
+## Архитектура
 
-## prod
+Проект следует слоистой схеме:
 
-[Docker Image](https://hub.docker.com/r/melkor73/goals-service) <br />
-[Open API](https://goals.melkor-apps.ru/api/v1/docs) <br />
+```text
+HTTP request
+    ↓
+Controller
+    ↓
+Service
+    ↓
+Repository
+    ↓
+DbService / pg
+    ↓
+PostgreSQL
+```
 
-Запуск миграций после обновления образа: `docker compose run --rm goals-service-migrations npx node-pg-migrate --config node-pg-migrate.config.mjs up` <br />
+- `Controller` принимает HTTP-запросы, запускает валидацию DTO и передаёт данные в сервис.
+- `Service` содержит бизнес-правила и управляет транзакциями для составных операций.
+- `Repository` содержит параметризованный SQL.
+- `DbService` управляет пулом соединений `pg`.
 
-Продление сертификата: `docker compose run --rm goals-certbot certonly --webroot --webroot-path=./certbot/www --email a.morgoth.b@gmail.com --agree-tos --no-eff-email -d goals.melkor-apps.ru` <br />
+Защищённые маршруты используют cookie `jwt`.
 
-Автопродление сертификата: `24 3,15 * * * $HOME/apps/goals-app/cert-renew.sh >> $HOME/apps/goals-app/logs/certbot_cron.log 2>&1`
+## Технологический стек
 
-Автобэкапы: `0 3 * * * $HOME/app/goals-app/goals-backup.sh >> $HOME/apps/goals-app/logs/backup.log 2>&1` <br />
+- Node.js `>=20.11` (Node.js 22 в `.nvmrc` и CI) и TypeScript;
+- NestJS 11 и Express;
+- PostgreSQL 17 и драйвер `pg`;
+- `node-pg-migrate` и SQL-миграции;
+- Swagger/OpenAPI через `@nestjs/swagger`;
+- `class-validator` и `class-transformer`;
+- Day.js для дат и таймзон;
+- Jest, Supertest и Testcontainers;
+- Docker, Docker Compose и pnpm;
+- Docusaurus для проектной документации.
 
-Восстановление бэкапа: `docker compose exec goals-postgres pg_restore -h localhost -U goals-user -d goals /var/lib/backups/<backup>.dump`
+## Быстрый запуск
+
+### Требования
+
+- Node.js `>=20.11`; рекомендуемая версия из `.nvmrc` — `22.14.0`;
+- pnpm 10;
+- Docker с поддержкой Docker Compose;
+- доступный auth-микросервис для проверки JWT.
+
+### Настройка окружения
+
+Скопировать `.env.example` в `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Основные переменные:
+
+| Переменная                                                     | Назначение                                                                              |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `NODE_ENV`                                                     | Режим запуска приложения                                                                |
+| `SERVICE_HOST`, `SERVICE_PORT`                                 | Адрес и порт HTTP-сервера                                                               |
+| `POSTGRES_DB_HOST`, `POSTGRES_DB_PORT`                         | Адрес PostgreSQL                                                                        |
+| `POSTGRES_DB_NAME`, `POSTGRES_DB_USER`, `POSTGRES_DB_PASSWORD` | Параметры базы данных                                                                   |
+| `DATABASE_URL`                                                 | Строка подключения к PostgreSQL; имеет приоритет в приложении и используется миграциями |
+| `MICROSERVICE_HOST`, `MICROSERVICE_PORT`                       | Адрес auth-микросервиса                                                                 |
+| `MAX_OUTDATED_STEPS_PERCENTAGE`                                | Максимальная допустимая доля просроченных шагов для назначения награды                  |
+
+Установите версию Node.js и зависимости:
+
+```bash
+nvm use
+pnpm install --frozen-lockfile
+```
+
+### Запуск через Docker
+
+Текущий `docker-compose.yml` запускает только PostgreSQL и публикует его на порту `54320` хоста:
+
+```bash
+docker compose up -d postgres
+pnpm migrate:init
+```
+
+После этого приложение запускается локально, как описано ниже. Auth-микросервис в compose-файл не входит и должен быть доступен отдельно.
+
+Остановить локальную базу:
+
+```bash
+docker compose down
+```
+
+Production-образ приложения собирается из корневого `Dockerfile`:
+
+```bash
+docker build -t goals-service .
+```
+
+Compose-конфигурации для запуска самого образа приложения в репозитории нет.
+
+### Локальный запуск
+
+После настройки `.env`, запуска PostgreSQL, применения миграций и запуска auth-микросервиса выполните:
+
+```bash
+pnpm start:dev
+```
+
+#### Туннелирование через tuna
+
+```bash
+brew install yuccastream/tap/tuna
+tuna config save-token <token>
+tuna http 3000
+```
+
+#### Отладка
+
+Через сокет в браузере:
+
+1. Запустить приложение с WebSocket для отладки: `pnpm start:debug`.
+2. Перейти в `chrome://inspect/#devices`.
+3. Нажать **Inspect** рядом с процессом NestJS.
+
+Через подключение к процессу Node.js в VS Code:
+
+1. Запустить приложение командой `pnpm start:debug`.
+2. Запустить конфигурацию «Дебаг с подключением к процессу Node JS» на вкладке Run and Debug.
+3. Убедиться, что в консоли процесса появилась строка `Debugger attached`.
+
+## Миграции
+
+Миграции находятся в каталоге `migrations/`, пишутся на SQL и используют `DATABASE_URL`.
+
+Применить все ожидающие миграции:
+
+```bash
+pnpm migrate:init
+```
+
+Откатить последнюю миграцию:
+
+```bash
+pnpm migrate:test:down
+```
+
+Создать SQL-файл новой миграции:
+
+```bash
+pnpm migrate:create -- <migration-name>
+```
+
+## Тестирование
+
+```bash
+pnpm test:unit
+```
+
+Запускает unit-тесты из `src/**/*.spec.ts`.
+
+```bash
+pnpm test:e2e
+```
+
+Запускает e2e-тесты из `test/`. Тесты бизнес-сценариев поднимают PostgreSQL 17 через Testcontainers, применяют миграции и требуют работающий Docker daemon.
+
+```bash
+pnpm test:cov
+```
+
+Запускает Jest с отчётом покрытия в `coverage/`.
+
+## Документация
+
+- [Бизнес-правила](https://goals-service-alpha.vercel.app/business/business-rules)
+- [Системная спецификация](https://goals-service-alpha.vercel.app/system/system-specification)
+- [Модель данных](https://goals-service-alpha.vercel.app/system/data-model)
+- [Обзор архитектуры](https://goals-service-alpha.vercel.app/architecture/overview)
+- [ADR: E2E-тестирование с Testcontainers](https://goals-service-alpha.vercel.app/architecture/adr/testing)
+
+После локального запуска доступны:
+
+- [Swagger основного API](http://localhost:3000/api/v1/docs);
+- [OpenAPI JSON](http://localhost:3000/api/v1/docs-json);
+- [Swagger health API](http://localhost:3000/health/docs);
+- [health endpoint](http://localhost:3000/api/v1/app/health).
+
+Production-ресурсы:
+
+- [Service](https://goals.melkor-apps.ru/api/v1);
+- [Swagger Goals service](https://goals.melkor-apps.ru/api/v1/docs);
+- [JSON-api](https://goals.melkor-apps.ru/api/v1/docs-json);
+- [Проектная документация (ТЗ)](https://goals-service-alpha.vercel.app);
+- [Docker Image](https://hub.docker.com/r/melkor73/goals-service);
+- [Open API](https://goals.melkor-apps.ru/api/v1/docs).
+
+Документацию можно открыть локально:
+
+```bash
+pnpm --dir docs install --frozen-lockfile
+pnpm docs:start
+```
+
+## Эксплуатация
+
+Команды ниже предполагают внешнюю production-конфигурацию Docker Compose с
+сервисами `goals-service-migrations`, `goals-certbot` и `goals-postgres`. Эта
+конфигурация в текущий репозиторий не входит.
+
+Запуск миграций после обновления образа:
+
+```bash
+docker compose run --rm goals-service-migrations npx node-pg-migrate --config node-pg-migrate.config.mjs up
+```
+
+Продление сертификата:
+
+```bash
+docker compose run --rm goals-certbot certonly --webroot --webroot-path=./certbot/www --email a.morgoth.b@gmail.com --agree-tos --no-eff-email -d goals.melkor-apps.ru
+```
+
+Автопродление сертификата:
+
+```cron
+24 3,15 * * * $HOME/apps/goals-app/cert-renew.sh >> $HOME/apps/goals-app/logs/certbot_cron.log 2>&1
+```
+
+Автобэкапы:
+
+```cron
+0 3 * * * $HOME/app/goals-app/goals-backup.sh >> $HOME/apps/goals-app/logs/backup.log 2>&1
+```
+
+Восстановление бэкапа:
+
+```bash
+docker compose exec goals-postgres pg_restore -h localhost -U goals-user -d goals /var/lib/backups/<backup>.dump
+```
 
 ## Релиз
 
-Происходит из main после сборки CI-workflow.
+Релиз выполняется из ветки `main` после успешной сборки CI workflow.
 
-Порядок действий:
-1. Дождаться успешного завершения CI-workflow
-2. Провести ручной деплой, запустив deploy-workflow
-3. Создать Github-релиз с релизным Docker-тегом через release-workflow
-
-### Документация
-
-- Техническая документация сервиса: текущий `README.md`.
-- Проектная документация (ТЗ): Docusaurus-сайт в папке `docs/`.
-
-Запуск Docusaurus локально:
-
-```bash
-cd docs
-pnpm install
-pnpm start
-```
-
-### Скрипты
-
-Перед началом работы: `nvm use`, так как требуется
-версия NodeJS с нативной поддержкой ESM.
-
-| Скрипт | Описание |
-| --- | --- |
-| `build` | Собирает проект в папку `dist`. |
-| `publish:docker` | Публикация образа в docker hub с указанием версии. |
-| `format` | Форматирует TypeScript-файлы в `src` и `test` через Prettier. |
-| `start` | Запускает приложение в обычном режиме через Nest. |
-| `start:dev` | Запускает приложение в режиме разработки с автоперезапуском. |
-| `start:debug` | Запускает приложение в debug-режиме с автоперезапуском. |
-| `start:prod` | Запускает собранную production-версию из `dist/main`. |
-| `lint` | Проверяет и автоматически исправляет проблемы линтинга ESLint. |
-| `test` | Запускает unit-тесты Jest. |
-| `test:watch` | Запускает тесты Jest в watch-режиме. |
-| `test:cov` | Запускает тесты и формирует отчет покрытия. |
-| `test:debug` | Запускает Jest в режиме отладки (`--runInBand`). |
-| `test:e2e` | Запускает e2e-тесты с конфигом `test/jest-e2e.json`. |
-| `migrate:create` | Создает новый SQL-файл миграции через `node-pg-migrate`. |
-| `migrate:init` | Применяет миграции вверх (`up`) к базе данных. |
-| `migrate:test:down` | Откатывает последнюю миграцию (`down`). |
-
-### Отладка
-
-**Через сокет в браузере**
-
-1. Запустить веб-сокет для отладки: `start:debug` <br />
-2. Перейти в chrome://inspect/#devices <br />
-3. Нажать Inspect около директории с NestJS <br />
-
-**Через подключение к процессу Node JS в VS Code**
-
-1. Запустить разработку в режиме отладки V8: `start:debug` <br />
-2. Запустить дебаггер через вкладку дебаггинга VS Code <br />
-3. В консоли с запущенным Node JS процессом должна появиться надпись "Debugger attached".
-
-### TODO и техдолг
-
-Код:
-* [x] ~~Добавить валидации для дат у цели~~
-* [x] ~~Вынести SQL-запросы в Repository *~~
-* [x] ~~Добавить seed factory для наполнения данными БД *~~
-* [x] ~~Провести рефакторинг создания и получения пользователя: удалить UserCreateInterceptor, добавить UsersService.getOrCreate(request.authUser) *~~
-* [x] ~~Добавить upsert при создании пользователя *~~ 
-* [x] ~~Добавить уникальный индекс даты завершения шага~~
-* [x] ~~Сделать передачу дат PostgreSQL -> pg в текстовом формате через ::text *~~
-* [ ] Добавить проверку создания шага только на черновике цели *
-* [ ] Изменить ручку создания шага на создание множественных шагов *
-* [ ] Добавить получение пользователя по id *
-* [ ] Добавить получение пользователей *
-* [ ] Возвращать только один элемент вместо массива в ручках на получение одной записи
-* [ ] Исследовать кэширование GET-запросов (например, через Redis)
-* [ ] добавить недостающие constraint, например, на уникальность
-
-Качество:
-* [x] ~~Исследовать возможность добавления предтестов на проверку наличия всех моков модулей,
-      чтобы максимально изолировать тесты~~ **Добавлен автомокинг**
-* [x] ~~Подключить [testcontainers](https://testcontainers.com/) *~~
-* [ ] Исследовать пользу от введения мутационного тестирования
-* [ ] Добавить юнит-тесты на проверку выходных данных методов сервисов
-* [x] ~~Добавить автогенерацию моков на основе схем OpenAPI~~ **Добавлена генерация моков src/mocks**
-* [ ] Подключить SonarQube или что-то подобное для shift left
-
-Надежность:
-* [ ] Добавить базовый сбор метрик в Prometheus
-* [ ] Добавить базовый логгинг
-
-Другое:
-* [x] ~~Поднять стенд с документацией~~ [Стенд на Vercel](https://goals-service-alpha.vercel.app)
-* [x] ~~Настроить автопродление сертификатов~~
-* [x] ~~Настроить бэкапы~~
-* [x] ~~Настроить миграции на VPS с инструкцией ручного запуска~~
-* [x] ~~Настроить healthchecks liveliness для goals-service~~
-* [x] ~~Настроить деплой релизов*~~
-* [x] ~~Настроить SHA-релизы c выпуском тэгов~~
-* [ ] выпустить бета-версию *
-* [ ] Настроить healthchecks liveliness для goals-auth
-
-Функиональность:
-
-* [ ] Возможно запускать цель можно только если создано не менее 3-х шагов?
+1. Дождаться успешного завершения CI workflow.
+2. Выполнить ручной деплой через `deploy` workflow.
+3. Создать GitHub Release с релизным Docker-тегом через `release` workflow.
