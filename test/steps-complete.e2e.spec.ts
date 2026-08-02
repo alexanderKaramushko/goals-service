@@ -4,13 +4,6 @@ import { StepsModule } from 'src/modules/steps/steps.module';
 import { CompleteStepDto } from 'src/modules/steps/steps.dto';
 import { createTestingApp } from 'src/helpers/create-testing-app';
 import {
-  PostgreSqlContainer,
-  StartedPostgreSqlContainer,
-} from '@testcontainers/postgresql';
-import { Client } from 'pg';
-import { execSync } from 'child_process';
-import {
-  clearTables,
   createStepFactory,
   getStepFactory,
   setTargetStatusFactory,
@@ -30,48 +23,18 @@ import { StepAlreadyCompletedException } from 'src/modules/steps/exceptions/step
 import { StepDeadlineOutdatedException } from 'src/modules/steps/exceptions/step-deadline-outdated';
 import { StepDeadlineNotClosestException } from 'src/modules/steps/exceptions/step-deadline-not-closest';
 import { Provider } from 'src/modules/users/users.types';
+import { setupTestDatabase } from './utils/setupTestDatabase';
 
 describe('Steps (e2e) - /PUT steps/complete/:stepId', () => {
-  jest.setTimeout(60000);
-
   let app: INestApplication;
-
-  let postgresContainer: StartedPostgreSqlContainer;
-  let postgresClient: Client;
-
-  beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer(
-      'postgres:17-alpine',
-    ).start();
-
-    postgresClient = new Client({
-      connectionString: postgresContainer.getConnectionUri(),
-    });
-
-    process.env.DATABASE_URL = postgresContainer.getConnectionUri();
-
-    await postgresClient.connect();
-
-    execSync('pnpm run migrate:init', {
-      env: {
-        ...process.env,
-        DATABASE_URL: postgresContainer.getConnectionUri(),
-      },
-    });
-  });
 
   afterEach(async () => {
     if (app) {
       await app.close();
     }
-
-    await clearTables(postgresClient, ['steps']);
   });
 
-  afterAll(async () => {
-    await postgresClient?.end();
-    await postgresContainer?.stop();
-  });
+  setupTestDatabase(['steps']);
 
   const valid: CompleteStepDto = {
     resultComment: 'Посмотрел видео по правильному питанию',

@@ -3,13 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { StepsModule } from 'src/modules/steps/steps.module';
 import { CreateStepDto } from 'src/modules/steps/steps.dto';
 import { createTestingApp } from 'src/helpers/create-testing-app';
-import {
-  PostgreSqlContainer,
-  StartedPostgreSqlContainer,
-} from '@testcontainers/postgresql';
-import { Client } from 'pg';
-import { execSync } from 'child_process';
-import { clearTables, getStepFactory } from './factories';
+import { getStepFactory } from './factories';
 import { createTargetFactory } from './factories/targets.factory';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { UsersRepository } from 'src/modules/users/users.repository';
@@ -21,35 +15,10 @@ import { StepWithSameDeadlineExistsException } from 'src/modules/steps/exception
 import { StepDeadlineOutdatedException } from 'src/modules/steps/exceptions/step-deadline-outdated';
 import { Provider } from 'src/modules/users/users.types';
 import { dayjs } from 'src/helpers/dayjs';
+import { setupTestDatabase } from './utils/setupTestDatabase';
 
 describe('Steps (e2e) - /POST steps/create', () => {
-  jest.setTimeout(60000);
-
   let app: INestApplication;
-
-  let postgresContainer: StartedPostgreSqlContainer;
-  let postgresClient: Client;
-
-  beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer(
-      'postgres:17-alpine',
-    ).start();
-
-    postgresClient = new Client({
-      connectionString: postgresContainer.getConnectionUri(),
-    });
-
-    process.env.DATABASE_URL = postgresContainer.getConnectionUri();
-
-    await postgresClient.connect();
-
-    execSync('pnpm run migrate:init', {
-      env: {
-        ...process.env,
-        DATABASE_URL: postgresContainer.getConnectionUri(),
-      },
-    });
-  });
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -60,16 +29,13 @@ describe('Steps (e2e) - /POST steps/create', () => {
     if (app) {
       await app.close();
     }
-
-    await clearTables(postgresClient, ['steps']);
   });
 
-  afterAll(async () => {
+  afterAll(() => {
     jest.useRealTimers();
-
-    await postgresClient?.end();
-    await postgresContainer?.stop();
   });
+
+  setupTestDatabase(['steps']);
 
   const valid: CreateStepDto = {
     title: 'Test',

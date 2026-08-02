@@ -2,13 +2,6 @@ import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { createTestingApp } from 'src/helpers/create-testing-app';
 import {
-  PostgreSqlContainer,
-  StartedPostgreSqlContainer,
-} from '@testcontainers/postgresql';
-import { Client } from 'pg';
-import { execSync } from 'child_process';
-import {
-  clearTables,
   createStepFactory,
   getStepFactory,
   setTargetStatusFactory,
@@ -26,47 +19,18 @@ import { StepNotFoundException } from 'src/modules/steps/exceptions/step-not-fou
 import { TargetStatus } from 'src/modules/targets/targets.types';
 import { TargetNotInStatusException } from 'src/modules/targets/exceptions/target-not-in-status.exception';
 import { Provider } from 'src/modules/users/users.types';
+import { setupTestDatabase } from './utils/setupTestDatabase';
 
 describe('Steps (e2e) - /DELETE steps/delete/:stepId', () => {
-  jest.setTimeout(60000);
-
   let app: INestApplication;
-  let postgresContainer: StartedPostgreSqlContainer;
-  let postgresClient: Client;
-
-  beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer(
-      'postgres:17-alpine',
-    ).start();
-
-    postgresClient = new Client({
-      connectionString: postgresContainer.getConnectionUri(),
-    });
-
-    process.env.DATABASE_URL = postgresContainer.getConnectionUri();
-
-    await postgresClient.connect();
-
-    execSync('pnpm run migrate:init', {
-      env: {
-        ...process.env,
-        DATABASE_URL: postgresContainer.getConnectionUri(),
-      },
-    });
-  });
 
   afterEach(async () => {
     if (app) {
       await app.close();
     }
-
-    await clearTables(postgresClient, ['targets', 'users']);
   });
 
-  afterAll(async () => {
-    await postgresClient?.end();
-    await postgresContainer?.stop();
-  });
+  setupTestDatabase(['targets', 'users']);
 
   it('Валидация :stepId', async () => {
     app = await createTestingApp({

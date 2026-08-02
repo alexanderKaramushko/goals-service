@@ -3,13 +3,6 @@ import { INestApplication } from '@nestjs/common';
 import { TargetsModule } from 'src/modules/targets/targets.module';
 import { CreateTargetDto } from 'src/modules/targets/targets.dto';
 import { createTestingApp } from 'src/helpers/create-testing-app';
-import {
-  PostgreSqlContainer,
-  StartedPostgreSqlContainer,
-} from '@testcontainers/postgresql';
-import { Client } from 'pg';
-import { execSync } from 'child_process';
-import { clearTables } from './factories';
 import { UsersModule } from 'src/modules/users/users.module';
 import { createUserFactory } from './factories/users.factory';
 import { Provider } from 'src/modules/users/users.types';
@@ -17,34 +10,10 @@ import { UsersRepository } from 'src/modules/users/users.repository';
 import { getTargetFactory } from './factories/targets.factory';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import { dayjs } from 'src/helpers/dayjs';
+import { setupTestDatabase } from './utils/setupTestDatabase';
 
 describe('Targets (e2e) – /POST targets/create', () => {
-  jest.setTimeout(60000);
-
   let app: INestApplication;
-  let postgresContainer: StartedPostgreSqlContainer;
-  let postgresClient: Client;
-
-  beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer(
-      'postgres:17-alpine',
-    ).start();
-
-    postgresClient = new Client({
-      connectionString: postgresContainer.getConnectionUri(),
-    });
-
-    process.env.DATABASE_URL = postgresContainer.getConnectionUri();
-
-    await postgresClient.connect();
-
-    execSync('pnpm run migrate:init', {
-      env: {
-        ...process.env,
-        DATABASE_URL: postgresContainer.getConnectionUri(),
-      },
-    });
-  });
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -55,18 +24,13 @@ describe('Targets (e2e) – /POST targets/create', () => {
     if (app) {
       await app.close();
     }
-
-    if (postgresClient) {
-      await clearTables(postgresClient, ['targets', 'users']);
-    }
   });
 
-  afterAll(async () => {
+  afterAll(() => {
     jest.useRealTimers();
-
-    await postgresClient?.end();
-    await postgresContainer?.stop();
   });
+
+  setupTestDatabase(['targets', 'users']);
 
   const valid: CreateTargetDto = {
     title: 'Test',

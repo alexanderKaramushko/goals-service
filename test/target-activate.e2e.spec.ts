@@ -1,9 +1,7 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { createTestingApp } from 'src/helpers/create-testing-app';
-import { Client } from 'pg';
-import { execSync } from 'child_process';
-import { clearTables, createStepFactory } from './factories';
+import { createStepFactory } from './factories';
 import { UsersModule } from 'src/modules/users/users.module';
 import { TargetsModule } from 'src/modules/targets/targets.module';
 import { createUserFactory } from './factories/users.factory';
@@ -22,52 +20,19 @@ import { TargetNotFoundException } from 'src/modules/targets/exceptions/target-n
 import { TargetNotInStatusException } from 'src/modules/targets/exceptions/target-not-in-status.exception';
 import { TargetDeadlineOutdatedException } from 'src/modules/targets/exceptions/target-deadline-outdated';
 import { TargetHasOutdatedStepsException } from 'src/modules/targets/exceptions/target-has-outdated-steps.exception';
-import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { StepsModule } from 'src/modules/steps/steps.module';
+import { setupTestDatabase } from './utils/setupTestDatabase';
 
 describe('Targets (e2e) - /PUT targets/activate/:targetId', () => {
-  jest.setTimeout(60000);
-
   let app: INestApplication;
-
-  let postgresContainer: Awaited<
-    ReturnType<InstanceType<typeof PostgreSqlContainer>['start']>
-  >;
-  let postgresClient: Client;
-
-  beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer(
-      'postgres:17-alpine',
-    ).start();
-
-    postgresClient = new Client({
-      connectionString: postgresContainer.getConnectionUri(),
-    });
-
-    process.env.DATABASE_URL = postgresContainer.getConnectionUri();
-
-    await postgresClient.connect();
-
-    execSync('pnpm run migrate:init', {
-      env: {
-        ...process.env,
-        DATABASE_URL: postgresContainer.getConnectionUri(),
-      },
-    });
-  });
 
   afterEach(async () => {
     if (app) {
       await app.close();
     }
-
-    await clearTables(postgresClient, ['steps']);
   });
 
-  afterAll(async () => {
-    await postgresClient?.end();
-    await postgresContainer?.stop();
-  });
+  setupTestDatabase(['steps']);
 
   it('Валидация :targetId', async () => {
     app = await createTestingApp({

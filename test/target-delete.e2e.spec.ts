@@ -1,13 +1,7 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { createTestingApp } from 'src/helpers/create-testing-app';
-import {
-  PostgreSqlContainer,
-  StartedPostgreSqlContainer,
-} from '@testcontainers/postgresql';
-import { Client } from 'pg';
-import { execSync } from 'child_process';
-import { clearTables, createStepFactory } from './factories';
+import { createStepFactory } from './factories';
 import { UsersModule } from 'src/modules/users/users.module';
 import { TargetsModule } from 'src/modules/targets/targets.module';
 import { StepsModule } from 'src/modules/steps/steps.module';
@@ -25,47 +19,18 @@ import { TargetStatus } from 'src/modules/targets/targets.types';
 import { Provider } from 'src/modules/users/users.types';
 import { TargetNotFoundException } from 'src/modules/targets/exceptions/target-not-found.exception';
 import { TargetNotInStatusException } from 'src/modules/targets/exceptions/target-not-in-status.exception';
+import { setupTestDatabase } from './utils/setupTestDatabase';
 
 describe('Targets (e2e) - /DELETE targets/delete/:targetId', () => {
-  jest.setTimeout(60000);
-
   let app: INestApplication;
-  let postgresContainer: StartedPostgreSqlContainer;
-  let postgresClient: Client;
-
-  beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer(
-      'postgres:17-alpine',
-    ).start();
-
-    postgresClient = new Client({
-      connectionString: postgresContainer.getConnectionUri(),
-    });
-
-    process.env.DATABASE_URL = postgresContainer.getConnectionUri();
-
-    await postgresClient.connect();
-
-    execSync('pnpm run migrate:init', {
-      env: {
-        ...process.env,
-        DATABASE_URL: postgresContainer.getConnectionUri(),
-      },
-    });
-  });
 
   afterEach(async () => {
     if (app) {
       await app.close();
     }
-
-    await clearTables(postgresClient, ['targets', 'users']);
   });
 
-  afterAll(async () => {
-    await postgresClient?.end();
-    await postgresContainer?.stop();
-  });
+  const testDatabase = setupTestDatabase(['targets', 'users']);
 
   it('Валидация :targetId', async () => {
     app = await createTestingApp({
@@ -136,7 +101,13 @@ describe('Targets (e2e) - /DELETE targets/delete/:targetId', () => {
 
     expect(deletedTarget).toBeUndefined();
 
-    const deletedStep = await postgresClient.query<{ id: number }>(
+    if (!testDatabase.postgresClient) {
+      throw new Error('Не найден testDatabase.postgresClient');
+    }
+
+    const deletedStep = await testDatabase.postgresClient.query<{
+      id: number;
+    }>(
       `
         SELECT s.id
         FROM steps s

@@ -4,13 +4,6 @@ import { CreateRewardOnTargetDto } from 'src/modules/rewards/rewards.dto';
 import { RewardsModule } from 'src/modules/rewards/rewards.module';
 import { createTestingApp } from 'src/helpers/create-testing-app';
 import {
-  PostgreSqlContainer,
-  StartedPostgreSqlContainer,
-} from '@testcontainers/postgresql';
-import { Client } from 'pg';
-import { execSync } from 'child_process';
-import {
-  clearTables,
   createRewardOnTargetFactory,
   getRewardsOnTargetBySenderUserIdFactory,
 } from './factories';
@@ -32,54 +25,18 @@ import { RewardOnUncompletedTargetException } from 'src/modules/rewards/exceptio
 import { RewardUnassignableException } from 'src/modules/rewards/exceptions/reward-unassignable.exception';
 import { RewardAlreadyAssignedException } from 'src/modules/rewards/exceptions/reward-already-assigned.exception';
 import { dayjs } from 'src/helpers/dayjs';
+import { setupTestDatabase } from './utils/setupTestDatabase';
 
 describe('Rewards (e2e) – /POST rewards/create/:targetId', () => {
-  jest.setTimeout(60000);
-
   let app: INestApplication;
-  let postgresContainer: StartedPostgreSqlContainer;
-  let postgresClient: Client;
-
-  beforeAll(async () => {
-    postgresContainer = await new PostgreSqlContainer(
-      'postgres:17-alpine',
-    ).start();
-
-    postgresClient = new Client({
-      connectionString: postgresContainer.getConnectionUri(),
-    });
-
-    process.env.DATABASE_URL = postgresContainer.getConnectionUri();
-
-    await postgresClient.connect();
-
-    execSync('pnpm run migrate:init', {
-      env: {
-        ...process.env,
-        DATABASE_URL: postgresContainer.getConnectionUri(),
-      },
-    });
-  });
 
   afterEach(async () => {
     if (app) {
       await app.close();
     }
-
-    if (postgresClient) {
-      await clearTables(postgresClient, [
-        'rewards',
-        'steps',
-        'targets',
-        'users',
-      ]);
-    }
   });
 
-  afterAll(async () => {
-    await postgresClient?.end();
-    await postgresContainer?.stop();
-  });
+  setupTestDatabase(['rewards', 'steps', 'targets', 'users']);
 
   const valid: CreateRewardOnTargetDto = {
     title: 'Test',
