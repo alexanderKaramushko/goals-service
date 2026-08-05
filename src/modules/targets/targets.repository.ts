@@ -11,6 +11,7 @@ import {
   GetTargetById,
   GetTargetByIdAndUserIdPayload,
   DeleteTargetRepositoryPayload,
+  GetAllTargetsWithStepsAndRewardsPayload,
 } from 'src/modules/targets/targets.repository.types';
 
 @Injectable()
@@ -48,13 +49,68 @@ export class TargetsRepository {
     );
   }
 
-  async getAllByUserId(userId: string): Promise<TargetRaw[]> {
+  async getAllByUserIdWithStepsAndRewards(
+    payload: GetAllTargetsWithStepsAndRewardsPayload,
+  ): Promise<TargetRaw[]> {
     return this.dbService.query(
-      `SELECT *
+      `
+        SELECT
+          t.id,
+          t.user_id,
+          t.title,
+          t.description,
+          t.status,
+          t.should_be_completed_at::text AS should_be_completed_at,
+          t.completed_at::text AS completed_at,
+          t.cancelled_at,
+          t.created_at,
+          t.updated_at,
+          t.result_comment,
+          t.can_assign_reward,
+          COALESCE(
+            (
+              SELECT json_agg(
+                json_build_object(
+                  'id', s.id,
+                  'targetId', s.target_id,
+                  'title', s.title,
+                  'description', s.description,
+                  'shouldBeCompletedAt', s.should_be_completed_at::text,
+                  'closedAt', s.closed_at::text,
+                  'createdAt', s.created_at::text,
+                  'completedAt', s.completed_at::text,
+                  'resultComment', s.result_comment
+                )
+              )
+              FROM steps s
+              WHERE s.target_id = t.id
+            ),
+            '[]'::json
+          ) AS steps,
+          COALESCE(
+            (
+              SELECT json_agg(
+                json_build_object(
+                  'id', r.id,
+                  'recipientUserId', r.recipient_user_id,
+                  'targetId', r.target_id,
+                  'type', r.type,
+                  'title', r.title,
+                  'description', r.description,
+                  'createdAt', r.created_at::text,
+                  'acceptedAt', r.accepted_at::text,
+                  'senderUserId', r.sender_user_id
+                )
+              )
+              FROM rewards r
+              WHERE r.target_id = t.id
+            ),
+            '[]'::json
+          ) AS rewards
         FROM targets t
         WHERE t.user_id = $1
       `,
-      [userId],
+      [payload.userId],
     );
   }
 

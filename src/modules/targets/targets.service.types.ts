@@ -1,3 +1,6 @@
+import { RewardRaw } from 'src/modules/rewards/rewards.types';
+import { StepRaw } from 'src/modules/steps/steps.types';
+
 export type CreateTargetPayload = {
   title: string;
   description: string;
@@ -28,6 +31,8 @@ export type TargetListItem = {
   status: string;
   shouldBeCompletedAt: string;
   isOutdated: boolean;
+  steps: StepRaw[];
+  rewards: RewardRaw[];
 };
 
 export type CompleteTargetPayload = {

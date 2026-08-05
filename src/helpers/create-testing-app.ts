@@ -1,10 +1,10 @@
 import {
-  type Provider,
   ValidationPipe,
   ModuleMetadata,
   CanActivate,
   NestInterceptor,
   ExecutionContext,
+  InjectionToken,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
@@ -16,16 +16,16 @@ import { CurrentUser } from 'src/modules/users/users.types';
 export async function createTestingApp(
   deps: {
     providers?: {
-      provide: Provider;
+      provide: InjectionToken;
       useValue: any;
     }[];
     modules?: Exclude<ModuleMetadata['imports'], undefined>;
     guards?: {
-      provide: Provider;
+      provide: InjectionToken;
       useValue: CanActivate;
     }[];
     interceptors?: {
-      provide: Provider;
+      provide: InjectionToken;
       useValue: NestInterceptor;
     }[];
   },
@@ -42,7 +42,7 @@ export async function createTestingApp(
 
   [
     ...(useRealDbService
-      ? [{}]
+      ? []
       : [
           {
             provide: DbService,
@@ -58,7 +58,7 @@ export async function createTestingApp(
     {
       provide: AUTH_MICROSERVICE,
       useValue: {
-        send: () => of([{ subjectId: 1, name: 'Test User' }]),
+        send: () => of([{ subjectId: '1', name: 'Test User' }]),
         emit: () => {},
         connect: () => undefined,
         close: () => undefined,

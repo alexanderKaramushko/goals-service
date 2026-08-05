@@ -1,3 +1,6 @@
+import { RewardRaw } from 'src/modules/rewards/rewards.types';
+import { StepRaw } from 'src/modules/steps/steps.types';
+
 export enum TargetStatus {
   Created = 'created',
   Active = 'active',
@@ -18,4 +21,6 @@ export type TargetRaw = {
   updated_at: string;
   result_comment: string | null;
   can_assign_reward: boolean | null;
+  steps: StepRaw[];
+  rewards: RewardRaw[];
 };

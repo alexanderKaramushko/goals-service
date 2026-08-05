@@ -85,20 +85,20 @@ flowchart TD
 
 ## Сводка endpoint'ов
 
-| Метод и путь                              | Назначение                 | Успешный статус | Таймзона |
-| ----------------------------------------- | -------------------------- | --------------- | -------- |
-| `POST /api/v1/targets/create`             | создать цель               | `201`           | да       |
-| `GET /api/v1/targets/get-all/:userId`     | получить цели пользователя | `200`           | да       |
-| `PUT /api/v1/targets/activate/:targetId`  | активировать цель          | `200`           | да       |
-| `PUT /api/v1/targets/complete/:targetId`  | завершить цель             | `200`           | да       |
-| `POST /api/v1/targets/cancel/:targetId`   | отменить цель              | `201`           | да       |
-| `DELETE /api/v1/targets/delete/:targetId` | удалить цель               | `200`           | да       |
-| `POST /api/v1/steps/create/:targetId`     | создать шаг                | `201`           | да       |
-| `GET /api/v1/steps/get-all/:targetId`     | получить шаги цели         | `200`           | да       |
-| `PUT /api/v1/steps/complete/:stepId`      | завершить шаг              | `200`           | да       |
-| `DELETE /api/v1/steps/delete/:stepId`     | удалить шаг                | `200`           | нет      |
-| `POST /api/v1/rewards/create/:targetId`   | назначить награду цели     | `201`           | нет      |
-| `GET /api/v1/users/get-all`               | получить пользователей     | `200`           | нет      |
+| Метод и путь                              | Назначение                | Успешный статус | Таймзона |
+| ----------------------------------------- | ------------------------- | --------------- | -------- |
+| `POST /api/v1/targets/create`             | создать цель              | `201`           | да       |
+| `GET /api/v1/targets/get-all-own`         | получить собственные цели | `200`           | да       |
+| `PUT /api/v1/targets/activate/:targetId`  | активировать цель         | `200`           | да       |
+| `PUT /api/v1/targets/complete/:targetId`  | завершить цель            | `200`           | да       |
+| `POST /api/v1/targets/cancel/:targetId`   | отменить цель             | `201`           | да       |
+| `DELETE /api/v1/targets/delete/:targetId` | удалить цель              | `200`           | да       |
+| `POST /api/v1/steps/create/:targetId`     | создать шаг               | `201`           | да       |
+| `GET /api/v1/steps/get-all/:targetId`     | получить шаги цели        | `200`           | да       |
+| `PUT /api/v1/steps/complete/:stepId`      | завершить шаг             | `200`           | да       |
+| `DELETE /api/v1/steps/delete/:stepId`     | удалить шаг               | `200`           | нет      |
+| `POST /api/v1/rewards/create/:targetId`   | назначить награду цели    | `201`           | нет      |
+| `GET /api/v1/users/get-all`               | получить пользователей    | `200`           | нет      |
 
 Числовые идентификаторы цели и шага проверяются через `ParseIntPipe`.
 Некорректное значение приводит к `400 Bad Request` до вызова сервиса.
@@ -125,12 +125,18 @@ flowchart TD
 
 ### Получение целей
 
-`GET /api/v1/targets/get-all/:userId`
+`GET /api/v1/targets/get-all-own`
 
-Endpoint возвращает массив целей указанного пользователя во всех статусах.
-Проверки совпадения `userId` с текущим пользователем нет. Для каждой цели
-рассчитывается `isOutdated`. Если пользователь или его цели отсутствуют,
-возвращается пустой массив. Порядок элементов не задан.
+Endpoint не принимает path- или query-параметры. Идентификатор владельца
+берётся из `request.user`, поэтому возвращаются только цели текущего
+пользователя во всех статусах.
+
+Каждый элемент массива содержит `id`, `userId`, `title`, `description`,
+`status`, `shouldBeCompletedAt`, рассчитанный признак `isOutdated`, а также
+массивы `steps` и `rewards`. В `steps` входят все связанные с целью шаги, в
+`rewards` — все связанные с ней награды. Если связанных объектов нет,
+соответствующее поле содержит пустой массив. Если у пользователя нет целей,
+endpoint возвращает пустой массив. Порядок целей, шагов и наград не задан.
 
 ### Активация цели
 
