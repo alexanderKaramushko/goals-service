@@ -53,10 +53,13 @@ export class TargetsService {
   }
 
   async getAllByUserId(payload: GetTargetsPayload): Promise<TargetListItem[]> {
-    const targets = await this.targetsRepository.getAllByUserId(payload.userId);
+    const targets =
+      await this.targetsRepository.getAllByUserIdWithStepsAndRewards({
+        userId: payload.userId,
+      });
 
     return targets.map((target) =>
-      this.toListItem(target, payload.userTimezone),
+      this.toListItem(target as any, payload.userTimezone),
     );
   }
 
@@ -89,6 +92,8 @@ export class TargetsService {
       isOutdated: completedAtDate
         ? shouldBeCompletedAtDate.isBefore(completedAtDate, 'day')
         : shouldBeCompletedAtDate.isBefore(currentDate, 'day'),
+      steps: targetRaw.steps,
+      rewards: targetRaw.rewards,
     };
   }
 

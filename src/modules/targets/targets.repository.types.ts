@@ -1,3 +1,4 @@
+import { CurrentUserId } from 'src/modules/users/users.types';
 import { TargetStatus } from './targets.types';
 
 export type CreateTargetRepositoryPayload = {
@@ -38,4 +39,8 @@ export type DeleteTargetRepositoryPayload = {
 
 export type CancelTargetRepositoryPayload = {
   targetId: number;
+};
+
+export type GetAllTargetsWithStepsAndRewardsPayload = {
+  userId: CurrentUserId;
 };

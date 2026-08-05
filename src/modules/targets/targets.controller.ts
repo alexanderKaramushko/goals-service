@@ -58,15 +58,15 @@ export class TargetsController {
     });
   }
 
-  @ApiOperation({ summary: 'Все цели пользователя' })
+  @ApiOperation({ summary: 'Все цели текущего пользователя' })
   @ApiResponse({
-    description: 'Список всех целей пользователя',
+    description: 'Список всех целей текущего пользователя с наградами и шагами',
     type: [TargetsResponseDto],
   })
-  @Get('get-all/:userId')
-  getAll(@Request() request: ExpressRequest, @Param('userId') userId: string) {
+  @Get('get-all-own')
+  getAllOwn(@Request() request: ExpressRequest) {
     return this.targetsService.getAllByUserId({
-      userId,
+      userId: request.user?.id as string,
       userTimezone: request.userTimezone as string,
     });
   }

@@ -53,6 +53,8 @@ describe('TargetsService', () => {
       updated_at: '2026-01-01T10:45:30.000Z',
       result_comment: null,
       can_assign_reward: null,
+      steps: [],
+      rewards: [],
     };
 
     expect(service.toCreatedResponse(targetRaw)).toEqual({
