@@ -12,9 +12,9 @@ export type StepCreatedResponse = {
   title: string;
   description: string;
   shouldBeCompletedAt: string;
-  closed_at: string | null;
-  created_at: string;
-  completed_at: string | null;
+  closedAt: string | null;
+  createdAt: string;
+  completedAt: string | null;
 };
 
 export type StepsListItem = {

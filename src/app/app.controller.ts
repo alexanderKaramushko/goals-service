@@ -5,7 +5,7 @@ import { ApiResponse } from '@nestjs/swagger';
 export class AppController {
   @ApiResponse({ status: 200, description: 'OK' })
   @Get('health')
-  test() {
+  test(): string {
     return 'OK!';
   }
 }

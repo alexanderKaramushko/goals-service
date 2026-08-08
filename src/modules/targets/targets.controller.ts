@@ -44,13 +44,13 @@ export class TargetsController {
   @ApiOperation({ summary: 'Создать цель' })
   @ApiCreatedResponse({
     description: 'Цель создана',
-    type: CreatedTargetResponseDto,
+    type: [CreatedTargetResponseDto],
   })
   @Post('create')
   create(
     @Body() createTargetDto: CreateTargetDto,
     @Request() request: ExpressRequest & { user: CurrentUser },
-  ) {
+  ): Promise<CreatedTargetResponseDto[]> {
     return this.targetsService.create({
       userId: request.user.id,
       userTimezone: request.userTimezone as string,
@@ -81,7 +81,7 @@ export class TargetsController {
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
     @Body() body: CompleteTargetDto,
-  ) {
+  ): Promise<CompletedTargetResponseDto> {
     return this.targetsService.complete({
       targetId,
       userId: request.user?.id as string,
@@ -99,7 +99,7 @@ export class TargetsController {
   activateTarget(
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
-  ) {
+  ): Promise<ActivatedTargetResponseDto> {
     return this.targetsService.activate({
       targetId,
       userId: request.user?.id as string,
@@ -116,7 +116,7 @@ export class TargetsController {
   cancelTarget(
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
-  ) {
+  ): Promise<CancelledTargetResponseDto> {
     return this.targetsService.cancel({
       targetId,
       userId: request.user?.id as string,
@@ -132,7 +132,7 @@ export class TargetsController {
   deleteTarget(
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
-  ) {
+  ): Promise<DeletedTargetResponseDto> {
     return this.targetsService.delete({
       targetId,
       userId: request.user?.id as string,

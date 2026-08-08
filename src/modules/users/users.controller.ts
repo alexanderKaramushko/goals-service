@@ -16,7 +16,7 @@ export class UsersController {
     type: [UserResponseDto],
   })
   @Get('get-all')
-  async getAll() {
+  async getAll(): Promise<UserResponseDto[]> {
     return this.usersService.getAllUsers();
   }
 }

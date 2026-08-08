@@ -170,7 +170,7 @@ export class ActivatedTargetResponseDto {
     description: 'Id активированной цели',
   })
   @IsInt()
-  id: string | null;
+  id: number;
 }
 
 export class CancelledTargetResponseDto {
@@ -179,7 +179,7 @@ export class CancelledTargetResponseDto {
     description: 'Id отмененной цели',
   })
   @IsInt()
-  id: string | null;
+  id: number;
 }
 
 export class DeletedTargetResponseDto {
@@ -188,5 +188,5 @@ export class DeletedTargetResponseDto {
     description: 'Id удаленной цели',
   })
   @IsInt()
-  id: string | null;
+  id: number;
 }

@@ -37,7 +37,7 @@ export class RewardsController {
     @Request() request: ExpressRequest,
     @Body() createRewardDto: CreateRewardOnTargetDto,
     @Param('targetId', ParseIntPipe) targetId: number,
-  ) {
+  ): Promise<CreatedRewardOnTargetResponseDto> {
     return this.rewardsService.createOnTarget({
       title: createRewardDto.title,
       description: createRewardDto.description,
