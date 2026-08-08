@@ -146,7 +146,7 @@ describe('Steps (e2e) - /PUT targets/complete/:targetId', () => {
       .expect((res) => {
         expect(res.body.message).not.toBeDefined();
         expect(res.status).toBe(200);
-        expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
+        expect(res.body.completedAt).toBe(dayjs().utc().format('YYYY-MM-DD'));
       });
 
     const completedTarget = await getTarget({
@@ -156,7 +156,7 @@ describe('Steps (e2e) - /PUT targets/complete/:targetId', () => {
 
     expect(completedTarget).toEqual(
       expect.objectContaining({
-        completed_at: dayjs().format('YYYY-MM-DD'),
+        completed_at: dayjs().utc().format('YYYY-MM-DD'),
         status: 'completed',
         result_comment: 'Составил план питания',
       }),
@@ -261,7 +261,7 @@ describe('Steps (e2e) - /PUT targets/complete/:targetId', () => {
       .expect((res) => {
         expect(res.body.message).not.toBeDefined();
         expect(res.status).toBe(200);
-        expect(res.body.completedAt).toBe(dayjs().format('YYYY-MM-DD'));
+        expect(res.body.completedAt).toBe(dayjs().utc().format('YYYY-MM-DD'));
       });
 
     const completedTarget = await getTarget({
@@ -271,7 +271,7 @@ describe('Steps (e2e) - /PUT targets/complete/:targetId', () => {
 
     expect(completedTarget).toEqual(
       expect.objectContaining({
-        completed_at: dayjs().format('YYYY-MM-DD'),
+        completed_at: dayjs().utc().format('YYYY-MM-DD'),
         status: 'completed',
         result_comment: 'Составил план питания',
       }),
