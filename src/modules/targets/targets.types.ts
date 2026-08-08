@@ -1,5 +1,4 @@
-import { RewardRaw } from 'src/modules/rewards/rewards.types';
-import { StepRaw } from 'src/modules/steps/steps.types';
+import { RewardType } from 'src/modules/rewards/rewards.types';
 
 export enum TargetStatus {
   Created = 'created',
@@ -7,6 +6,25 @@ export enum TargetStatus {
   Completed = 'completed',
   Cancelled = 'cancelled',
 }
+
+export type TargetStepRaw = {
+  id: number;
+  targetId: number;
+  title: string;
+  description: string;
+  shouldBeCompletedAt: string;
+  completedAt: string | null;
+};
+
+export type TargetRewardRaw = {
+  id: number;
+  recipientUserId: string | null;
+  targetId: number;
+  type: RewardType;
+  title: string;
+  description: string;
+  senderUserId: string;
+};
 
 export type TargetRaw = {
   id: number;
@@ -21,6 +39,6 @@ export type TargetRaw = {
   updated_at: string;
   result_comment: string | null;
   can_assign_reward: boolean | null;
-  steps: StepRaw[];
-  rewards: RewardRaw[];
+  steps: TargetStepRaw[];
+  rewards: TargetRewardRaw[];
 };

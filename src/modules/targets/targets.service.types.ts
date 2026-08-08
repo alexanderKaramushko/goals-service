@@ -1,5 +1,4 @@
-import { RewardRaw } from 'src/modules/rewards/rewards.types';
-import { StepRaw } from 'src/modules/steps/steps.types';
+import { RewardType } from 'src/modules/rewards/rewards.types';
 
 export type CreateTargetPayload = {
   title: string;
@@ -23,6 +22,25 @@ export type TargetCreatedResponse = {
   shouldBeCompletedAt: string;
 };
 
+export type TargetStepListItem = {
+  id: number;
+  targetId: number;
+  title: string;
+  description: string;
+  shouldBeCompletedAt: string;
+  completedAt: string | null;
+};
+
+export type TargetRewardListItem = {
+  id: number;
+  recipientUserId: string | null;
+  targetId: number;
+  type: RewardType;
+  title: string;
+  description: string;
+  senderUserId: string;
+};
+
 export type TargetListItem = {
   id: number;
   userId: string;
@@ -31,8 +49,8 @@ export type TargetListItem = {
   status: string;
   shouldBeCompletedAt: string;
   isOutdated: boolean;
-  steps: StepRaw[];
-  rewards: RewardRaw[];
+  steps: TargetStepListItem[];
+  rewards: TargetRewardListItem[];
 };
 
 export type CompleteTargetPayload = {

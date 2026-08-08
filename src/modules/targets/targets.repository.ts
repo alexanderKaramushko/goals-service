@@ -76,10 +76,7 @@ export class TargetsRepository {
                   'title', s.title,
                   'description', s.description,
                   'shouldBeCompletedAt', s.should_be_completed_at::text,
-                  'closedAt', s.closed_at,
-                  'createdAt', s.created_at,
-                  'completedAt', s.completed_at::text,
-                  'resultComment', s.result_comment
+                  'completedAt', s.completed_at::text
                 )
               )
               FROM steps s
@@ -97,8 +94,6 @@ export class TargetsRepository {
                   'type', r.type,
                   'title', r.title,
                   'description', r.description,
-                  'createdAt', r.created_at,
-                  'acceptedAt', r.accepted_at,
                   'senderUserId', r.sender_user_id
                 )
               )
