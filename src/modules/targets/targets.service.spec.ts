@@ -2,11 +2,12 @@ import { TargetsService } from 'src/modules/targets/targets.service';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 
 import targets from 'src/mocks/TargetsResponseDto.json';
-import { TargetStatus } from 'src/modules/targets/targets.types';
+import { TargetRaw, TargetStatus } from 'src/modules/targets/targets.types';
 import { BadRequestException } from '@nestjs/common';
 import { DbService } from 'src/modules/db/db.service';
 import { ConfigService } from '@nestjs/config';
 import { CreateTargetPayload } from './targets.service.types';
+import { RewardType } from 'src/modules/rewards/rewards.types';
 
 describe('TargetsService', () => {
   let service: TargetsService;
@@ -68,13 +69,81 @@ describe('TargetsService', () => {
   });
 
   describe('getAllByUserId', () => {
+    const targetWithRelations = {
+      ...target,
+      steps: [],
+      rewards: [],
+    };
+
+    it('мапит вложенные шаги и награды в типы сервиса targets', () => {
+      const targetRaw: TargetRaw = {
+        id: 1,
+        user_id: 'user-1',
+        title: 'Цель',
+        description: 'Описание цели',
+        status: TargetStatus.Active,
+        should_be_completed_at: '2027-01-01',
+        completed_at: null,
+        cancelled_at: null,
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+        result_comment: null,
+        can_assign_reward: null,
+        steps: [
+          {
+            id: 2,
+            targetId: 1,
+            title: 'Шаг',
+            description: 'Описание шага',
+            shouldBeCompletedAt: '2026-12-01',
+            completedAt: null,
+          },
+        ],
+        rewards: [
+          {
+            id: 3,
+            recipientUserId: null,
+            targetId: 1,
+            type: RewardType.target,
+            title: 'Награда',
+            description: 'Описание награды',
+            senderUserId: 'user-2',
+          },
+        ],
+      };
+
+      const result = service.toListItem(targetRaw, 'Europe/Moscow');
+
+      expect(result.steps).toEqual([
+        {
+          id: 2,
+          targetId: 1,
+          title: 'Шаг',
+          description: 'Описание шага',
+          shouldBeCompletedAt: '2026-12-01',
+          completedAt: null,
+        },
+      ]);
+      expect(result.rewards).toEqual([
+        {
+          id: 3,
+          recipientUserId: null,
+          targetId: 1,
+          type: RewardType.target,
+          title: 'Награда',
+          description: 'Описание награды',
+          senderUserId: 'user-2',
+        },
+      ]);
+    });
+
     it('isOutdated = true, если текущая дата больше чем дата дедлайна', () => {
       jest.setSystemTime(new Date(2026, 0, 1));
 
       expect(
         service.toListItem(
           {
-            ...target,
+            ...targetWithRelations,
             completed_at: '',
             should_be_completed_at: '2025-01-01T20:00:00.000Z',
           },
@@ -89,7 +158,7 @@ describe('TargetsService', () => {
       expect(
         service.toListItem(
           {
-            ...target,
+            ...targetWithRelations,
             completed_at: '',
             should_be_completed_at: '2026-01-01T20:00:00.000Z',
           },
@@ -104,7 +173,7 @@ describe('TargetsService', () => {
       expect(
         service.toListItem(
           {
-            ...target,
+            ...targetWithRelations,
             completed_at: '',
             should_be_completed_at: '2027-01-01T20:00:00.000Z',
           },
@@ -119,7 +188,7 @@ describe('TargetsService', () => {
       expect(
         service.toListItem(
           {
-            ...target,
+            ...targetWithRelations,
             completed_at: '',
             should_be_completed_at: '2026-01-01T20:00:00.000Z',
           },
@@ -134,7 +203,7 @@ describe('TargetsService', () => {
       expect(
         service.toListItem(
           {
-            ...target,
+            ...targetWithRelations,
             completed_at: '',
             should_be_completed_at: '2026-01-01T10:00:00.000Z',
           },
@@ -147,7 +216,7 @@ describe('TargetsService', () => {
       expect(
         service.toListItem(
           {
-            ...target,
+            ...targetWithRelations,
             completed_at: '2026-01-01T20:00:00.000Z',
             should_be_completed_at: '2025-01-01T20:00:00.000Z',
           },
@@ -160,7 +229,7 @@ describe('TargetsService', () => {
       expect(
         service.toListItem(
           {
-            ...target,
+            ...targetWithRelations,
             completed_at: '2025-01-01T20:00:00.000Z',
             should_be_completed_at: '2025-01-01T20:00:00.000Z',
           },
@@ -173,7 +242,7 @@ describe('TargetsService', () => {
       expect(
         service.toListItem(
           {
-            ...target,
+            ...targetWithRelations,
             completed_at: '2024-01-01T20:00:00.000Z',
             should_be_completed_at: '2025-01-01T20:00:00.000Z',
           },

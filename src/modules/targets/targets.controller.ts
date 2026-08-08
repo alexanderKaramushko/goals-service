@@ -64,7 +64,7 @@ export class TargetsController {
     type: [TargetsResponseDto],
   })
   @Get('get-all-own')
-  getAllOwn(@Request() request: ExpressRequest) {
+  getAllOwn(@Request() request: ExpressRequest): Promise<TargetsResponseDto[]> {
     return this.targetsService.getAllByUserId({
       userId: request.user?.id as string,
       userTimezone: request.userTimezone as string,

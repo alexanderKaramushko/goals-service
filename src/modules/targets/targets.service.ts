@@ -52,17 +52,6 @@ export class TargetsService {
     return targets.map((target) => this.toCreatedResponse(target));
   }
 
-  async getAllByUserId(payload: GetTargetsPayload): Promise<TargetListItem[]> {
-    const targets =
-      await this.targetsRepository.getAllByUserIdWithStepsAndRewards({
-        userId: payload.userId,
-      });
-
-    return targets.map((target) =>
-      this.toListItem(target as any, payload.userTimezone),
-    );
-  }
-
   toCreatedResponse(targetRaw: TargetRaw): TargetCreatedResponse {
     return {
       id: targetRaw.id,
@@ -72,6 +61,17 @@ export class TargetsService {
       status: targetRaw.status,
       shouldBeCompletedAt: targetRaw.should_be_completed_at,
     };
+  }
+
+  async getAllByUserId(payload: GetTargetsPayload): Promise<TargetListItem[]> {
+    const targets =
+      await this.targetsRepository.getAllByUserIdWithStepsAndRewards({
+        userId: payload.userId,
+      });
+
+    return targets.map((target) =>
+      this.toListItem(target, payload.userTimezone),
+    );
   }
 
   toListItem(targetRaw: TargetRaw, userTimezone: string): TargetListItem {
@@ -92,8 +92,23 @@ export class TargetsService {
       isOutdated: completedAtDate
         ? shouldBeCompletedAtDate.isBefore(completedAtDate, 'day')
         : shouldBeCompletedAtDate.isBefore(currentDate, 'day'),
-      steps: targetRaw.steps,
-      rewards: targetRaw.rewards,
+      steps: targetRaw.steps.map((step) => ({
+        id: step.id,
+        targetId: step.targetId,
+        title: step.title,
+        description: step.description,
+        shouldBeCompletedAt: step.shouldBeCompletedAt,
+        completedAt: step.completedAt,
+      })),
+      rewards: targetRaw.rewards.map((reward) => ({
+        id: reward.id,
+        recipientUserId: reward.recipientUserId,
+        targetId: reward.targetId,
+        type: reward.type,
+        title: reward.title,
+        description: reward.description,
+        senderUserId: reward.senderUserId,
+      })),
     };
   }
 
