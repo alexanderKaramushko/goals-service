@@ -25,6 +25,7 @@ import {
   CreatedStepResponseDto,
   CreateStepDto,
   DeletedStepResponseDto,
+  StepsResponseDto,
 } from 'src/modules/steps/steps.dto';
 import { type Request as ExpressRequest } from 'express';
 import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
@@ -38,7 +39,7 @@ export class StepsController {
   @ApiOperation({ summary: 'Создать шаг' })
   @ApiCreatedResponse({
     description: 'Шаг создан',
-    type: CreatedStepResponseDto,
+    type: [CreatedStepResponseDto],
   })
   @ApiParam({
     name: 'targetId',
@@ -51,7 +52,7 @@ export class StepsController {
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
     @Body() createStepDto: CreateStepDto,
-  ) {
+  ): Promise<CreatedStepResponseDto[]> {
     return this.stepsService.create({
       targetId,
       userTimezone: request.userTimezone as string,
@@ -62,7 +63,7 @@ export class StepsController {
   @ApiOperation({ summary: 'Все шаги у цели' })
   @ApiCreatedResponse({
     description: 'Список всех шагов цели',
-    type: CreatedStepResponseDto,
+    type: [StepsResponseDto],
   })
   @ApiParam({
     name: 'targetId',
@@ -74,7 +75,7 @@ export class StepsController {
   async getAll(
     @Request() request: ExpressRequest,
     @Param('targetId', ParseIntPipe) targetId: number,
-  ) {
+  ): Promise<StepsResponseDto[]> {
     return this.stepsService.getAllByTargetId({
       targetId,
       userTimezone: request.userTimezone as string,
@@ -92,7 +93,7 @@ export class StepsController {
     @Request() request: ExpressRequest,
     @Body() body: CompleteStepDto,
     @Param('stepId', ParseIntPipe) stepId: number,
-  ) {
+  ): Promise<CompletedStepResponseDto> {
     return this.stepsService.completeStep({
       stepId: stepId,
       resultComment: body.resultComment,
@@ -110,7 +111,7 @@ export class StepsController {
   deleteStep(
     @Request() request: ExpressRequest,
     @Param('stepId', ParseIntPipe) stepId: number,
-  ) {
+  ): Promise<DeletedStepResponseDto> {
     return this.stepsService.deleteStep({
       stepId,
       userId: request.user?.id as string,

@@ -36,9 +36,9 @@ export class StepsService {
       title: stepRaw.title,
       description: stepRaw.description,
       shouldBeCompletedAt: stepRaw.should_be_completed_at,
-      closed_at: stepRaw.closed_at,
-      created_at: stepRaw.created_at,
-      completed_at: stepRaw.completed_at,
+      closedAt: stepRaw.closed_at,
+      createdAt: stepRaw.created_at,
+      completedAt: stepRaw.completed_at,
     };
   }
 

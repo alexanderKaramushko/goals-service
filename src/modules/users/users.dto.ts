@@ -34,8 +34,8 @@ export class UserResponseDto {
   @ApiProperty({
     example: '2026-06-21 16:37:39.368 +0400',
     description: 'Дата создания',
+    nullable: true,
   })
   @IsString()
-  @IsNotEmpty()
-  createdAt: string;
+  createdAt: string | null;
 }
