@@ -76,8 +76,8 @@ export class TargetsRepository {
                   'title', s.title,
                   'description', s.description,
                   'shouldBeCompletedAt', s.should_be_completed_at::text,
-                  'closedAt', s.closed_at::text,
-                  'createdAt', s.created_at::text,
+                  'closedAt', s.closed_at,
+                  'createdAt', s.created_at,
                   'completedAt', s.completed_at::text,
                   'resultComment', s.result_comment
                 )
@@ -97,8 +97,8 @@ export class TargetsRepository {
                   'type', r.type,
                   'title', r.title,
                   'description', r.description,
-                  'createdAt', r.created_at::text,
-                  'acceptedAt', r.accepted_at::text,
+                  'createdAt', r.created_at,
+                  'acceptedAt', r.accepted_at,
                   'senderUserId', r.sender_user_id
                 )
               )
@@ -201,7 +201,16 @@ export class TargetsRepository {
     payload: GetAllTargetStepsPayload,
   ): Promise<TargetRaw[]> {
     const result = await poolClient.query<TargetRaw>(
-      `SELECT *
+      `SELECT
+          s.id,
+          s.target_id,
+          s.title,
+          s.description,
+          s.should_be_completed_at::text AS should_be_completed_at,
+          s.closed_at,
+          s.created_at,
+          s.completed_at::text AS completed_at,
+          s.result_comment
         FROM steps s
         WHERE s.target_id = $1
         FOR UPDATE;

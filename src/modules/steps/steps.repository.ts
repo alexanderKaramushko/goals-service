@@ -21,7 +21,16 @@ export class StepsRepository {
     shouldBeCompletedAt: string,
   ): Promise<StepRaw[]> {
     return this.dbService.query(
-      `SELECT *
+      `SELECT
+          s.id,
+          s.target_id,
+          s.title,
+          s.description,
+          s.should_be_completed_at::text AS should_be_completed_at,
+          s.closed_at,
+          s.created_at,
+          s.completed_at::text AS completed_at,
+          s.result_comment
         FROM steps s
         WHERE s.target_id = $1
         AND s.should_be_completed_at = $2::date
@@ -57,7 +66,16 @@ export class StepsRepository {
 
   async getAllByTargetId(targetId: number): Promise<StepRaw[]> {
     return this.dbService.query(
-      `SELECT s.*
+      `SELECT
+          s.id,
+          s.target_id,
+          s.title,
+          s.description,
+          s.should_be_completed_at::text AS should_be_completed_at,
+          s.closed_at,
+          s.created_at,
+          s.completed_at::text AS completed_at,
+          s.result_comment
         FROM steps s
         INNER JOIN targets t ON t.id = s.target_id
         WHERE s.target_id = $1
@@ -72,7 +90,16 @@ export class StepsRepository {
     payload: GetAllAscDeadlineByTargetIdPayload,
   ): Promise<StepRaw[]> {
     const result = await poolClient.query(
-      `SELECT s.*
+      `SELECT
+          s.id,
+          s.target_id,
+          s.title,
+          s.description,
+          s.should_be_completed_at::text AS should_be_completed_at,
+          s.closed_at,
+          s.created_at,
+          s.completed_at::text AS completed_at,
+          s.result_comment
         FROM steps s
         INNER JOIN targets t ON t.id = s.target_id
         WHERE s.target_id = $1 AND s.completed_at IS NULL
@@ -129,7 +156,19 @@ export class StepsRepository {
     payload: GetTargetByStepIdPayload,
   ): Promise<TargetRaw | undefined> {
     const result = await poolClient.query<TargetRaw>(
-      `SELECT t.*
+      `SELECT
+          t.id,
+          t.user_id,
+          t.title,
+          t.description,
+          t.status,
+          t.should_be_completed_at::text AS should_be_completed_at,
+          t.completed_at::text AS completed_at,
+          t.cancelled_at,
+          t.created_at,
+          t.updated_at,
+          t.result_comment,
+          t.can_assign_reward
         FROM steps s
         INNER JOIN targets t ON t.id = s.target_id
         WHERE s.id = $1 AND t.user_id = $2
