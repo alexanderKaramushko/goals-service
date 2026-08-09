@@ -156,7 +156,7 @@ describe('Users (e2e) - GET users/:userId/targets', () => {
             canAssignReward: false,
             description: 'Закрыть все задачи и получить допуск',
             id: activeTarget.id,
-            rewardAssigned: false,
+            reward: null,
             shouldBeCompletedAt: '2027-02-14',
             status: 'active',
             steps: [],
@@ -166,7 +166,7 @@ describe('Users (e2e) - GET users/:userId/targets', () => {
             canAssignReward: true,
             description: 'Описание',
             id: completedTarget.id,
-            rewardAssigned: false,
+            reward: null,
             shouldBeCompletedAt: '2027-02-14',
             status: 'completed',
             steps: [],
@@ -176,7 +176,7 @@ describe('Users (e2e) - GET users/:userId/targets', () => {
       });
   });
 
-  it('если текущий пользователь уже назначил награду цели, возвращается rewardAssigned = true', async () => {
+  it('возвращает награду, которую текущий пользователь назначил цели', async () => {
     app = await createTestingApp(
       {
         modules: [UsersModule, TargetsModule, RewardsModule],
@@ -242,7 +242,15 @@ describe('Users (e2e) - GET users/:userId/targets', () => {
             canAssignReward: true,
             description: 'Закрыть все задачи и получить допуск',
             id: target.id,
-            rewardAssigned: true,
+            reward: {
+              acceptedAt: null,
+              createdAt: expect.any(String),
+              description: 'За успешное завершение цели',
+              id: expect.any(Number),
+              targetId: target.id,
+              title: 'Билет в кино',
+              type: RewardType.target,
+            },
             shouldBeCompletedAt: '2027-02-14',
             status: 'completed',
             steps: [],
@@ -252,7 +260,7 @@ describe('Users (e2e) - GET users/:userId/targets', () => {
       });
   });
 
-  it('если текущий пользователь ещё не назначал награду цели, возвращается rewardAssigned = false', async () => {
+  it('возвращает reward = null, если награду назначил другой пользователь', async () => {
     app = await createTestingApp(
       {
         modules: [UsersModule, TargetsModule, RewardsModule],
@@ -323,7 +331,7 @@ describe('Users (e2e) - GET users/:userId/targets', () => {
             canAssignReward: true,
             description: 'Закрыть все задачи и получить допуск',
             id: target.id,
-            rewardAssigned: false,
+            reward: null,
             shouldBeCompletedAt: '2027-02-14',
             status: 'completed',
             steps: [],

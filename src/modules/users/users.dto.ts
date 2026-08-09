@@ -2,6 +2,7 @@ import { IsNotEmpty, IsEnum, IsString } from 'class-validator';
 import { Provider } from './users.types';
 import { ApiProperty } from '@nestjs/swagger';
 import { TargetStatus } from 'src/modules/targets/targets.types';
+import { CreatedRewardOnTargetResponseDto } from 'src/modules/rewards/rewards.dto';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -82,8 +83,12 @@ export class UserTargetsResponseDto {
   @ApiProperty({ example: true })
   canAssignReward: boolean;
 
-  @ApiProperty({ example: false })
-  rewardAssigned: boolean;
+  @ApiProperty({
+    type: CreatedRewardOnTargetResponseDto,
+    nullable: true,
+    description: 'Награда, назначенная текущим пользователем',
+  })
+  reward: CreatedRewardOnTargetResponseDto | null;
 
   @ApiProperty({
     type: [UserTargetStepsDto],

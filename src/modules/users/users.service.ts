@@ -64,7 +64,7 @@ export class UsersService {
       status: userTargetRaw.status,
       shouldBeCompletedAt: userTargetRaw.should_be_completed_at,
       canAssignReward: Boolean(userTargetRaw.can_assign_reward),
-      rewardAssigned: userTargetRaw.reward_assigned,
+      reward: userTargetRaw.reward,
       steps: userTargetRaw.steps.map((step) => ({
         id: step.id,
         targetId: step.targetId,
