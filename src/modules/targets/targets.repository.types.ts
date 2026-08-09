@@ -1,4 +1,4 @@
-import { CurrentUserId } from 'src/modules/users/users.types';
+import { UserId } from 'src/modules/users/users.types';
 import { TargetStatus } from './targets.types';
 
 export type CreateTargetRepositoryPayload = {
@@ -42,5 +42,5 @@ export type CancelTargetRepositoryPayload = {
 };
 
 export type GetAllTargetsWithStepsAndRewardsPayload = {
-  userId: CurrentUserId;
+  userId: UserId;
 };

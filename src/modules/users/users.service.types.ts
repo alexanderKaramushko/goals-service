@@ -1,4 +1,5 @@
-import { Provider } from './users.types';
+import { StepRaw } from '../steps/steps.types';
+import { CurrentUserId, Provider, UserId } from './users.types';
 
 export type CreateOrUpdateUserPayload = {
   name: string;
@@ -16,4 +17,20 @@ export type UserListItem = {
   id: string;
   fullName: string;
   createdAt: string | null;
+};
+
+export type GetUserTargetsPayload = {
+  userId: UserId;
+  currentUserId: CurrentUserId;
+};
+
+export type UserTargetsListItem = {
+  id: number;
+  userId: string;
+  title: string;
+  description: string;
+  status: string;
+  shouldBeCompletedAt: string;
+  isOutdated: boolean;
+  steps: StepRaw[];
 };

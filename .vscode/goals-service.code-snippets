@@ -23,5 +23,44 @@
       "}"
     ],
     "description": "Create async service method with BEGIN/ROLLBACK transaction handling"
+  },
+  "NestJS e2e test": {
+    "scope": "typescript",
+    "prefix": "e2e",
+    "description": "Создать шаблон e2e-теста для NestJS",
+    "body": [
+      "import request from 'supertest';",
+      "import { INestApplication } from '@nestjs/common';",
+      "import { createTestingApp } from 'src/helpers/create-testing-app';",
+      "import { StepsModule } from 'src/modules/steps/steps.module';",
+      "import { setupTestDatabase } from './utils/setupTestDatabase';",
+      "",
+      "describe('${1:Название модуля} (e2e) - ${2:метод}', () => {",
+      "  let app: INestApplication;",
+      "",
+      "  afterEach(async () => {",
+      "    if (app) {",
+      "      await app.close();",
+      "    }",
+      "  });",
+      "",
+      "  setupTestDatabase([${3}]);",
+      "",
+      "  it('${4:описание теста}', async () => {",
+      "    app = await createTestingApp({",
+      "      modules: [StepsModule],",
+      "    });",
+      "",
+      "    await request(app.getHttpServer())",
+      "      .delete('${5:/steps/delete/wrongId}')",
+      "      .expect((res) => {",
+      "        expect(res.status).toBe(${6:400});",
+      "        expect(res.body.message).toContain(",
+      "          '${7:Validation failed (numeric string is expected)}',",
+      "        );",
+      "      });",
+      "  });",
+      "});$0"
+    ]
   }
 }

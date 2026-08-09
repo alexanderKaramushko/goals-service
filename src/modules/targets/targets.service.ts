@@ -15,8 +15,12 @@ import type {
 } from 'src/modules/targets/targets.service.types';
 import { dayjs } from 'src/helpers/dayjs';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
-import { TargetRaw, TargetStatus } from 'src/modules/targets/targets.types';
-import { DbService } from '../db/db.service';
+import {
+  TargetRaw,
+  TargetRawWithStepsAndRewards,
+  TargetStatus,
+} from 'src/modules/targets/targets.types';
+import { DbService } from 'src/modules/db/db.service';
 import { TargetNotFoundException } from './exceptions/target-not-found.exception';
 import { TargetNotInStatusException } from './exceptions/target-not-in-status.exception';
 import { TargetDeadlineOutdatedException } from './exceptions/target-deadline-outdated';
@@ -74,7 +78,10 @@ export class TargetsService {
     );
   }
 
-  toListItem(targetRaw: TargetRaw, userTimezone: string): TargetListItem {
+  toListItem(
+    targetRaw: TargetRawWithStepsAndRewards,
+    userTimezone: string,
+  ): TargetListItem {
     const currentDate = dayjs(new Date()).tz(userTimezone);
 
     const completedAtDate =

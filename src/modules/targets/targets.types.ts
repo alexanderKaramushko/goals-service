@@ -39,6 +39,9 @@ export type TargetRaw = {
   updated_at: string;
   result_comment: string | null;
   can_assign_reward: boolean | null;
+};
+
+export type TargetRawWithStepsAndRewards = TargetRaw & {
   steps: TargetStepRaw[];
   rewards: TargetRewardRaw[];
 };
