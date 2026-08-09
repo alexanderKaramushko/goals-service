@@ -64,13 +64,21 @@ export class UsersRepository {
             ),
             '[]'::json
           ) AS steps,
-          EXISTS(
-            SELECT 1
+          (
+            SELECT json_build_object(
+              'id', r.id,
+              'targetId', r.target_id,
+              'title', r.title,
+              'description', r.description,
+              'type', r.type,
+              'createdAt', r.created_at,
+              'acceptedAt', r.accepted_at
+            )
             FROM rewards r
             WHERE r.target_id = t.id
               AND r.sender_user_id = $2
               AND r.type = 'target'
-          ) AS reward_assigned
+          ) AS reward
         FROM targets t
         WHERE t.user_id = $1 AND t.status IN ('active', 'completed')
       `,

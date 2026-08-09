@@ -138,22 +138,23 @@ query или body не требуется. Заголовок `x-user-timezone` 
 
 Если таких целей нет, endpoint возвращает `200 OK` и пустой массив. Каждый
 элемент ответа содержит `id`, `title`, `description`, `status`,
-`shouldBeCompletedAt`, `canAssignReward`, `steps` и `rewardAssigned`.
+`shouldBeCompletedAt`, `canAssignReward`, `steps` и `reward`.
 
 Каждый элемент `steps` содержит `id`, `targetId`, `title`, `description`,
 `shouldBeCompletedAt` и `completedAt`.
 
-Дополнительно в endpoint рассчитывается только поле `rewardAssigned`: оно равно
-`true`, если текущий пользователь уже назначил этой цели награду, иначе —
-`false`. Поле `canAssignReward` возвращается из `target` без расчёта в этом
-endpoint.
+Поле `reward` содержит награду типа `target`, которую текущий
+пользователь назначил этой цели, либо `null`, если такой награды нет.
+Объект награды содержит `id`, `targetId`, `title`, `description`, `type`,
+`createdAt` и `acceptedAt`. Поле `canAssignReward` возвращается из `target`
+без расчёта в этом endpoint.
 
 Последовательность чтения:
 
 1. `AuthGuard` определяет текущего пользователя.
 2. Выбираются цели владельца `userId` только в статусах `active` и `completed`.
-3. Для каждой цели проверяется наличие награды типа `target`, у которой
-   отправитель — текущий пользователь.
+3. Для каждой цели выбирается награда типа `target`, у которой
+   отправитель — текущий пользователь; при её отсутствии выбирается `null`.
 4. Возвращается массив; отсутствие строк не считается ошибкой.
 
 ### Активация цели

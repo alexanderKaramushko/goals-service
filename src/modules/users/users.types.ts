@@ -34,6 +34,16 @@ export type UserTargetStepRaw = {
   completedAt: string | null;
 };
 
+export type UserTargetRewardRaw = {
+  id: number;
+  targetId: number;
+  title: string;
+  description: string;
+  type: 'target';
+  createdAt: string;
+  acceptedAt: string | null;
+};
+
 export type UserTargetRaw = {
   id: number;
   user_id: string;
@@ -47,6 +57,6 @@ export type UserTargetRaw = {
   updated_at: string;
   result_comment: string | null;
   can_assign_reward: boolean | null;
-  reward_assigned: boolean;
+  reward: UserTargetRewardRaw | null;
   steps: UserTargetStepRaw[];
 };
