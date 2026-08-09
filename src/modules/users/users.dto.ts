@@ -1,6 +1,7 @@
 import { IsNotEmpty, IsEnum, IsString } from 'class-validator';
 import { Provider } from './users.types';
 import { ApiProperty } from '@nestjs/swagger';
+import { TargetStatus } from 'src/modules/targets/targets.types';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -38,4 +39,65 @@ export class UserResponseDto {
   })
   @IsString()
   createdAt: string | null;
+}
+
+export class UserTargetStepsDto {
+  @ApiProperty({ example: 1 })
+  id: number;
+
+  @ApiProperty({ example: 1 })
+  targetId: number;
+
+  @ApiProperty({ example: 'Накопить 1000р' })
+  title: string;
+
+  @ApiProperty({ example: 'Копейка рубль бережет!' })
+  description: string;
+
+  @ApiProperty({ example: '2027-02-14' })
+  shouldBeCompletedAt: string;
+
+  @ApiProperty({ example: '2026-06-06', nullable: true })
+  completedAt: string | null;
+}
+
+export class UserTargetsResponseDto {
+  @ApiProperty({ example: 1 })
+  id: number;
+
+  @ApiProperty({ example: 'Составить план питания' })
+  title: string;
+
+  @ApiProperty({
+    example: 'Расписать план питания и составить список продуктов',
+  })
+  description: string;
+
+  @ApiProperty({ example: TargetStatus.Created, enum: TargetStatus })
+  status: string;
+
+  @ApiProperty({ example: '2026-02-14' })
+  shouldBeCompletedAt: string;
+
+  @ApiProperty({ example: true })
+  canAssignReward: boolean;
+
+  @ApiProperty({ example: false })
+  rewardAssigned: boolean;
+
+  @ApiProperty({
+    type: [UserTargetStepsDto],
+    description: 'Все шаги цели',
+    example: [
+      {
+        id: 1,
+        targetId: 1,
+        title: 'Накопить 1000р',
+        description: 'Копейка рубль бережет!',
+        shouldBeCompletedAt: '2027-02-14',
+        completedAt: '2026-06-06',
+      },
+    ],
+  })
+  steps: UserTargetStepsDto[];
 }

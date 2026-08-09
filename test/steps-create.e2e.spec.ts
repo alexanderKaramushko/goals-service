@@ -159,8 +159,8 @@ describe('Steps (e2e) - /POST steps/create', () => {
             title: valid.title,
             description: valid.description,
             shouldBeCompletedAt: '2027-02-15',
-            closed_at: null,
-            completed_at: null,
+            closedAt: null,
+            completedAt: null,
           }),
         ]);
         expect(dayjs(res.body[0].created_at).format('YYYY-MM-DD')).toBe(

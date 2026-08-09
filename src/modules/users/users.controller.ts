@@ -1,8 +1,10 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Request, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { ApiCookieAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { UserResponseDto } from './users.dto';
+import { UserResponseDto, UserTargetsResponseDto } from './users.dto';
+import type { UserId } from './users.types';
+import { type Request as ExpressRequest } from 'express';
 
 @UseGuards(AuthGuard)
 @ApiCookieAuth('jwt')
@@ -18,5 +20,21 @@ export class UsersController {
   @Get('get-all')
   async getAll(): Promise<UserResponseDto[]> {
     return this.usersService.getAllUsers();
+  }
+
+  @ApiOperation({ summary: 'Активные и завершенные цели пользователя' })
+  @ApiResponse({
+    description: 'Список активных и завершенных целей пользователя',
+    type: [UserTargetsResponseDto],
+  })
+  @Get(':userId/targets')
+  async getUserTargets(
+    @Request() request: ExpressRequest,
+    @Param('userId') userId: UserId,
+  ): Promise<UserTargetsResponseDto[]> {
+    return this.usersService.getUserTargets({
+      userId,
+      currentUserId: request.user?.id as string,
+    });
   }
 }

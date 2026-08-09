@@ -2,7 +2,10 @@ import { TargetsService } from 'src/modules/targets/targets.service';
 import { TargetsRepository } from 'src/modules/targets/targets.repository';
 
 import targets from 'src/mocks/TargetsResponseDto.json';
-import { TargetRaw, TargetStatus } from 'src/modules/targets/targets.types';
+import {
+  TargetRawWithStepsAndRewards,
+  TargetStatus,
+} from 'src/modules/targets/targets.types';
 import { BadRequestException } from '@nestjs/common';
 import { DbService } from 'src/modules/db/db.service';
 import { ConfigService } from '@nestjs/config';
@@ -76,7 +79,7 @@ describe('TargetsService', () => {
     };
 
     it('мапит вложенные шаги и награды в типы сервиса targets', () => {
-      const targetRaw: TargetRaw = {
+      const targetRaw: TargetRawWithStepsAndRewards = {
         id: 1,
         user_id: 'user-1',
         title: 'Цель',

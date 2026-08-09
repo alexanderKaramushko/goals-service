@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/modules/db/db.service';
-import { TargetRaw } from 'src/modules/targets/targets.types';
+import {
+  TargetRaw,
+  TargetRawWithStepsAndRewards,
+} from 'src/modules/targets/targets.types';
 import { PoolClient } from 'pg';
 import {
   CancelTargetRepositoryPayload,
@@ -51,7 +54,7 @@ export class TargetsRepository {
 
   async getAllByUserIdWithStepsAndRewards(
     payload: GetAllTargetsWithStepsAndRewardsPayload,
-  ): Promise<TargetRaw[]> {
+  ): Promise<TargetRawWithStepsAndRewards[]> {
     return this.dbService.query(
       `
         SELECT
