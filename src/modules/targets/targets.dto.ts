@@ -111,6 +111,9 @@ export class TargetsResponseDto {
   @ApiProperty({ example: false })
   isOutdated: boolean;
 
+  @ApiProperty({ example: 'Хочу книгу в награду', nullable: true })
+  resultComment: string | null;
+
   @ApiProperty({
     type: [TargetStepsDto],
     description: 'Все шаги цели',
