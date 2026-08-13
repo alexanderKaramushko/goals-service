@@ -49,6 +49,7 @@ export type TargetListItem = {
   status: string;
   shouldBeCompletedAt: string;
   isOutdated: boolean;
+  resultComment: string | null;
   steps: TargetStepListItem[];
   rewards: TargetRewardListItem[];
 };

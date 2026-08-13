@@ -86,6 +86,7 @@ describe('Targets (e2e) - /GET targets/get-all-own', () => {
             description: 'Закрыть все задачи и получить допуск',
             id: target.id,
             isOutdated: expect.any(Boolean),
+            resultComment: null,
             rewards: [],
             shouldBeCompletedAt: '2027-02-14',
             status: 'created',
@@ -156,6 +157,7 @@ describe('Targets (e2e) - /GET targets/get-all-own', () => {
             description: 'Закрыть все задачи и получить допуск',
             id: target.id,
             isOutdated: expect.any(Boolean),
+            resultComment: null,
             rewards: [],
             shouldBeCompletedAt: '2027-02-14',
             status: 'created',
@@ -253,6 +255,7 @@ describe('Targets (e2e) - /GET targets/get-all-own', () => {
             description: 'Закрыть все задачи и получить допуск',
             id: target.id,
             isOutdated: expect.any(Boolean),
+            resultComment: null,
             rewards: expect.arrayContaining([
               expect.objectContaining({
                 id: firstReward.id,

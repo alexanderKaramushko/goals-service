@@ -99,6 +99,7 @@ export class TargetsService {
       isOutdated: completedAtDate
         ? shouldBeCompletedAtDate.isBefore(completedAtDate, 'day')
         : shouldBeCompletedAtDate.isBefore(currentDate, 'day'),
+      resultComment: targetRaw.result_comment,
       steps: targetRaw.steps.map((step) => ({
         id: step.id,
         targetId: step.targetId,
