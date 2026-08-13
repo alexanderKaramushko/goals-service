@@ -161,6 +161,7 @@ describe('Users (e2e) - GET users/:userId/targets', () => {
             status: 'active',
             steps: [],
             title: 'Сдать экзамен',
+            resultComment: null,
           },
           {
             canAssignReward: true,
@@ -171,6 +172,7 @@ describe('Users (e2e) - GET users/:userId/targets', () => {
             status: 'completed',
             steps: [],
             title: 'Завершенная цель',
+            resultComment: 'Экзамен сдан',
           },
         ]);
       });
@@ -255,6 +257,7 @@ describe('Users (e2e) - GET users/:userId/targets', () => {
             status: 'completed',
             steps: [],
             title: 'Сдать экзамен',
+            resultComment: 'Экзамен сдан',
           },
         ]);
       });
@@ -336,6 +339,7 @@ describe('Users (e2e) - GET users/:userId/targets', () => {
             status: 'completed',
             steps: [],
             title: 'Сдать экзамен',
+            resultComment: 'Экзамен сдан',
           },
         ]);
       });
