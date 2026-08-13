@@ -1,4 +1,3 @@
-import { StepRaw } from '../steps/steps.types';
 import { CurrentUserId, Provider, UserId } from './users.types';
 
 export type CreateOrUpdateUserPayload = {
@@ -24,13 +23,33 @@ export type GetUserTargetsPayload = {
   currentUserId: CurrentUserId;
 };
 
+export type UserTargetStep = {
+  id: number;
+  targetId: number;
+  title: string;
+  description: string;
+  shouldBeCompletedAt: string;
+  completedAt: string | null;
+};
+
+export type UserTargetReward = {
+  id: number;
+  targetId: number;
+  title: string;
+  description: string;
+  type: 'target';
+  createdAt: string;
+  acceptedAt: string | null;
+};
+
 export type UserTargetsListItem = {
   id: number;
-  userId: string;
   title: string;
   description: string;
   status: string;
+  canAssignReward: boolean;
   shouldBeCompletedAt: string;
-  isOutdated: boolean;
-  steps: StepRaw[];
+  resultComment: string | null;
+  reward: UserTargetReward | null;
+  steps: UserTargetStep[];
 };

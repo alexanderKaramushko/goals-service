@@ -83,6 +83,9 @@ export class UserTargetsResponseDto {
   @ApiProperty({ example: true })
   canAssignReward: boolean;
 
+  @ApiProperty({ example: 'Хочу книгу в награду', nullable: true })
+  resultComment: string | null;
+
   @ApiProperty({
     type: CreatedRewardOnTargetResponseDto,
     nullable: true,

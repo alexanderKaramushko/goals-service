@@ -6,6 +6,7 @@ import {
   CreatedUserResponse,
   GetUserTargetsPayload,
   UserListItem,
+  UserTargetsListItem,
 } from 'src/modules/users/users.service.types';
 import { UserTargetsResponseDto } from './users.dto';
 
@@ -54,9 +55,7 @@ export class UsersService {
     return targets.map((target) => this.toUserTargetsItemResponse(target));
   }
 
-  toUserTargetsItemResponse(
-    userTargetRaw: UserTargetRaw,
-  ): UserTargetsResponseDto {
+  toUserTargetsItemResponse(userTargetRaw: UserTargetRaw): UserTargetsListItem {
     return {
       id: userTargetRaw.id,
       title: userTargetRaw.title,
@@ -65,6 +64,7 @@ export class UsersService {
       shouldBeCompletedAt: userTargetRaw.should_be_completed_at,
       canAssignReward: Boolean(userTargetRaw.can_assign_reward),
       reward: userTargetRaw.reward,
+      resultComment: userTargetRaw.result_comment,
       steps: userTargetRaw.steps.map((step) => ({
         id: step.id,
         targetId: step.targetId,

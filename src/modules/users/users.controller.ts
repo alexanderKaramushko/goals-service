@@ -28,7 +28,7 @@ export class UsersController {
     type: [UserTargetsResponseDto],
   })
   @Get(':userId/targets')
-  async getUserTargets(
+  getUserTargets(
     @Request() request: ExpressRequest,
     @Param('userId') userId: UserId,
   ): Promise<UserTargetsResponseDto[]> {
