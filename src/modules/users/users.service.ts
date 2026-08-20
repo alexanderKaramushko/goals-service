@@ -4,6 +4,7 @@ import { UserRaw, UserTargetRaw } from 'src/modules/users/users.types';
 import {
   CreateOrUpdateUserPayload,
   CreatedUserResponse,
+  GetAllUsersPayload,
   GetUserTargetsPayload,
   UserListItem,
   UserTargetsListItem,
@@ -30,8 +31,10 @@ export class UsersService {
     };
   }
 
-  async getAllUsers(): Promise<UserListItem[]> {
-    const users = await this.usersRepository.getAllUsers();
+  async getAllUsers(payload: GetAllUsersPayload): Promise<UserListItem[]> {
+    const users = await this.usersRepository.getAllUsers({
+      currentUserId: payload.currentUserId,
+    });
 
     return users.map((user) => this.toListItem(user));
   }

@@ -1,5 +1,9 @@
 import { CurrentUserId, Provider, UserId } from './users.types';
 
+export type GetAllUsersPayload = {
+  currentUserId: CurrentUserId;
+};
+
 export type CreateOrUpdateUserPayload = {
   name: string;
   subjectId: string;
