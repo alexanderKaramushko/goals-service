@@ -3,6 +3,7 @@ import { DbService } from 'src/modules/db/db.service';
 import { UserRaw, UserTargetRaw } from 'src/modules/users/users.types';
 import {
   CreateOrUpdateUserRepositoryPayload,
+  GetAllUsersRepositoryPayload,
   GetAllUserTargetsWithStepsPayload,
 } from 'src/modules/users/users.repository.types';
 
@@ -25,8 +26,14 @@ export class UsersRepository {
     );
   }
 
-  async getAllUsers(): Promise<UserRaw[]> {
-    return this.dbService.query(`SELECT * from users;`, []);
+  async getAllUsers(payload: GetAllUsersRepositoryPayload): Promise<UserRaw[]> {
+    return this.dbService.query(
+      `
+        SELECT * from users u
+        WHERE u.id != $1;
+      `,
+      [payload.currentUserId],
+    );
   }
 
   async getAllTargetsByUserIdWithSteps(

@@ -14,12 +14,14 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Все пользователи' })
   @ApiResponse({
-    description: 'Список всех пользователей',
+    description: 'Список всех пользователей кроме текущего',
     type: [UserResponseDto],
   })
   @Get('get-all')
-  async getAll(): Promise<UserResponseDto[]> {
-    return this.usersService.getAllUsers();
+  async getAll(@Request() request: ExpressRequest): Promise<UserResponseDto[]> {
+    return this.usersService.getAllUsers({
+      currentUserId: request.user?.id as string,
+    });
   }
 
   @ApiOperation({ summary: 'Активные и завершенные цели пользователя' })
