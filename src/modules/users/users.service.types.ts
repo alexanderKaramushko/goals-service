@@ -57,3 +57,13 @@ export type UserTargetsListItem = {
   reward: UserTargetReward | null;
   steps: UserTargetStep[];
 };
+
+export type GetUserPayload = {
+  userId: UserId;
+};
+
+export type UserResponse = {
+  id: string;
+  fullName: string;
+  createdAt: string | null;
+};

@@ -14,3 +14,7 @@ export type GetAllUserTargetsWithStepsPayload = {
   userId: UserId;
   currentUserId: CurrentUserId;
 };
+
+export type GetUserByIdRepositoryPayload = {
+  userId: UserId;
+};
