@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { UserRaw, UserTargetRaw } from 'src/modules/users/users.types';
 import {
   CreateOrUpdateUserPayload,
   CreatedUserResponse,
   GetAllUsersPayload,
+  GetUserPayload,
   GetUserTargetsPayload,
   UserListItem,
+  UserResponse,
   UserTargetsListItem,
 } from 'src/modules/users/users.service.types';
-import { UserTargetsResponseDto } from './users.dto';
+import { UserResponseDto, UserTargetsResponseDto } from './users.dto';
 
 @Injectable()
 export class UsersService {
@@ -77,5 +79,25 @@ export class UsersService {
         completedAt: step.completedAt,
       })),
     };
+  }
+
+  mapUserResponse(userRaw: UserRaw): UserResponse {
+    return {
+      id: userRaw.id,
+      fullName: userRaw.full_name,
+      createdAt: userRaw.created_at,
+    };
+  }
+
+  async getUser(payload: GetUserPayload): Promise<UserResponseDto> {
+    const user = await this.usersRepository.getUserById({
+      userId: payload.userId,
+    });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    return this.mapUserResponse(user);
   }
 }

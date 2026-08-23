@@ -5,6 +5,7 @@ import {
   CreateOrUpdateUserRepositoryPayload,
   GetAllUsersRepositoryPayload,
   GetAllUserTargetsWithStepsPayload,
+  GetUserByIdRepositoryPayload,
 } from 'src/modules/users/users.repository.types';
 
 @Injectable()
@@ -91,5 +92,25 @@ export class UsersRepository {
       `,
       [payload.userId, payload.currentUserId],
     );
+  }
+
+  async getUserById(
+    payload: GetUserByIdRepositoryPayload,
+  ): Promise<UserRaw | undefined> {
+    const result = await this.dbService.query<UserRaw>(
+      `
+        SELECT
+          u.id,
+          u.full_name,
+          u.created_at
+        FROM users u
+        WHERE u.id = $1
+      `,
+      [payload.userId],
+    );
+
+    const [user] = result;
+
+    return user;
   }
 }
