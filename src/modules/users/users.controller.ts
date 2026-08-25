@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Request, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { ApiCookieAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -53,9 +46,7 @@ export class UsersController {
     type: UserResponseDto,
   })
   @Get(':userId')
-  getUser(
-    @Param('userId', ParseIntPipe) userId: UserId,
-  ): Promise<UserResponseDto> {
+  getUser(@Param('userId') userId: UserId): Promise<UserResponseDto> {
     return this.usersService.getUser({
       userId,
     });

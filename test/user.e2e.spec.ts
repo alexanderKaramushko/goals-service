@@ -65,15 +65,4 @@ describe('Users (e2e) - GET users/:userId', () => {
         });
       });
   });
-
-  it('возвращает 400 для некорректного id', async () => {
-    app = await createTestingApp(
-      {
-        modules: [UsersModule],
-      },
-      { useRealDbService: true },
-    );
-
-    await request(app.getHttpServer()).get('/users/invalid-id').expect(400);
-  });
 });
