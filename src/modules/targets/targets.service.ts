@@ -26,16 +26,16 @@ import { TargetNotInStatusException } from './exceptions/target-not-in-status.ex
 import { TargetDeadlineOutdatedException } from './exceptions/target-deadline-outdated';
 import { TargetHasUncompletedStepsException } from './exceptions/target-has-uncompleted-steps.exception';
 import { ConfigService } from '@nestjs/config';
-import { MAX_OUTDATED_STEPS_PERCENTAGE_FALLBACK } from 'src/constants';
 import { TargetWasNotActivatedException } from './exceptions/target-was-not-activated';
 import { TargetHasOutdatedStepsException } from './exceptions/target-has-outdated-steps.exception';
+import type { EnvironmentVariables } from 'src/infra/config/config.module';
 
 @Injectable()
 export class TargetsService {
   constructor(
     private targetsRepository: TargetsRepository,
     private dbService: DbService,
-    private configService: ConfigService,
+    private configService: ConfigService<EnvironmentVariables, true>,
   ) {}
 
   async create(payload: CreateTargetPayload): Promise<TargetCreatedResponse[]> {
@@ -182,15 +182,10 @@ export class TargetsService {
           ? (outdatedSteps.length / steps.length) * 100
           : 0;
 
-      const maxOutdatedStepsPercentageRaw =
-        this.configService.get<string>('MAX_OUTDATED_STEPS_PERCENTAGE') ??
-        MAX_OUTDATED_STEPS_PERCENTAGE_FALLBACK.toString();
-
-      const maxOutdatedStepsPercentage = Number.isNaN(
-        Number.parseInt(maxOutdatedStepsPercentageRaw, 10),
-      )
-        ? MAX_OUTDATED_STEPS_PERCENTAGE_FALLBACK
-        : Number.parseInt(maxOutdatedStepsPercentageRaw, 10);
+      const maxOutdatedStepsPercentage = this.configService.getOrThrow(
+        'MAX_OUTDATED_STEPS_PERCENTAGE',
+        { infer: true },
+      );
 
       const completedTarget = await this.targetsRepository.completeTarget(
         {

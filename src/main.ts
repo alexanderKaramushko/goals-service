@@ -8,9 +8,13 @@ import { TargetsModule } from 'src/modules/targets/targets.module';
 import { StepsModule } from 'src/modules/steps/steps.module';
 import { RewardsModule } from 'src/modules/rewards/rewards.module';
 import { UsersModule } from './modules/users/users.module';
+import { ConfigService } from '@nestjs/config';
+import type { EnvironmentVariables } from 'src/infra/config/config.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService =
+    app.get<ConfigService<EnvironmentVariables, true>>(ConfigService);
 
   app.use(cookieParser());
 
@@ -58,8 +62,8 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   await app.listen(
-    Number.parseInt(process.env.SERVICE_PORT ?? '3000', 10),
-    process.env.SERVICE_HOST ?? '0.0.0.0',
+    configService.getOrThrow('SERVICE_PORT', { infer: true }),
+    configService.getOrThrow('SERVICE_HOST', { infer: true }),
   );
 }
 

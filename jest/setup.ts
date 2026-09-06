@@ -4,8 +4,10 @@ import path, { join } from 'node:path';
 import { loadConfig, register } from 'tsconfig-paths';
 import { sample } from 'openapi-sampler';
 import { isDeepStrictEqual } from 'node:util';
+import { ConfigService } from '@nestjs/config';
 
 export default async () => {
+  const configService = new ConfigService<NodeJS.ProcessEnv>();
   const tsconfig = loadConfig(process.cwd());
 
   if (tsconfig.resultType === 'failed') {
@@ -47,7 +49,10 @@ export default async () => {
       },
     ).components?.schemas;
 
-    const mocksDir = join(process.cwd(), process.env.MOCKS_DIR ?? 'src/mocks');
+    const mocksDir = join(
+      process.cwd(),
+      configService.get('MOCKS_DIR') ?? 'src/mocks',
+    );
 
     mkdirSync(mocksDir, { recursive: true });
 

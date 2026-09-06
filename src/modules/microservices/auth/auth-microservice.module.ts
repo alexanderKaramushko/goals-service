@@ -2,22 +2,28 @@ import { Module } from '@nestjs/common';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { AuthMicroserviceService } from 'src/modules/microservices/auth/auth-microservice.service';
 import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
+import type { EnvironmentVariables } from 'src/infra/config/config.module';
 
 @Module({
-  imports: [ConfigModule],
   providers: [
     {
       provide: AUTH_MICROSERVICE,
-      useFactory: async (configService: ConfigService) => {
-        const host = configService.get('MICROSERVICE_HOST');
-        const port = configService.get('MICROSERVICE_PORT');
+      useFactory: async (
+        configService: ConfigService<EnvironmentVariables, true>,
+      ) => {
+        const host = configService.getOrThrow('MICROSERVICE_HOST', {
+          infer: true,
+        });
+        const port = configService.getOrThrow('MICROSERVICE_PORT', {
+          infer: true,
+        });
 
         const microservice = ClientProxyFactory.create({
           transport: Transport.TCP,
           options: {
             host,
-            port: Number.parseInt(port as string, 10),
+            port,
           },
         });
 
