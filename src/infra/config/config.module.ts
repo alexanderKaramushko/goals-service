@@ -89,7 +89,8 @@ export const environmentValidationSchema = Joi.object({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`,
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
+      envFilePath: `.env.${process.env.NODE_ENV ?? 'development'}`,
       validationSchema: environmentValidationSchema,
     }),
   ],
