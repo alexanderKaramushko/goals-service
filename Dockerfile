@@ -6,7 +6,7 @@ COPY package.json pnpm-lock.yaml .npmrc ./
 
 RUN npm config set strict-ssl false
 
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+RUN npm install -g pnpm@10 && pnpm install --frozen-lockfile
 
 COPY . .
 
@@ -20,7 +20,7 @@ COPY package.json pnpm-lock.yaml .npmrc ./
 
 RUN npm config set strict-ssl false
 
-RUN npm install -g pnpm && pnpm install --prod --frozen-lockfile
+RUN npm install -g pnpm@10 && pnpm install --prod --frozen-lockfile
 
 COPY --from=builder /app/dist ./dist
 
