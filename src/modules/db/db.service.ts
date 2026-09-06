@@ -1,22 +1,38 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Pool, QueryResultRow } from 'pg';
+import type { EnvironmentVariables } from 'src/infra/config/config.module';
 
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
   private pool: Pool;
 
-  constructor() {
-    const databaseUrl = process.env.DATABASE_URL;
+  constructor(
+    private configService: ConfigService<EnvironmentVariables, true>,
+  ) {
+    const databaseUrl = this.configService.get('DATABASE_URL', {
+      infer: true,
+    });
     const config = databaseUrl
       ? {
           connectionString: databaseUrl,
         }
       : {
-          host: process.env.POSTGRES_DB_HOST,
-          port: Number.parseInt(process.env.POSTGRES_DB_PORT ?? '5432', 10),
-          user: process.env.POSTGRES_DB_USER,
-          password: process.env.POSTGRES_DB_PASSWORD,
-          database: process.env.POSTGRES_DB_NAME,
+          host: this.configService.getOrThrow('POSTGRES_DB_HOST', {
+            infer: true,
+          }),
+          port: this.configService.getOrThrow('POSTGRES_DB_PORT', {
+            infer: true,
+          }),
+          user: this.configService.getOrThrow('POSTGRES_DB_USER', {
+            infer: true,
+          }),
+          password: this.configService.getOrThrow('POSTGRES_DB_PASSWORD', {
+            infer: true,
+          }),
+          database: this.configService.getOrThrow('POSTGRES_DB_NAME', {
+            infer: true,
+          }),
         };
 
     this.pool = new Pool(config);
@@ -42,7 +58,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleInit() {
-    if (process.env.NODE_ENV === 'development') {
+    if (
+      this.configService.getOrThrow('NODE_ENV', { infer: true }) ===
+      'development'
+    ) {
       this.pool.addListener('connect', () => {
         console.log('Успешно подключились к БД');
       });

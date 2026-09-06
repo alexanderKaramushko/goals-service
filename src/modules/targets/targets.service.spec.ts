@@ -11,6 +11,7 @@ import { DbService } from 'src/modules/db/db.service';
 import { ConfigService } from '@nestjs/config';
 import { CreateTargetPayload } from './targets.service.types';
 import { RewardType } from 'src/modules/rewards/rewards.types';
+import type { EnvironmentVariables } from 'src/infra/config/config.module';
 
 describe('TargetsService', () => {
   let service: TargetsService;
@@ -34,8 +35,8 @@ describe('TargetsService', () => {
         getPoolClient: () => {},
       } as DbService,
       {
-        get: () => '',
-      } as unknown as ConfigService,
+        getOrThrow: () => 20,
+      } as unknown as ConfigService<EnvironmentVariables, true>,
     );
   });
 

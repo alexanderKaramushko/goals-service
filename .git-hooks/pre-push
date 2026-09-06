@@ -1,14 +1,6 @@
 #!/bin/sh
 
-check_ext() {
-  local ext=$1
-  git diff --name-only --cached | grep -q "\.${ext}$"
-}
-
 pnpm run --dir . check:lint
-
-if check_ext "ts" || check_ext "js"; then
-  pnpm run --dir . check:types
-  pnpm run --dir . test:unit
-  pnpm run --dir . test:e2e
-fi
+pnpm run --dir . check:types
+pnpm run --dir . test:unit
+pnpm run --dir . test:e2e

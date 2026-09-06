@@ -12,6 +12,7 @@ import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { DbService } from 'src/modules/db/db.service';
 import { AUTH_MICROSERVICE } from 'src/modules/microservices/auth/tokens';
 import { CurrentUser } from 'src/modules/users/users.types';
+import { AppConfigModule } from 'src/infra/config/config.module';
 
 export async function createTestingApp(
   deps: {
@@ -37,7 +38,7 @@ export async function createTestingApp(
   const { useRealDbService = false } = options ?? {};
 
   const module = Test.createTestingModule({
-    imports: [...modules],
+    imports: [AppConfigModule, ...modules],
   });
 
   [
