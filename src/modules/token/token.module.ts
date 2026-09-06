@@ -13,7 +13,10 @@ import path from 'node:path';
         const keysPath = path.resolve(process.cwd(), './keys');
 
         return {
-          publicKey: fs.readFileSync(path.resolve(keysPath, 'public.pem')),
+          publicKey: fs.readFileSync(
+            path.resolve(keysPath, 'public.pem'),
+            'utf-8',
+          ),
         };
       },
     }),
