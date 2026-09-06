@@ -7,6 +7,6 @@ import { TokenModule } from '../token/token.module';
 @Module({
   imports: [AuthMicroServiceModule, forwardRef(() => UsersModule), TokenModule],
   providers: [AuthGuard],
-  exports: [AuthGuard, AuthMicroServiceModule],
+  exports: [AuthGuard, AuthMicroServiceModule, TokenModule],
 })
 export class AuthModule {}
