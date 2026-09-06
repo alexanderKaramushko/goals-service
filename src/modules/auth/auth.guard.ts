@@ -46,7 +46,7 @@ export class AuthGuard implements CanActivate {
 
       try {
         [authProviderUser] = await this.authMicroserviceService.getSSOUser(
-          request.cookies.jwt,
+          request.cookies.access_token,
         );
       } catch (error) {
         throw new ServiceUnavailableException(
