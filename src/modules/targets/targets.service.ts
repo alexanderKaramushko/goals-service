@@ -29,6 +29,7 @@ import { ConfigService } from '@nestjs/config';
 import { TargetWasNotActivatedException } from './exceptions/target-was-not-activated';
 import { TargetHasOutdatedStepsException } from './exceptions/target-has-outdated-steps.exception';
 import type { EnvironmentVariables } from 'src/infra/config/config.module';
+import { canAssignReward } from './domain/can-assign-reward';
 
 @Injectable()
 export class TargetsService {
@@ -171,17 +172,6 @@ export class TargetsService {
         throw new TargetHasUncompletedStepsException();
       }
 
-      const outdatedSteps = steps.filter(
-        (step) =>
-          !step.completed_at &&
-          currentDate.isAfter(step.should_be_completed_at, 'day'),
-      );
-
-      const outdatedPercentage =
-        outdatedSteps.length && steps.length
-          ? (outdatedSteps.length / steps.length) * 100
-          : 0;
-
       const maxOutdatedStepsPercentage = this.configService.getOrThrow(
         'MAX_OUTDATED_STEPS_PERCENTAGE',
         { infer: true },
@@ -190,7 +180,14 @@ export class TargetsService {
       const completedTarget = await this.targetsRepository.completeTarget(
         {
           targetId: target.id,
-          canAssignReward: outdatedPercentage < maxOutdatedStepsPercentage,
+          canAssignReward: canAssignReward(
+            steps.map(({ completed_at, should_be_completed_at }) => ({
+              completedAt: completed_at ? dayjs(completed_at) : null,
+              shouldBeCompletedAt: dayjs(should_be_completed_at),
+            })),
+            currentDate,
+            maxOutdatedStepsPercentage,
+          ),
           resultComment: payload.resultComment,
         },
         poolClient,
