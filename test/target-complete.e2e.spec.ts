@@ -159,6 +159,7 @@ describe('Steps (e2e) - /PUT targets/complete/:targetId', () => {
         completed_at: dayjs().utc().format('YYYY-MM-DD'),
         status: 'completed',
         result_comment: 'Составил план питания',
+        can_assign_reward: true,
       }),
     );
   });
@@ -274,6 +275,7 @@ describe('Steps (e2e) - /PUT targets/complete/:targetId', () => {
         completed_at: dayjs().utc().format('YYYY-MM-DD'),
         status: 'completed',
         result_comment: 'Составил план питания',
+        can_assign_reward: false,
       }),
     );
   });
