@@ -1,15 +1,126 @@
 services:
-  postgres:
-    image: postgres:17
-    container_name: ${POSTGRES_DB_NAME}
+  goals-postgres:
+    image: postgres:16-alpine
+    container_name: goals-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB_NAME}
       POSTGRES_USER: ${POSTGRES_DB_USER}
       POSTGRES_PASSWORD: ${POSTGRES_DB_PASSWORD}
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - goals_postgres_data:/var/lib/postgresql/data
+      - ./backups:/var/lib/backups:ro
+    env_file:
+      - .env.goals.production
     ports:
-      - 54320:5432
+      - 127.0.0.1:5432:5432
+    restart: unless-stopped
+
+   autoheal:
+    image: willfarrell/autoheal:latest
+    restart: unless-stopped
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  goals-service:
+    image: melkor73/goals-service:latest
+    container_name: goals-service
+    env_file:
+      - .env.goals.production
+    depends_on:
+      - goals-postgres
+      - goals-auth
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - ./keys:/app/keys:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('https://goals.melkor-apps.ru/api/v1/app/health/ready').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 2
+      start_period: 15s
+    labels:
+      - "autoheal=true"
+
+  goals-mongo:
+    image: mongo:latest
+    container_name: goals-mongo
+    ports:
+      - 27017:27017
+    env_file:
+      - .env.auth.production
+    volumes:
+      - goals_mongo_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('https://goals.melkor-apps.ru/auth/app/health/ready').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+    restart: unless-stopped
+
+  goals-auth:
+    image: melkor73/goals-auth:latest
+    container_name: goals-auth
+    depends_on:
+      - goals-mongo
+    ports:
+      - 3001:3001
+      - 3002:3002
+    env_file:
+      - .env.auth.production
+    volumes:
+      - ./keys:/app/keys:ro
+    restart: unless-stopped
+    labels:
+      - "autoheal=true"
+
+  goals-nginx:
+    image: nginx:1.27-alpine
+    container_name: goals-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - ./certbot/conf:/etc/nginx/ssl:ro
+    depends_on:
+      - goals-service
+      - goals-auth
+    restart: unless-stopped
+
+  goals-certbot:
+    image: certbot/certbot:latest
+    container_name: goals_certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: /bin/sh
+
+  goals-service-migrations:
+    image: melkor73/goals-service:latest
+    container_name: goals-service-migrations
+    entrypoint: ""
+    env_file:
+      - .env.goals.production
+
+  goals-front:
+    image: melkor73/goals-front:latest
+    container_name: goals-front
+    restart: unless-stopped
 
 volumes:
-  db-data:
+  goals_postgres_data:
+  goals_mongo_data:
