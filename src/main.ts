@@ -10,9 +10,50 @@ import { RewardsModule } from 'src/modules/rewards/rewards.module';
 import { UsersModule } from './modules/users/users.module';
 import { ConfigService } from '@nestjs/config';
 import type { EnvironmentVariables } from 'src/infra/config/config.module';
+import {
+  WinstonModule,
+  utilities as nestWinstonModuleUtilities,
+} from 'nest-winston';
+import winston from 'winston';
+import 'winston-daily-rotate-file';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const fileTransport = process.env.LOG_FILE_PATH
+    ? [
+        new winston.transports.DailyRotateFile({
+          dirname: process.env.LOG_FILE_PATH,
+          filename: 'app-%DATE%.log',
+          datePattern: 'YYYY-MM-DD',
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.prettyPrint(),
+          ),
+          zippedArchive: true,
+          maxSize: '20m',
+          maxFiles: '3d',
+        }),
+      ]
+    : [];
+
+  const app = await NestFactory.create(AppModule, {
+    logger: WinstonModule.createLogger({
+      format: winston.format.json(),
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.ms(),
+            nestWinstonModuleUtilities.format.nestLike('goals-service', {
+              colors: true,
+              prettyPrint: true,
+            }),
+          ),
+        }),
+        ...fileTransport,
+      ],
+    }),
+  });
+
   const configService =
     app.get<ConfigService<EnvironmentVariables, true>>(ConfigService);
 
