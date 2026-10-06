@@ -16,9 +16,9 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  it('/app/health (GET)', async () => {
+  it('/app/health/ready (GET)', async () => {
     await request(app.getHttpServer())
-      .get('/app/health')
+      .get('/app/health/ready')
       .expect(200)
       .expect('OK!');
   });
