@@ -1,4 +1,9 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pool, QueryResultRow } from 'pg';
 import type { EnvironmentVariables } from 'src/infra/config/config.module';
@@ -6,6 +11,7 @@ import type { EnvironmentVariables } from 'src/infra/config/config.module';
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
   private pool: Pool;
+  private readonly logger = new Logger(DbService.name);
 
   constructor(
     private configService: ConfigService<EnvironmentVariables, true>,
@@ -13,6 +19,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     const databaseUrl = this.configService.get('DATABASE_URL', {
       infer: true,
     });
+
     const config = databaseUrl
       ? {
           connectionString: databaseUrl,
@@ -48,6 +55,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       const result = await client.query<T>(sql, params);
 
       return result.rows;
+    } catch (error) {
+      this.logger.error(`Ошибка выполнения запроса`, error);
+
+      return [];
     } finally {
       client.release();
     }
@@ -63,7 +74,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       'development'
     ) {
       this.pool.addListener('connect', () => {
-        console.log('Успешно подключились к БД');
+        this.logger.log('Успешно подлючились к БД');
       });
     }
   }
