@@ -69,14 +69,9 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleInit() {
-    if (
-      this.configService.getOrThrow('NODE_ENV', { infer: true }) ===
-      'development'
-    ) {
-      this.pool.addListener('connect', () => {
-        this.logger.log('Успешно подлючились к БД');
-      });
-    }
+    this.pool.addListener('connect', () => {
+      this.logger.log('Успешно подлючились к БД');
+    });
   }
 
   async onModuleDestroy() {
