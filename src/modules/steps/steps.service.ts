@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { dayjs } from 'src/helpers/dayjs';
 import { StepsRepository } from 'src/modules/steps/steps.repository';
 import { StepRaw } from 'src/modules/steps/steps.types';
@@ -24,6 +24,8 @@ import { TargetNotInStatusException } from '../targets/exceptions/target-not-in-
 
 @Injectable()
 export class StepsService {
+  private readonly logger = new Logger(StepsService.name);
+
   constructor(
     private stepsRepository: StepsRepository,
     private dbService: DbService,
@@ -50,7 +52,9 @@ export class StepsService {
       shouldBeCompletedAtDate.isBefore(currentDate, 'day') ||
       shouldBeCompletedAtDate.isSame(currentDate, 'day')
     ) {
-      throw new StepDeadlineOutdatedException();
+      const exception = new StepDeadlineOutdatedException();
+      this.logger.error(exception.message);
+      throw exception;
     }
 
     const stepWithSameShouldBeCompletedAt =
@@ -62,9 +66,13 @@ export class StepsService {
     if (stepWithSameShouldBeCompletedAt.length > 0) {
       const [step] = stepWithSameShouldBeCompletedAt;
 
-      throw new StepWithSameDeadlineExistsException(
+      const exception = new StepWithSameDeadlineExistsException(
         dayjs(step.should_be_completed_at).format('YYYY-MM-DD'),
       );
+
+      this.logger.error(exception.message);
+
+      throw exception;
     }
 
     try {
@@ -72,7 +80,9 @@ export class StepsService {
 
       return steps.map((step) => this.toCreatedResponse(step));
     } catch (error) {
-      throw new BadRequestException(error.message);
+      const exception = new BadRequestException(error.message);
+      this.logger.error(exception.message);
+      throw exception;
     }
   }
 
@@ -129,7 +139,9 @@ export class StepsService {
       );
 
       if (!step) {
-        throw new StepNotFoundException();
+        const exception = new StepNotFoundException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const target = await this.stepsRepository.getTargetByStepId(poolClient, {
@@ -138,18 +150,24 @@ export class StepsService {
       });
 
       if (target && target.status !== TargetStatus.Active) {
-        throw new TargetNotActiveException();
+        const exception = new TargetNotActiveException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       if (step.completed_at !== null) {
-        throw new StepAlreadyCompletedException();
+        const exception = new StepAlreadyCompletedException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const currentDate = dayjs(new Date()).tz(payload.userTimezone);
       const shouldBeCompletedAtDate = dayjs(step.should_be_completed_at);
 
       if (currentDate.isAfter(shouldBeCompletedAtDate, 'day')) {
-        throw new StepDeadlineOutdatedException();
+        const exception = new StepDeadlineOutdatedException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const steps = await this.stepsRepository.getAllAscDeadlineByTargetId(
@@ -169,7 +187,9 @@ export class StepsService {
         closestNotOutdatedStep &&
         closestNotOutdatedStep.id !== payload.stepId
       ) {
-        throw new StepDeadlineNotClosestException();
+        const exception = new StepDeadlineNotClosestException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const completedStep = await this.stepsRepository.completeStep(
@@ -181,7 +201,9 @@ export class StepsService {
       );
 
       if (!completedStep) {
-        throw new BadRequestException('Не удалось завершить шаг');
+        const exception = new BadRequestException('Не удалось завершить шаг');
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       await poolClient.query('COMMIT');
@@ -210,7 +232,9 @@ export class StepsService {
       );
 
       if (!step) {
-        throw new StepNotFoundException();
+        const exception = new StepNotFoundException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const target = await this.stepsRepository.getTargetByStepId(poolClient, {
@@ -219,11 +243,15 @@ export class StepsService {
       });
 
       if (!target) {
-        throw new StepNotFoundException();
+        const exception = new StepNotFoundException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       if (target.status !== TargetStatus.Created) {
-        throw new TargetNotInStatusException(TargetStatus.Created);
+        const exception = new TargetNotInStatusException(TargetStatus.Created);
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const deletedStep = await this.stepsRepository.deleteStep(
@@ -234,7 +262,9 @@ export class StepsService {
       );
 
       if (!deletedStep) {
-        throw new BadRequestException('Не удалось удалить шаг');
+        const exception = new BadRequestException('Не удалось удалить шаг');
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       await poolClient.query('COMMIT');

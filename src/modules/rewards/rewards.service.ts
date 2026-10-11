@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RewardsRepository } from 'src/modules/rewards/rewards.repository';
 import { RewardRaw, RewardType } from 'src/modules/rewards/rewards.types';
 import { CreateRewardRepositoryPayload } from 'src/modules/rewards/rewards.repository.types';
@@ -17,6 +17,8 @@ import { RewardOnOwnTargetException } from './exceptions/reward-on-own-target.ex
 
 @Injectable()
 export class RewardsService {
+  private readonly logger = new Logger(RewardsService.name);
+
   constructor(
     private rewardsRepository: RewardsRepository,
     private targetsRepository: TargetsRepository,
@@ -37,19 +39,27 @@ export class RewardsService {
       );
 
       if (!target) {
-        throw new TargetNotFoundException();
+        const exception = new TargetNotFoundException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       if (target.user_id === payload.senderUserId) {
-        throw new RewardOnOwnTargetException();
+        const exception = new RewardOnOwnTargetException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       if (target.status !== TargetStatus.Completed) {
-        throw new RewardOnUncompletedTargetException();
+        const exception = new RewardOnUncompletedTargetException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       if (!target.can_assign_reward) {
-        throw new RewardUnassignableException();
+        const exception = new RewardUnassignableException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const senderRewardsOnTarget =
@@ -59,7 +69,9 @@ export class RewardsService {
         );
 
       if (senderRewardsOnTarget.length > 0) {
-        throw new RewardAlreadyAssignedException();
+        const exception = new RewardAlreadyAssignedException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const createdReward = await this.rewardsRepository.createRewardOnTarget(

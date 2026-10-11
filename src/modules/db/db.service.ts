@@ -70,7 +70,14 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     this.pool.addListener('connect', () => {
-      this.logger.log('Успешно подлючились к БД');
+      this.logger.log('Успешно открыто соединение с БД');
+    });
+
+    this.pool.addListener('error', (error: Error) => {
+      this.logger.error(
+        `Ошибка простаивающего соединения с БД: ${error.message}`,
+        error.stack,
+      );
     });
   }
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import type {
   ActivatedTargetResponse,
   ActivateTargetPayload,
@@ -33,6 +33,8 @@ import { canAssignReward } from './domain/can-assign-reward';
 
 @Injectable()
 export class TargetsService {
+  private readonly logger = new Logger(TargetsService.name);
+
   constructor(
     private targetsRepository: TargetsRepository,
     private dbService: DbService,
@@ -47,9 +49,11 @@ export class TargetsService {
       shouldBeCompletedAtDate.isBefore(currentDate, 'day') ||
       shouldBeCompletedAtDate.isSame(currentDate, 'day')
     ) {
-      throw new BadRequestException(
+      const exception = new BadRequestException(
         'Дата окончания должна быть больше текущей даты',
       );
+      this.logger.error(exception.message);
+      throw exception;
     }
 
     const targets = await this.targetsRepository.createTarget(payload);
@@ -144,18 +148,24 @@ export class TargetsService {
       );
 
       if (!target) {
-        throw new TargetNotFoundException();
+        const exception = new TargetNotFoundException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       if (target.status !== TargetStatus.Active) {
-        throw new TargetNotInStatusException(TargetStatus.Active);
+        const exception = new TargetNotInStatusException(TargetStatus.Active);
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const currentDate = dayjs(new Date()).tz(payload.userTimezone);
       const shouldBeCompletedAtDate = dayjs(target.should_be_completed_at);
 
       if (currentDate.isAfter(shouldBeCompletedAtDate, 'day')) {
-        throw new TargetDeadlineOutdatedException();
+        const exception = new TargetDeadlineOutdatedException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const steps = await this.targetsRepository.getAllTargetSteps(poolClient, {
@@ -169,7 +179,9 @@ export class TargetsService {
             !currentDate.isAfter(dayjs(step.should_be_completed_at), 'day'),
         )
       ) {
-        throw new TargetHasUncompletedStepsException();
+        const exception = new TargetHasUncompletedStepsException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const maxOutdatedStepsPercentage = this.configService.getOrThrow(
@@ -194,7 +206,9 @@ export class TargetsService {
       );
 
       if (!completedTarget) {
-        throw new BadRequestException('Не удалось завершить цель');
+        const exception = new BadRequestException('Не удалось завершить цель');
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       await poolClient.query('COMMIT');
@@ -237,18 +251,24 @@ export class TargetsService {
       );
 
       if (!target) {
-        throw new TargetNotFoundException();
+        const exception = new TargetNotFoundException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       if (target.status !== TargetStatus.Created) {
-        throw new TargetNotInStatusException(TargetStatus.Created);
+        const exception = new TargetNotInStatusException(TargetStatus.Created);
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const currentDate = dayjs(new Date()).tz(payload.userTimezone);
       const shouldBeCompletedAtDate = dayjs(target.should_be_completed_at);
 
       if (currentDate.isAfter(shouldBeCompletedAtDate, 'day')) {
-        throw new TargetDeadlineOutdatedException();
+        const exception = new TargetDeadlineOutdatedException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const steps = await this.targetsRepository.getAllTargetSteps(poolClient, {
@@ -260,7 +280,9 @@ export class TargetsService {
           currentDate.isAfter(dayjs(step.should_be_completed_at), 'day'),
         )
       ) {
-        throw new TargetHasOutdatedStepsException();
+        const exception = new TargetHasOutdatedStepsException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const activatedTarget = await this.targetsRepository.updateTargetStatus(
@@ -272,7 +294,9 @@ export class TargetsService {
       );
 
       if (!activatedTarget) {
-        throw new TargetWasNotActivatedException();
+        const exception = new TargetWasNotActivatedException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       await poolClient.query('COMMIT');
@@ -301,11 +325,15 @@ export class TargetsService {
       );
 
       if (!target) {
-        throw new TargetNotFoundException();
+        const exception = new TargetNotFoundException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       if (target.status !== TargetStatus.Active) {
-        throw new TargetNotInStatusException(TargetStatus.Active);
+        const exception = new TargetNotInStatusException(TargetStatus.Active);
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const cancelledTarget = await this.targetsRepository.cancelTarget(
@@ -316,7 +344,9 @@ export class TargetsService {
       );
 
       if (!cancelledTarget) {
-        throw new BadRequestException('Не удалось отменить цель');
+        const exception = new BadRequestException('Не удалось отменить цель');
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       await poolClient.query('COMMIT');
@@ -351,11 +381,15 @@ export class TargetsService {
       );
 
       if (!target) {
-        throw new TargetNotFoundException();
+        const exception = new TargetNotFoundException();
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       if (target.status !== TargetStatus.Created) {
-        throw new TargetNotInStatusException(TargetStatus.Created);
+        const exception = new TargetNotInStatusException(TargetStatus.Created);
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       const deletedTarget = await this.targetsRepository.deleteTarget(
@@ -367,7 +401,9 @@ export class TargetsService {
       );
 
       if (!deletedTarget) {
-        throw new BadRequestException('Не удалось удалить цель');
+        const exception = new BadRequestException('Не удалось удалить цель');
+        this.logger.error(exception.message);
+        throw exception;
       }
 
       await poolClient.query('COMMIT');

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { UserRaw, UserTargetRaw } from 'src/modules/users/users.types';
 import {
@@ -15,6 +15,8 @@ import { UserResponseDto, UserTargetsResponseDto } from './users.dto';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(private usersRepository: UsersRepository) {}
 
   async createOrUpdate(
@@ -95,7 +97,9 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('Пользователь не найден');
+      const exception = new NotFoundException('Пользователь не найден');
+      this.logger.error(exception.message);
+      throw exception;
     }
 
     return this.mapUserResponse(user);
