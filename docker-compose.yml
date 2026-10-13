@@ -33,7 +33,7 @@ services:
       - goals-auth
     restart: unless-stopped
     ports:
-      - 3000:3000
+      - 127.0.0.1:3000:3000
     volumes:
       - ./keys:/app/keys:ro
       - ./logs/goals-service:/logs
@@ -43,7 +43,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "fetch('https://goals.melkor-apps.ru/api/v1/app/health/ready').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+          "fetch('https://goals.melkor-apps.ru/api/v1/app/health/live').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
         ]
       interval: 10s
       timeout: 3s
@@ -69,8 +69,8 @@ services:
     depends_on:
       - goals-mongo
     ports:
-      - 3001:3001
-      - 3002:3002
+      - 127.0.0.1:3001:3001
+      - 127.0.0.1:3002:3002
     env_file:
       - .env.auth.production
     volumes:
@@ -82,7 +82,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "fetch('https://goals.melkor-apps.ru/auth/app/health/ready').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+          "fetch('https://goals.melkor-apps.ru/auth/app/health/live').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
         ]
       interval: 10s
       timeout: 3s
@@ -126,6 +126,15 @@ services:
     image: melkor73/goals-front:latest
     container_name: goals-front
     restart: unless-stopped
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3004:3001"
+    volumes:
+      - ./uptime-kuma-data:/app/data
 
 volumes:
   goals_postgres_data:
