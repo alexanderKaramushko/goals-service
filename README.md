@@ -6,6 +6,16 @@ Backend-сервис для социальной системы целей и н
 Сервис не выполняет аутентификацию самостоятельно: JWT из cookie проверяется отдельным auth-микросервисом,
 после чего пользователь создаётся или обновляется в локальной базе.
 
+Production-ресурсы:
+
+- [Service](https://goals.melkor-apps.ru/api/v1);
+- [Swagger Goals service](https://goals.melkor-apps.ru/api/v1/docs);
+- [JSON-api](https://goals.melkor-apps.ru/api/v1/docs-json);
+- [Проектная документация (ТЗ)](https://goals-service-alpha.vercel.app);
+- [Docker Image](https://hub.docker.com/r/melkor73/goals-service);
+- [Open API](https://goals.melkor-apps.ru/api/v1/docs).
+- [Observability](https://goals-service-health.melkor-apps.ru/dashboard/1).
+
 ## Возможности
 
 Актуальный список задач и планы развития находятся в проекте [GitHub](https://github.com/users/alexanderKaramushko/projects/2).
@@ -195,15 +205,6 @@ pnpm test:cov
 - [OpenAPI JSON](http://localhost:3000/api/v1/docs-json);
 - [Swagger health API](http://localhost:3000/health/docs);
 - [health endpoint](http://localhost:3000/api/v1/app/health).
-
-Production-ресурсы:
-
-- [Service](https://goals.melkor-apps.ru/api/v1);
-- [Swagger Goals service](https://goals.melkor-apps.ru/api/v1/docs);
-- [JSON-api](https://goals.melkor-apps.ru/api/v1/docs-json);
-- [Проектная документация (ТЗ)](https://goals-service-alpha.vercel.app);
-- [Docker Image](https://hub.docker.com/r/melkor73/goals-service);
-- [Open API](https://goals.melkor-apps.ru/api/v1/docs).
 
 Документацию можно открыть локально:
 
