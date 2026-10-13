@@ -8,12 +8,11 @@ Backend-сервис для социальной системы целей и н
 
 Production-ресурсы:
 
+- [Проектная документация (ТЗ)](https://goals-service-alpha.vercel.app);
 - [Service](https://goals.melkor-apps.ru/api/v1);
 - [Swagger Goals service](https://goals.melkor-apps.ru/api/v1/docs);
 - [JSON-api](https://goals.melkor-apps.ru/api/v1/docs-json);
-- [Проектная документация (ТЗ)](https://goals-service-alpha.vercel.app);
 - [Docker Image](https://hub.docker.com/r/melkor73/goals-service);
-- [Open API](https://goals.melkor-apps.ru/api/v1/docs).
 - [Observability](https://goals-service-health.melkor-apps.ru/dashboard/1).
 
 ## Возможности
