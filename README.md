@@ -227,7 +227,7 @@ docker compose run --rm goals-service-migrations npx node-pg-migrate --config no
 Продление сертификата:
 
 ```bash
-docker compose run --rm goals-certbot certonly --webroot --webroot-path=./certbot/www --email a.morgoth.b@gmail.com --agree-tos --no-eff-email -d goals.melkor-apps.ru
+docker compose run --rm --entrypoint certbot goals-certbot certonly --webroot --webroot-path=/var/www/certbot --email a.morgoth.b@gmail.com --agree-tos --no-eff-email -d goals.melkor-apps.ru
 ```
 
 Автопродление сертификата:
