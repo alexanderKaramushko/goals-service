@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
-import { MAX_OUTDATED_STEPS_PERCENTAGE_FALLBACK } from 'src/constants';
+import {
+  MAX_OUTDATED_STEPS_PERCENTAGE_FALLBACK,
+  MAX_POOL_SIZE_FALLBACK,
+} from 'src/constants';
 
 export interface EnvironmentVariables {
   NODE_ENV: string;
@@ -17,6 +20,7 @@ export interface EnvironmentVariables {
   POSTGRES_DB_USER?: string;
   POSTGRES_DB_PASSWORD?: string;
   MAX_OUTDATED_STEPS_PERCENTAGE: number;
+  MAX_POOL_SIZE: number;
 }
 
 export const environmentValidationSchema = Joi.object({
@@ -83,6 +87,7 @@ export const environmentValidationSchema = Joi.object({
     .min(0)
     .max(100)
     .default(MAX_OUTDATED_STEPS_PERCENTAGE_FALLBACK),
+  MAX_POOL_SIZE: Joi.number().integer().default(MAX_POOL_SIZE_FALLBACK),
 });
 
 @Module({
