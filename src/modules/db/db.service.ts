@@ -5,7 +5,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Pool, QueryResultRow } from 'pg';
+import { Pool, PoolConfig, QueryResultRow } from 'pg';
 import type { EnvironmentVariables } from 'src/infra/config/config.module';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       infer: true,
     });
 
-    const config = databaseUrl
+    const config: PoolConfig = databaseUrl
       ? {
           connectionString: databaseUrl,
         }
@@ -42,7 +42,11 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           }),
         };
 
-    this.pool = new Pool(config);
+    this.pool = new Pool({
+      ...config,
+      application_name: 'goals-service',
+      max: configService.get('MAX_POOL_SIZE'),
+    });
   }
 
   async query<T extends QueryResultRow>(
