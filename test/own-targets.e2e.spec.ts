@@ -80,8 +80,9 @@ describe('Targets (e2e) - /GET targets/get-all-own', () => {
     await request(app.getHttpServer())
       .get(`/targets/get-all-own`)
       .set('x-user-timezone', 'Europe/Moscow')
+      .expect(200)
       .expect((res) => {
-        expect(res.body).toEqual([
+        expect(res.body.pages).toEqual([
           {
             description: 'Закрыть все задачи и получить допуск',
             id: target.id,
@@ -151,8 +152,9 @@ describe('Targets (e2e) - /GET targets/get-all-own', () => {
     await request(app.getHttpServer())
       .get(`/targets/get-all-own`)
       .set('x-user-timezone', 'Europe/Moscow')
+      .expect(200)
       .expect((res) => {
-        expect(res.body).toEqual([
+        expect(res.body.pages).toEqual([
           {
             description: 'Закрыть все задачи и получить допуск',
             id: target.id,
@@ -249,8 +251,9 @@ describe('Targets (e2e) - /GET targets/get-all-own', () => {
     await request(app.getHttpServer())
       .get(`/targets/get-all-own`)
       .set('x-user-timezone', 'Europe/Moscow')
+      .expect(200)
       .expect((res) => {
-        expect(res.body).toEqual([
+        expect(res.body.pages).toEqual([
           {
             description: 'Закрыть все задачи и получить допуск',
             id: target.id,
@@ -364,9 +367,9 @@ describe('Targets (e2e) - /GET targets/get-all-own', () => {
       .set('x-user-timezone', 'Europe/Moscow')
       .expect(200)
       .expect(({ body }) => {
-        expect(body).toHaveLength(1);
-        expect(body[0].steps).toHaveLength(2);
-        expect(body[0].rewards).toHaveLength(2);
+        expect(body.pages).toHaveLength(1);
+        expect(body.pages[0].steps).toHaveLength(2);
+        expect(body.pages[0].rewards).toHaveLength(2);
       });
   });
 
@@ -421,7 +424,7 @@ describe('Targets (e2e) - /GET targets/get-all-own', () => {
       .set('x-user-timezone', 'Europe/Moscow')
       .expect(200)
       .expect(({ body }) => {
-        expect(body[0].isOutdated).toBe(expectedIsOutdated);
+        expect(body.pages[0].isOutdated).toBe(expectedIsOutdated);
       });
   });
 });

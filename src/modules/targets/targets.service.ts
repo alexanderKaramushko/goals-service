@@ -30,6 +30,11 @@ import { TargetWasNotActivatedException } from './exceptions/target-was-not-acti
 import { TargetHasOutdatedStepsException } from './exceptions/target-has-outdated-steps.exception';
 import type { EnvironmentVariables } from 'src/infra/config/config.module';
 import { canAssignReward } from './domain/can-assign-reward';
+import {
+  ClientCursorPagePayload,
+  CursorPagePayload,
+  CursorPageResponse,
+} from 'src/types';
 
 @Injectable()
 export class TargetsService {
@@ -72,15 +77,67 @@ export class TargetsService {
     };
   }
 
-  async getAllByUserId(payload: GetTargetsPayload): Promise<TargetListItem[]> {
+  async getAllByUserId(
+    payload: ClientCursorPagePayload<GetTargetsPayload>,
+  ): Promise<CursorPageResponse<TargetListItem[]>> {
+    let cursorSettings: CursorPagePayload<GetTargetsPayload>['cursorSettings'] =
+      null;
+
+    if (payload.paginationCursor) {
+      try {
+        cursorSettings = JSON.parse(atob(payload.paginationCursor));
+      } catch {
+        throw new BadRequestException('Неправильный формат курсора');
+      }
+    }
+
     const targets =
       await this.targetsRepository.getAllByUserIdWithStepsAndRewards({
         userId: payload.userId,
+        cursorSettings,
+        pageSettings: {
+          limit: payload.limit,
+        },
       });
 
-    return targets.map((target) =>
-      this.toListItem(target, payload.userTimezone),
-    );
+    const lastTarget = targets[targets.length - 1];
+    const nextCursor = lastTarget
+      ? btoa(
+          JSON.stringify({
+            createdAt: lastTarget.created_at,
+            id: lastTarget.id,
+          }),
+        )
+      : null;
+
+    let nextTargets: TargetRawWithStepsAndRewards[] = [];
+
+    if (lastTarget) {
+      try {
+        nextTargets =
+          await this.targetsRepository.getAllByUserIdWithStepsAndRewards({
+            userId: payload.userId,
+            cursorSettings: {
+              createdAt: lastTarget.created_at,
+              id: lastTarget.id,
+            },
+            pageSettings: {
+              limit: 1,
+            },
+          });
+        // eslint-disable-next-line no-empty
+      } catch {}
+    }
+
+    return {
+      pages: targets.map((target) =>
+        this.toListItem(target, payload.userTimezone),
+      ),
+      pageInfo: {
+        hasNextPage: nextTargets.length > 0,
+        paginationCursor: nextCursor,
+      },
+    };
   }
 
   toListItem(
