@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Request,
   UseGuards,
   UseInterceptors,
@@ -19,6 +20,7 @@ import {
   CreatedTargetResponseDto,
   CreateTargetDto,
   DeletedTargetResponseDto,
+  PaginationQueryDto,
   TargetsResponseDto,
 } from 'src/modules/targets/targets.dto';
 import { TargetsService } from 'src/modules/targets/targets.service';
@@ -33,6 +35,7 @@ import {
 } from '@nestjs/swagger';
 import { TimezoneInterceptor } from 'src/interceptors/timezone/timezone.interceptor';
 import { CurrentUser } from '../users/users.types';
+import { CursorPageResponse } from 'src/types';
 
 @UseGuards(AuthGuard)
 @UseInterceptors(TimezoneInterceptor)
@@ -64,10 +67,15 @@ export class TargetsController {
     type: [TargetsResponseDto],
   })
   @Get('get-all-own')
-  getAllOwn(@Request() request: ExpressRequest): Promise<TargetsResponseDto[]> {
+  getAllOwn(
+    @Request() request: ExpressRequest,
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<CursorPageResponse<TargetsResponseDto[]>> {
     return this.targetsService.getAllByUserId({
       userId: request.user?.id as string,
       userTimezone: request.userTimezone as string,
+      paginationCursor: paginationQuery.paginationCursor ?? null,
+      limit: +(paginationQuery.limit ?? 10),
     });
   }
 

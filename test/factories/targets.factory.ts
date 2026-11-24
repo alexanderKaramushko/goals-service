@@ -2,7 +2,6 @@ import { TargetsRepository } from 'src/modules/targets/targets.repository';
 import {
   CompleteTargetRepositoryPayload,
   CreateTargetRepositoryPayload,
-  GetAllTargetsWithStepsAndRewardsPayload,
   GetTargetByIdAndUserIdPayload,
 } from 'src/modules/targets/targets.repository.types';
 import { TargetStatus } from 'src/modules/targets/targets.types';
@@ -35,7 +34,11 @@ export function completeTargetFactory(targetsRepository: TargetsRepository) {
 }
 
 export function getTargetsFactory(targetsRepository: TargetsRepository) {
-  return (payload: GetAllTargetsWithStepsAndRewardsPayload) => {
+  return (
+    payload: Parameters<
+      TargetsRepository['getAllByUserIdWithStepsAndRewards']
+    >[0],
+  ) => {
     return targetsRepository.getAllByUserIdWithStepsAndRewards(payload);
   };
 }

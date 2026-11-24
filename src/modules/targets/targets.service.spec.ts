@@ -17,6 +17,11 @@ describe('TargetsService', () => {
   let service: TargetsService;
   const target = targets[0];
 
+  const getAllByUserIdWithStepsAndRewards = jest.fn<
+    ReturnType<TargetsRepository['getAllByUserIdWithStepsAndRewards']>,
+    Parameters<TargetsRepository['getAllByUserIdWithStepsAndRewards']>
+  >();
+
   beforeAll(() => {
     jest.useFakeTimers();
   });
@@ -26,10 +31,14 @@ describe('TargetsService', () => {
   });
 
   beforeEach(() => {
+    getAllByUserIdWithStepsAndRewards.mockReset();
+    getAllByUserIdWithStepsAndRewards.mockResolvedValue([]);
+
     service = new TargetsService(
       {
         createTarget: () => [],
         getAllByUserId: () => [],
+        getAllByUserIdWithStepsAndRewards,
       } as unknown as TargetsRepository,
       {
         getPoolClient: () => {},
@@ -78,6 +87,52 @@ describe('TargetsService', () => {
       steps: [],
       rewards: [],
     };
+
+    const payload = {
+      userId: 'user-1',
+      userTimezone: 'Europe/Moscow',
+      paginationCursor: null,
+      limit: 10,
+    };
+
+    it('возвращает пустую страницу без курсора', async () => {
+      await expect(service.getAllByUserId(payload)).resolves.toEqual({
+        pages: [],
+        pageInfo: { hasNextPage: false, paginationCursor: null },
+      });
+
+      expect(getAllByUserIdWithStepsAndRewards).toHaveBeenCalledWith({
+        userId: payload.userId,
+        cursorSettings: null,
+        pageSettings: { limit: payload.limit },
+      });
+    });
+
+    it('считает пустую строку отсутствием курсора', async () => {
+      await expect(
+        service.getAllByUserId({ ...payload, paginationCursor: '' }),
+      ).resolves.toEqual({
+        pages: [],
+        pageInfo: { hasNextPage: false, paginationCursor: null },
+      });
+
+      expect(getAllByUserIdWithStepsAndRewards).toHaveBeenCalledWith({
+        userId: payload.userId,
+        cursorSettings: null,
+        pageSettings: { limit: payload.limit },
+      });
+    });
+
+    it.each(['{}', btoa('invalid json')])(
+      'отклоняет курсор с некорректной кодировкой или JSON: %s',
+      async (paginationCursor) => {
+        await expect(
+          service.getAllByUserId({ ...payload, paginationCursor }),
+        ).rejects.toBeInstanceOf(BadRequestException);
+
+        expect(getAllByUserIdWithStepsAndRewards).not.toHaveBeenCalled();
+      },
+    );
 
     it('мапит вложенные шаги и награды в типы сервиса targets', () => {
       const targetRaw: TargetRawWithStepsAndRewards = {

@@ -1,5 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsDateString, IsString, IsInt } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsDateString,
+  IsString,
+  IsInt,
+  IsOptional,
+  IsNumberString,
+} from 'class-validator';
 import { TargetStatus } from 'src/modules/targets/targets.types';
 import { RewardType } from 'src/modules/rewards/rewards.types';
 
@@ -42,6 +49,21 @@ export class CreatedTargetResponseDto {
 
   @ApiProperty({ example: '2026-02-14' })
   shouldBeCompletedAt: string;
+}
+
+export class PaginationQueryDto {
+  @ApiPropertyOptional({ description: 'Курсор для пагинации' })
+  @IsOptional()
+  @IsString()
+  paginationCursor?: string;
+
+  @ApiPropertyOptional({
+    description: 'Лимит элементов на страницу',
+    default: '10',
+  })
+  @IsOptional()
+  @IsNumberString()
+  limit?: string;
 }
 
 export class TargetStepsDto {

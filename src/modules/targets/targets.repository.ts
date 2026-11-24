@@ -16,6 +16,7 @@ import {
   DeleteTargetRepositoryPayload,
   GetAllTargetsWithStepsAndRewardsPayload,
 } from 'src/modules/targets/targets.repository.types';
+import { CursorPagePayload } from 'src/types';
 
 @Injectable()
 export class TargetsRepository {
@@ -53,10 +54,17 @@ export class TargetsRepository {
   }
 
   async getAllByUserIdWithStepsAndRewards(
-    payload: GetAllTargetsWithStepsAndRewardsPayload,
+    payload: CursorPagePayload<GetAllTargetsWithStepsAndRewardsPayload>,
   ): Promise<TargetRawWithStepsAndRewards[]> {
     return this.dbService.query(
       `
+        WITH cursor_targets AS (
+          SELECT * FROM targets t
+          WHERE t.user_id = $1
+            AND (($2::timestamptz IS NULL OR $3::integer IS NULL) OR (t.created_at < $2 OR (t.created_at = $2 AND t.id < $3::integer)))
+          ORDER BY t.created_at DESC, t.id DESC
+          LIMIT $4
+        )
         SELECT
           t.id,
           t.user_id,
@@ -105,10 +113,14 @@ export class TargetsRepository {
             ),
             '[]'::json
           ) AS rewards
-        FROM targets t
-        WHERE t.user_id = $1
+        FROM cursor_targets t
       `,
-      [payload.userId],
+      [
+        payload.userId,
+        payload.cursorSettings?.createdAt ?? null,
+        payload.cursorSettings?.id ?? null,
+        payload.pageSettings.limit,
+      ],
     );
   }
 
